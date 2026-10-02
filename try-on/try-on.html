@@ -176,6 +176,13 @@
     } from './hand-tracking.js';
     import { RingTryOnPipeline } from './ring-tryon-pipeline.js';
     import { SessionRecorder } from './session-recorder.js';
+    import {
+      loadFaceLandmarker,
+      disposeFaceLandmarker,
+      FaceTrackingSession,
+      getFaceLandmarkerDelegate,
+    } from './face-tracking.js';
+    import { FaceTryOnPipeline } from './face-tryon-pipeline.js';
 
     // Minimal SKU -> ring model catalog (Task 7 moves this to catalog JSON).
     //  - the_ring_1_carat: CC-BY-4.0, commercial use allowed with credit.
@@ -191,20 +198,37 @@
     const RING_ALIASES = { solitaire: 'CELESTE-SOLITAIRE-RING', one: 'DEV-ONE-RING' };
     const DEFAULT_RING_SKU = 'CELESTE-SOLITAIRE-RING';
 
+    // Earrings (Task 7 moves this to catalog JSON). lengthMm = real length
+    // from the hook's top to the bottom of the drop; sets the on-ear size.
+    const EARRING_CATALOG = {
+      'GOLDEN-BALL-CRYSTAL-DROP-EARRINGS': {
+        url: '../golden_ball_crystal_diamond_drop_earrings/scene.gltf',
+        lengthMm: 48,
+        credit: '"Golden Ball Crystal Diamond Drop Earrings" by DineshThennarasan (sketchfab.com/dineshthennarasan), CC-BY-4.0',
+        creditUrl: 'https://sketchfab.com/3d-models/golden-ball-crystal-diamond-drop-earrings-863d3b5c1a714cfb88dc01c7ea0fbcfe',
+      },
+    };
+    const DEFAULT_EARRING_SKU = 'GOLDEN-BALL-CRYSTAL-DROP-EARRINGS';
+
     const urlParams = new URLSearchParams(window.location.search);
-    const category = urlParams.get('category') || 'ring';
+    // Face-tracked categories share one tracker; 'earrings' accepted as an alias.
+    const rawCategory = (urlParams.get('category') || 'ring').toLowerCase();
+    const category = rawCategory === 'earrings' ? 'earring' : rawCategory;
+    const FACE_CATEGORIES = ['earring'];
     const sku = urlParams.get('sku') || 'UNKNOWN-SKU';
     // ?ring=solitaire | ?ring=one switches the model directly (testing).
     const ringKey = RING_ALIASES[urlParams.get('ring')] || (RING_CATALOG[sku] ? sku : DEFAULT_RING_SKU);
     const RING_ENTRY = RING_CATALOG[ringKey];
     const RING_MODEL_URL = RING_ENTRY.url;
-    if (RING_ENTRY.credit) {
+    const EARRING_ENTRY = EARRING_CATALOG[sku] || EARRING_CATALOG[DEFAULT_EARRING_SKU];
+    const CREDIT_ENTRY = category === 'ring' ? RING_ENTRY : category === 'earring' ? EARRING_ENTRY : null;
+    if (CREDIT_ENTRY && CREDIT_ENTRY.credit) {
       const creditEl = document.getElementById('model-credit');
       const a = document.createElement('a');
-      a.href = RING_ENTRY.creditUrl;
+      a.href = CREDIT_ENTRY.creditUrl;
       a.target = '_blank';
       a.rel = 'noopener';
-      a.textContent = RING_ENTRY.credit;
+      a.textContent = CREDIT_ENTRY.credit;
       a.className = 'underline';
       creditEl.append('3D model: ', a);
       creditEl.classList.remove('hidden');
@@ -282,9 +306,83 @@
       alert('360° product viewer fallback will be wired up in a later step.');
     }
 
-    // Only the ring pipeline is wired up in this task; necklace/earring
-    // (face) tracking is added in Task 5 behind the same category switch.
+    // Face tracking for earrings (Phase 2: tracking + debug outline only;
+    // the 3D earrings are added in Phase 3).
+    async function startFaceTracking() {
+      modelLoadingIndicator.classList.remove('hidden');
+      modelLoadingIndicator.lastChild.textContent = ' Loading face tracking…';
+      try {
+        await loadFaceLandmarker();
+        pipeline = new FaceTryOnPipeline({
+          overlayCanvas,
+          debugCanvas: SHOW_DEBUG_SKELETON ? debugCanvas : null,
+          modelUrl: EARRING_ENTRY.url,
+          lengthMm: EARRING_ENTRY.lengthMm,
+        });
+        await pipeline.init();
+      } catch (err) {
+        modelLoadingIndicator.classList.add('hidden');
+        statusPill.textContent = 'Face tracking failed to load — showing camera only';
+        logDebug({ category, sku, faceTrackingLoadError: String(err) });
+        return;
+      }
+      modelLoadingIndicator.classList.add('hidden');
+      statusPill.textContent = 'Show your face to the camera';
+
+      trackingSession = new FaceTrackingSession(videoEl, (result) => {
+        const rect = overlayCanvas.getBoundingClientRect();
+        const info = pipeline.processFrame({
+          source: videoEl,
+          sourceWidth: videoEl.videoWidth,
+          sourceHeight: videoEl.videoHeight,
+          displaySize: { width: rect.width, height: rect.height },
+          faceResult: result,
+          mirror: currentFacingMode === 'user',
+          timestampMs: performance.now(),
+        });
+        const status = info.faceDetected ? 'Earrings on — turn your head to see them' : 'Show your face to the camera';
+        if (status !== lastStatus) {
+          lastStatus = status;
+          statusPill.textContent = status;
+        }
+        window.__faceInfo = info; // last frame's info, for automated checks
+        if (SHOW_DEBUG_SKELETON) window.__faceResult = result;
+        if (SHOW_DEBUG_SKELETON && performance.now() - lastDebugLog > 500) {
+          lastDebugLog = performance.now();
+          const r = (v, d = 1) => (Number.isFinite(v) ? Number(v.toFixed(d)) : v);
+          logDebug({
+            category, sku,
+            faceDelegate: getFaceLandmarkerDelegate(),
+            faceDetected: info.faceDetected,
+            landmarks: info.landmarkCount,
+            yawDeg: r(info.yawDeg), pitchDeg: r(info.pitchDeg), rollDeg: r(info.rollDeg),
+            faceWidthPx: r(info.faceWidthPx),
+            earringLengthPx: r(info.earringLengthPx),
+            earringLengthMm: EARRING_ENTRY.lengthMm,
+          });
+        }
+      });
+      trackingSession.start();
+
+      if (SHOW_DEBUG_SKELETON) {
+        recorder = new SessionRecorder({
+          videoEl,
+          overlayCanvas,
+          isMirrored: () => currentFacingMode === 'user',
+          pipeline,
+          filePrefix: 'earringtryon',
+        });
+        recordBtn.classList.remove('hidden');
+      }
+    }
+
+    // Rings use hand tracking; earrings use face tracking. Necklaces will
+    // join the face path later.
     async function startTrackingForCategory() {
+      if (FACE_CATEGORIES.includes(category)) {
+        await startFaceTracking();
+        return;
+      }
       if (category !== 'ring') {
         statusPill.textContent = `Live camera connected (${category} tracking not yet implemented)`;
         return;
@@ -443,6 +541,7 @@
     document.getElementById('back-btn').addEventListener('click', () => {
       stopTracking();
       disposeHandLandmarker();
+      disposeFaceLandmarker();
       stopCamera(videoEl, currentStream);
       history.back();
     });
@@ -452,6 +551,7 @@
     window.addEventListener('pagehide', () => {
       stopTracking();
       disposeHandLandmarker();
+      disposeFaceLandmarker();
       stopCamera(videoEl, currentStream);
     });
 

@@ -1,12 +1,11 @@
 /**
  * session-recorder.js  (debug tool, shown only with ?debug=1)
  *
- * Records ~10 s of a live try-on session as two downloads:
- *   1. ringtryon-<time>.json — every frame's MediaPipe output (landmarks,
- *      world landmarks, handedness), the skin-mask measurement, and what
- *      the live solver decided. This can be replayed offline through
- *      RingSolver to measure size/tilt stability numerically.
- *   2. ringtryon-<time>.webm — the camera feed with the ring composited
+ * Records ~10 s of a live try-on session (ring or earrings) as two downloads:
+ *   1. <prefix>-<time>.json — every frame's MediaPipe output and what the
+ *      live solver decided, for offline replay through RingSolver /
+ *      EarringSolver (ring: also the skin-mask measurement).
+ *   2. <prefix>-<time>.webm — the camera feed with the jewellery composited
  *      (mirrored like the screen), to see what the numbers correspond to.
  *
  * Nothing is uploaded anywhere; files are saved locally via a download.
@@ -39,12 +38,14 @@ export class SessionRecorder {
    * @param {HTMLCanvasElement} opts.overlayCanvas - WebGL ring layer (preserveDrawingBuffer: true)
    * @param {() => boolean} opts.isMirrored
    * @param {{startRecording:Function, stopRecording:Function}} opts.pipeline
+   * @param {string} [opts.filePrefix='ringtryon'] - download names: <prefix>-<time>.json/.webm
    */
-  constructor({ videoEl, overlayCanvas, isMirrored, pipeline }) {
+  constructor({ videoEl, overlayCanvas, isMirrored, pipeline, filePrefix = 'ringtryon' }) {
     this.videoEl = videoEl;
     this.overlayCanvas = overlayCanvas;
     this.isMirrored = isMirrored;
     this.pipeline = pipeline;
+    this.filePrefix = filePrefix;
     this.active = false;
   }
 
@@ -122,14 +123,14 @@ export class SessionRecorder {
     const frames = this.pipeline.stopRecording();
     const stamp = new Date().toISOString().replace(/[:.]/g, '-');
     const meta = {
-      app: 'caen-ring-tryon',
+      app: `caen-${this.filePrefix}`,
       version: 1,
       recordedAt: new Date().toISOString(),
       userAgent: navigator.userAgent,
       durationMs,
       frameCount: frames.length,
     };
-    download(new Blob([JSON.stringify({ meta, frames })], { type: 'application/json' }), `ringtryon-${stamp}.json`);
+    download(new Blob([JSON.stringify({ meta, frames })], { type: 'application/json' }), `${this.filePrefix}-${stamp}.json`);
 
     let videoSaved = false;
     if (recorder) {
@@ -139,7 +140,7 @@ export class SessionRecorder {
       });
       if (chunks.length) {
         const ext = (recorder.mimeType || '').includes('mp4') ? 'mp4' : 'webm';
-        download(new Blob(chunks, { type: recorder.mimeType || 'video/webm' }), `ringtryon-${stamp}.${ext}`);
+        download(new Blob(chunks, { type: recorder.mimeType || 'video/webm' }), `${this.filePrefix}-${stamp}.${ext}`);
         videoSaved = true;
       }
     }

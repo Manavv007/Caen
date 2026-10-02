@@ -143,15 +143,18 @@ export async function loadEarringModel(THREE, GLTFLoader, url) {
 }
 
 /**
- * Copy for the other ear: mirrored left-right (three.js flips the face
- * winding automatically for a negative scale, so lighting stays correct).
- * Geometry and materials are shared, not duplicated.
+ * Copy for the other ear, mirrored across the ear. On the ear the model's
+ * X axis runs front-to-back (the hook's plane) and Z runs across the ear
+ * (see earring-solver.js), so the mirror is along Z: both hooks still end
+ * behind the lobe, and any asymmetric detail faces the same way on both
+ * sides of the head. three.js flips face winding for the negative scale,
+ * so lighting stays correct. Geometry and materials are shared.
  */
 export function cloneMirroredEarring(object) {
   const pivot = new (object.constructor)();
   const copy = object.clone(true);
   pivot.add(copy);
-  pivot.scale.set(-1, 1, 1);
+  pivot.scale.set(1, 1, -1);
   pivot.name = 'earring-mirrored';
   return pivot;
 }
