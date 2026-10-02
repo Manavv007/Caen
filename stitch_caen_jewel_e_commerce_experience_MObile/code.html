@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+
+<html lang="en" style=""><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Syne:wght@400..800&amp;display=swap" rel="stylesheet"/><link class="" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&amp;family=Plus+Jakarta+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: 'class', theme: { extend: { colors: { 'on-primary-container': '#fffbff', 'on-primary': '#ffffff', 'surface-container-highest': '#eae1dc', 'on-primary-fixed-variant': '#663a42', 'secondary-fixed': '#e5e2e1', 'surface-tint': '#81515a', 'secondary-fixed-dim': '#c8c6c5', 'on-secondary-fixed': '#1c1b1b', 'surface-bright': '#fff8f5', 'inverse-on-surface': '#f8efea', 'on-surface-variant': '#514345', 'surface-container': '#f5ece7', 'tertiary-container': '#90702e', 'outline': '#837375', 'surface-container-low': '#fbf2ed', 'tertiary-fixed': '#ffdea5', 'secondary': '#5f5e5e', 'surface': '#fff8f5', 'on-tertiary-container': '#fffbff', 'on-background': '#1f1b18', 'surface-variant': '#eae1dc', 'inverse-surface': '#34302c', 'on-surface': '#1f1b18', 'primary-container': '#9a676f', 'primary-fixed-dim': '#f4b7c0', 'tertiary': '#755717', 'on-tertiary-fixed-variant': '#5d4201', 'on-tertiary-fixed': '#261900', 'background': '#fff8f5', 'error': '#ba1a1a', 'on-tertiary': '#ffffff', 'secondary-container': '#e2dfde', 'outline-variant': '#d5c2c4', 'error-container': '#ffdad6', 'surface-container-high': '#efe6e1', 'primary': '#7e4f57', 'on-secondary-container': '#636262', 'tertiary-fixed-dim': '#e9c176', 'primary-fixed': '#ffd9de', 'surface-dim': '#e1d8d3', 'inverse-primary': '#f4b7c0', 'on-secondary': '#ffffff', 'on-error': '#ffffff', 'on-secondary-fixed-variant': '#474746', 'on-primary-fixed': '#331018', 'on-error-container': '#93000a', 'surface-container-lowest': '#ffffff' }, borderRadius: { 'DEFAULT': '0.25rem', 'lg': '0.5rem', 'xl': '0.75rem', 'full': '9999px' }, spacing: { 'space-4xl': '10rem', 'max-width': '1440px', 'space-xs': '0.5rem', 'gutter': '1.5rem', 'space-md': '1rem', 'space-xl': '2.5rem', 'space-lg': '1.5rem', 'space-sm': '0.75rem', 'margin-desktop': '3rem', 'space-3xl': '6rem', 'space-2xs': '0.25rem', 'space-2xl': '4rem', 'space-3xs': '0.125rem', 'margin-mobile': '1.25rem' }, fontFamily: { 'spec-num': ['Syne'], 'body-lg': ['Newsreader'], 'headline-xl': ['Syne'], 'body-md': ['Newsreader'], 'headline-sm': ['Syne'], 'caption-italic': ['Newsreader'], 'display-lg-mobile': ['Syne'], 'headline-xl-mobile': ['Syne'], 'display-lg': ['Syne'], 'label-caps': ['Syne'], 'body-xl': ['Newsreader'] }, fontSize: { 'spec-num': ['14px', { lineHeight: '18px', letterSpacing: '0.04em', fontWeight: '500' }], 'body-lg': ['18px', { lineHeight: '28px', letterSpacing: '0em', fontWeight: '400' }], 'headline-xl': ['44px', { lineHeight: '48px', letterSpacing: '-0.02em', fontWeight: '600' }], 'body-md': ['15px', { lineHeight: '22px', letterSpacing: '0.01em', fontWeight: '400' }], 'headline-sm': ['22px', { lineHeight: '28px', letterSpacing: '0em', fontWeight: '600' }], 'caption-italic': ['13px', { lineHeight: '18px', letterSpacing: '0.02em', fontWeight: '400' }], 'display-lg-mobile': ['38px', { lineHeight: '42px', letterSpacing: '-0.02em', fontWeight: '700' }], 'headline-xl-mobile': ['28px', { lineHeight: '34px', letterSpacing: '-0.01em', fontWeight: '600' }], 'display-lg': ['64px', { lineHeight: '68px', letterSpacing: '-0.03em', fontWeight: '700' }], 'label-caps': ['11px', { lineHeight: '14px', letterSpacing: '0.14em', fontWeight: '700' }], 'body-xl': ['22px', { lineHeight: '32px', letterSpacing: '-0.01em', fontWeight: '400' }] } } } };</script></head><body class="bg-surface font-body-md text-body-md text-on-surface flex flex-col min-h-screen"><header class="fixed top-0 inset-x-0 z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] pt-safe"><aside class="h-8 px-space-md flex items-center justify-between bg-surface-container-high text-on-surface-variant overflow-hidden"><div class="w-full flex items-center justify-center text-center overflow-hidden px-2"><span class="font-label-caps uppercase text-[9px] tracking-widest text-on-surface truncate">✦ COMPLIMENTARY SHIPPING ON ORDERS ABOVE ₹10,000 | EASY RETURNS | CERTIFIED DIAMONDS ✦</span></div></aside><div class="h-20 px-space-md flex items-center justify-between gap-space-sm"><div class="flex items-center gap-space-xs"><button aria-label="Menu" class="w-11 h-11 flex items-center justify-center text-on-surface hover:text-primary transition-colors"><span class="material-symbols-outlined text-[24px]">menu</span></button></div><div class="flex flex-col items-center justify-center text-center select-none"><a class="block group" data-path="catalog" href="#"><div class="flex flex-col items-center justify-center"><img alt="CAEN JEWELS" class="h-7 w-auto object-contain mx-auto" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQ0EQ3VKcmtEuxBJoT2bIrGCvyyOR6mbDvMcu7rzxihoYb9TDLU1BVOUrzA7WeHEJcgClblWJv4R0jrTX8NYx28u7p4XCp0tJhZuClQHvsguDXPGYATK4bKPphrmoHRKTmmHhYG6T9dVlkPt8A4G6wRDpoWT31SD924HuPbAfYlq5sCEgFVpgHvY2u__pLFinKbJBQLjmERbWd2kyjfW97yc2MI-bls2izymQ1YmJHuZl0XbgrT7b_H6qcCpH5QaVRsg"/><span class="font-headline-sm text-[13px] text-on-surface tracking-[0.24em] uppercase font-normal leading-tight mt-0.5">CAEN JEWELS</span></div></a></div><div class="flex items-center gap-space-xs"><a aria-label="Wishlist" class="w-11 h-11 flex items-center justify-center text-on-surface hover:text-primary transition-colors" data-path="wishlist" href="#"><span class="material-symbols-outlined text-[22px]">favorite</span></a><a aria-label="Shopping Bag" class="w-11 h-11 flex items-center justify-center relative text-on-surface hover:text-primary transition-colors" data-path="cart" href="#"><span class="material-symbols-outlined text-[22px]">shopping_bag</span><span class="absolute top-2 right-2 w-4 h-4 bg-primary text-on-primary font-spec-num text-[9px] font-semibold flex items-center justify-center rounded-full">0</span></a><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center ml-space-2xs"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex flex-col relative w-full pt-28 pb-32 bg-surface min-h-screen"><div class="flex flex-col w-full select-none">
+<!-- 1. HERO SECTION -->
+<section class="w-full px-space-md py-space-xl flex flex-col gap-space-lg bg-surface">
+<div class="flex flex-col gap-space-2xs">
+<div class="inline-flex items-center gap-space-2xs">
+<span class="w-1.5 h-1.5 bg-primary rounded-full"></span>
+<span class="font-label-caps text-label-caps text-primary uppercase tracking-[0.2em]">HAUTE JOAILLERIE • MUMBAI • PARIS</span>
+</div>
+<h1 class="font-headline-xl-mobile text-headline-xl-mobile text-on-surface tracking-tight mt-space-2xs">Jewellery, <span class="italic font-['EB_Garamond',serif] font-normal text-tertiary">made personal.</span></h1>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed mt-space-3xs">
+        Timeless pieces designed to become part of your everyday story. Museum-grade craftsmanship sculpted in luminous intimacy and finished in hallmarked recut gold.
+      </p>
+</div>
+<!-- Dual Action CTAs -->
+<div class="flex flex-col gap-space-xs w-full">
+<a class="w-full h-12 bg-on-surface text-surface flex items-center justify-center font-label-caps text-label-caps tracking-widest uppercase transition-colors hover:bg-primary" data-path="catalog" href="#">SHOP THE COLLECTION</a>
+<a class="w-full h-12 bg-surface-container text-on-surface flex items-center justify-center font-label-caps text-label-caps tracking-widest uppercase transition-colors hover:bg-surface-container-high" data-path="new-arrivals" href="#">
+        EXPLORE NEW ARRIVALS
+      </a>
+</div>
+<!-- Trust Hallmark Highlights -->
+<div class="grid grid-cols-3 gap-space-2xs pt-space-xs">
+<div class="bg-surface-container-low p-space-xs flex flex-col items-center text-center gap-space-3xs">
+<span class="material-symbols-outlined text-primary text-[18px]">verified</span>
+<span class="font-label-caps text-[9px] uppercase tracking-wider text-on-surface font-semibold">18K &amp; 22K SOLID GOLD</span>
+</div>
+<div class="bg-surface-container-low p-space-xs flex flex-col items-center text-center gap-space-3xs">
+<span class="material-symbols-outlined text-primary text-[18px]">workspace_premium</span>
+<span class="font-label-caps text-[9px] uppercase tracking-wider text-on-surface font-semibold">IGI &amp; GIA CERTIFIED NATURAL STONES</span>
+</div>
+<div class="bg-surface-container-low p-space-xs flex flex-col items-center text-center gap-space-3xs">
+<span class="material-symbols-outlined text-primary text-[18px]">nest_eco_leaf</span>
+<span class="font-label-caps text-[9px] uppercase tracking-wider text-on-surface font-semibold">CONFLICT-FREE SOURCING</span>
+</div>
+</div>
+<!-- Hero Campaign Spotlight Tile -->
+<div class="relative w-full bg-surface-container overflow-hidden shadow-sm">
+<div class="aspect-[4/5] w-full overflow-hidden relative">
+<img class="w-full h-full object-cover object-center" data-alt="High luxury editorial portrait of an Indian bride wearing a layered diamond necklace and gold bangles, illuminated by soft golden candlelit ambiance, architectural jewelry styling" src="https://lh3.googleusercontent.com/aida-public/AB6AXuABpKzDmdydfzSRLj5SaUxVRB665A942xShrWhlB9Eamoicu3vBg26AfaB-4dnfHsp8KwuY5oSOjB3DC-bozY_hpz5w7zGFaZzdGHXASGhomsS9PAknsNGTZ_7ftFS5tFVXgo29hn3tk4JtrVe0W0tvdwgck-N-IFj1W7G21DZJS13MXS7pO7ES6OQ3ikFOzVt-uRJ76_nsOHoxXIB4LrEiU_QreTWAXaybIGYXSg43OOoU1i0dzRkO"/>
+<div class="absolute inset-0 bg-gradient-to-t from-on-surface/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-0 inset-x-0 p-space-md text-surface flex flex-col gap-space-3xs">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-[10px] text-tertiary-fixed uppercase tracking-widest">ARCHIVAL PIECE</span>
+<span class="font-spec-num text-spec-num text-surface">№ 8402</span>
+</div>
+<p class="font-headline-sm text-[17px] leading-tight text-surface font-semibold">
+            HAUTE COLLAR — Tri-Row Riviera Solitaire
+          </p>
+<div class="flex items-center justify-between pt-space-3xs">
+<span class="font-spec-num text-spec-num tracking-wide text-surface-bright font-bold">₹1,84,000</span>
+<span class="font-caption-italic text-[11px] text-surface-container-highest tracking-wide">(INCLUDES 18K MOUNT)</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 2. SHOP BY CATEGORY -->
+<section class="w-full bg-surface-container-lowest px-space-md py-space-xl flex flex-col gap-space-md">
+<div class="flex flex-col gap-space-3xs">
+<span class="font-label-caps text-label-caps text-primary uppercase tracking-[0.2em]">THE CURATIONS</span>
+<h2 class="font-headline-xl-mobile text-headline-xl-mobile text-on-surface">SHOP BY CATEGORY</h2>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+        Curated collections crafted for every nuance of style and perpetual grace, hand-finished in our master studio.
+      </p>
+</div>
+<div class="flex overflow-x-auto gap-space-sm pb-space-xs scrollbar-none snap-x snap-mandatory -mx-space-md px-space-md">
+<!-- Rings -->
+<a class="flex-none w-[160px] snap-start bg-surface-container-low flex flex-col group" data-path="category-rings" href="#">
+<div class="aspect-square w-full relative overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Minimalist macro shot of an 18 karat gold diamond solitaire ring resting on raw travertine marble with direct sunlight casting crisp geometric shadows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzxKIjH3_MayHyKNGQQEeavETjsVHV6VVG0BajdnHyb4Uv3wSt86nE3xPH5yhXme1No2nLa58lqR7wvKpSl6HXyJLrCml1fZ2oXh-8bpLc7QWgChGYh16bNf3syHctr9SSRAFC6yIPi5w4yLtvt2hT3VNuRlz19D0zTI_frwXReldLNHYaiwgKy413k0SAPDyY71itGMhdKe-NfW6r8dV1lWZHwWOquzLGkvk0lYkOs-H3r2HmfYXb"/>
+<span class="absolute top-2 right-2 bg-on-surface/80 text-surface font-spec-num text-[9px] px-1.5 py-0.5">32</span>
+</div>
+<div class="p-space-xs flex flex-col">
+<span class="font-headline-sm text-[15px] font-semibold text-on-surface tracking-wide">RINGS</span>
+<span class="font-caption-italic text-caption-italic text-on-surface-variant">Solitaires &amp; Bands</span>
+</div>
+</a>
+<!-- Earrings -->
+<a class="flex-none w-[160px] snap-start bg-surface-container-low flex flex-col group" data-path="category-earrings" href="#">
+<div class="aspect-square w-full relative overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Elegant woman admiring delicate pavé diamond huggie hoop earrings reflected in an ornate gilded vanity mirror in warm ambient light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDS1DDEsEnudS59XE11AZjceSDJ7sQ7Cl22-SpkAQBu6bF135b-YdQ5zoET4RGqdVohdJXjGPYzaKJVYx1BcfSQmXIrIzdKp0fJyqeUQyvTZVSIZvQuRNa-mxhfcqbnJCUQc6mj7xVd3sr1GDDulWwHy_IRlOkBG7RwNBe3SzrAxgrFCsQlKg0TweFikZwhgDHfywtU2q8QffdLGkO8U1GmYQbd1c89JPCAlQJC5eEEENnHMLQetaWq"/>
+<span class="absolute top-2 right-2 bg-on-surface/80 text-surface font-spec-num text-[9px] px-1.5 py-0.5">24</span>
+</div>
+<div class="p-space-xs flex flex-col">
+<span class="font-headline-sm text-[15px] font-semibold text-on-surface tracking-wide">EARRINGS</span>
+<span class="font-caption-italic text-caption-italic text-on-surface-variant">Studs, Drops &amp; Hoops</span>
+</div>
+</a>
+<!-- Necklaces -->
+<a class="flex-none w-[160px] snap-start bg-surface-container-low flex flex-col group" data-path="category-necklaces" href="#">
+<div class="aspect-square w-full relative overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Dual layered delicate gold necklaces with dainty diamond charms draped gracefully across a silk linen neckline in soft morning light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDsEOOFs-JhgmGcTOVk3H3jltHeMP7QPOa4SX7iwyFd6EYLPqeMaOquivop60dhXMS9vb5doFe4d84--5sSd6iLlRvIneEPom1ROjJTbmkcnPEZHSPsVVrhUCH42TD2GsY9zIXMvFBbqxSMi-aB_BnrE61WzIFbTwmWhcvQ5WrGAsxcav-hSpkC-1IaZx4bNaiWV6WvVxY3RtQBDEYD7DdYTKMlJSnXpez2bbVbdKOO5-ANMyq-unu6"/>
+<span class="absolute top-2 right-2 bg-on-surface/80 text-surface font-spec-num text-[9px] px-1.5 py-0.5">18</span>
+</div>
+<div class="p-space-xs flex flex-col">
+<span class="font-headline-sm text-[15px] font-semibold text-on-surface tracking-wide">NECKLACES</span>
+<span class="font-caption-italic text-caption-italic text-on-surface-variant">Pendants &amp; Chokers</span>
+</div>
+</a>
+<!-- Bracelets -->
+<a class="flex-none w-[160px] snap-start bg-surface-container-low flex flex-col group" data-path="category-bracelets" href="#">
+<div class="aspect-square w-full relative overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Close up of a woman's wrist wearing an architectural pavé diamond tennis bracelet paired with subtle stackable gold cuffs" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSBcv--20VtMs0CEdaY9_EItcTeAjUhjhdARiG__AT_2Idn3vQbljQ1M7ST11y7_fkELLn7r85JCARDMmJCudnE25ea6FTOe4pzTRikgmedcr8_478u5RPKGceBZZPnR0jVh-LQ6m3LPHupqMG5ipOpH5aBhBorrHGBT33ru92LA6GYtufFi_X8ITF5bRyyTSKOKeGVM1n817w5gRz1PsB6Sv9LIuvyMLCo4MEQRoBraJhgEBUolL7"/>
+<span class="absolute top-2 right-2 bg-on-surface/80 text-surface font-spec-num text-[9px] px-1.5 py-0.5">15</span>
+</div>
+<div class="p-space-xs flex flex-col">
+<span class="font-headline-sm text-[15px] font-semibold text-on-surface tracking-wide">BRACELETS</span>
+<span class="font-caption-italic text-caption-italic text-on-surface-variant">Tennis &amp; Bangles</span>
+</div>
+</a>
+<!-- Diamonds -->
+<a class="flex-none w-[160px] snap-start bg-surface-container-low flex flex-col group" data-path="category-diamonds" href="#">
+<div class="aspect-square w-full relative overflow-hidden bg-surface-container flex items-center justify-center">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="A pristine loose round brilliant cut diamond sparkling against raw grey slate plinth with razor-sharp light refraction" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtoLuURQoWICTBd4t7sVDIDtrJbFw-wLFBYw0MJS-gtCke8CheHM78T5TEPoPx6LXKV8jS7WU4qPTHGJKxSElFZqJCLTClKLg_-z0hWCEHPNhIfkbtg_hGbvWWap5ZIEKrAJmCeJ4nTx6QeaRGRHXoQColV4bCvsImMeOS6rwtAB65beVXyPOd7y9PhsU3FHNbNUT_-MV2eQ0ZSaMZfObxDq-C7zrFpB_LlqE5a4BuOZMn50IElHTH"/>
+<span class="absolute top-2 right-2 bg-on-surface/80 text-surface font-spec-num text-[9px] px-1.5 py-0.5">SOL</span>
+</div>
+<div class="p-space-xs flex flex-col">
+<span class="font-headline-sm text-[15px] font-semibold text-on-surface tracking-wide">DIAMONDS</span>
+<span class="font-caption-italic text-caption-italic text-on-surface-variant">Certified Solitaires</span>
+</div>
+</a>
+</div>
+</section>
+<!-- 3. EXPLORE OUR DIAMOND CUTS -->
+<section class="w-full bg-surface-container px-space-md py-space-xl flex flex-col gap-space-lg">
+<div class="flex flex-col items-center text-center gap-space-3xs">
+<span class="font-label-caps text-label-caps text-primary uppercase tracking-[0.2em]">GEOMETRIC MASTERPIECES</span>
+<h2 class="font-headline-xl-mobile text-headline-xl-mobile text-on-surface">Explore Our Diamond Cuts</h2>
+<p class="font-caption-italic text-caption-italic text-on-surface-variant">Where Geometry Elevates Style</p>
+</div>
+<!-- 8 Signature Diamond Cuts Grid -->
+<div class="grid grid-cols-4 gap-space-xs">
+<!-- Emerald -->
+<div class="bg-surface-container-lowest p-space-xs flex flex-col items-center text-center gap-space-2xs cursor-pointer hover:bg-surface-container-high transition-colors">
+<div class="w-12 h-14 flex items-center justify-center text-on-surface">
+<svg class="w-9 h-11 stroke-current fill-none" stroke-width="1.2" viewbox="0 0 40 50">
+<rect height="40" rx="3" stroke="currentColor" width="30" x="5" y="5"></rect>
+<rect height="32" rx="2" stroke="currentColor" width="22" x="9" y="9"></rect>
+<line x1="5" x2="9" y1="5" y2="9"></line>
+<line x1="35" x2="31" y1="5" y2="9"></line>
+<line x1="5" x2="9" y1="45" y2="41"></line>
+<line x1="35" x2="31" y1="45" y2="41"></line>
+<line x1="14" x2="26" y1="14" y2="14"></line>
+<line x1="14" x2="26" y1="36" y2="36"></line>
+</svg>
+</div>
+<span class="font-label-caps text-[10px] uppercase tracking-wider font-bold text-on-surface">EMERALD</span>
+</div>
+<!-- Oval -->
+<div class="bg-surface-container-lowest p-space-xs flex flex-col items-center text-center gap-space-2xs cursor-pointer hover:bg-surface-container-high transition-colors">
+<div class="w-12 h-14 flex items-center justify-center text-on-surface">
+<svg class="w-9 h-11 stroke-current fill-none" stroke-width="1.2" viewbox="0 0 40 50">
+<ellipse cx="20" cy="25" rx="15" ry="21"></ellipse>
+<ellipse cx="20" cy="25" rx="9" ry="13"></ellipse>
+<line x1="20" x2="20" y1="4" y2="12"></line>
+<line x1="20" x2="20" y1="38" y2="46"></line>
+<line x1="5" x2="11" y1="25" y2="25"></line>
+<line x1="29" x2="35" y1="25" y2="25"></line>
+</svg>
+</div>
+<span class="font-label-caps text-[10px] uppercase tracking-wider font-bold text-on-surface">OVAL</span>
+</div>
+<!-- Cushion -->
+<div class="bg-surface-container-lowest p-space-xs flex flex-col items-center text-center gap-space-2xs cursor-pointer hover:bg-surface-container-high transition-colors">
+<div class="w-12 h-14 flex items-center justify-center text-on-surface">
+<svg class="w-9 h-11 stroke-current fill-none" stroke-width="1.2" viewbox="0 0 40 50">
+<rect height="28" rx="8" stroke="currentColor" width="28" x="6" y="10"></rect>
+<rect height="16" rx="4" stroke="currentColor" width="16" x="12" y="16"></rect>
+<line x1="6" x2="12" y1="10" y2="16"></line>
+<line x1="34" x2="28" y1="10" y2="16"></line>
+<line x1="6" x2="12" y1="38" y2="32"></line>
+<line x1="34" x2="28" y1="38" y2="32"></line>
+</svg>
+</div>
+<span class="font-label-caps text-[10px] uppercase tracking-wider font-bold text-on-surface">CUSHION</span>
+</div>
+<!-- Round -->
+<div class="bg-surface-container-lowest p-space-xs flex flex-col items-center text-center gap-space-2xs cursor-pointer hover:bg-surface-container-high transition-colors">
+<div class="w-12 h-14 flex items-center justify-center text-on-surface">
+<svg class="w-9 h-11 stroke-current fill-none" stroke-width="1.2" viewbox="0 0 40 50">
+<circle cx="20" cy="25" r="18"></circle>
+<circle cx="20" cy="25" r="10"></circle>
+<polygon points="20,7 29,20 20,33 11,20"></polygon>
+<line x1="2" x2="10" y1="25" y2="25"></line>
+<line x1="30" x2="38" y1="25" y2="25"></line>
+</svg>
+</div>
+<span class="font-label-caps text-[10px] uppercase tracking-wider font-bold text-on-surface">ROUND</span>
+</div>
+<!-- Princess -->
+<div class="bg-surface-container-lowest p-space-xs flex flex-col items-center text-center gap-space-2xs cursor-pointer hover:bg-surface-container-high transition-colors">
+<div class="w-12 h-14 flex items-center justify-center text-on-surface">
+<svg class="w-9 h-11 stroke-current fill-none" stroke-width="1.2" viewbox="0 0 40 50">
+<rect height="28" width="28" x="6" y="10"></rect>
+<line x1="6" x2="34" y1="10" y2="38"></line>
+<line x1="6" x2="34" y1="38" y2="10"></line>
+<rect height="16" width="16" x="12" y="16"></rect>
+</svg>
+</div>
+<span class="font-label-caps text-[10px] uppercase tracking-wider font-bold text-on-surface">PRINCESS</span>
+</div>
+<!-- Pear -->
+<div class="bg-surface-container-lowest p-space-xs flex flex-col items-center text-center gap-space-2xs cursor-pointer hover:bg-surface-container-high transition-colors">
+<div class="w-12 h-14 flex items-center justify-center text-on-surface">
+<svg class="w-9 h-11 stroke-current fill-none" stroke-width="1.2" viewbox="0 0 40 50">
+<path d="M 20 6 C 26 18, 35 26, 35 34 C 35 42, 28 47, 20 47 C 12 47, 5 42, 5 34 C 5 26, 14 18, 20 6 Z"></path>
+<circle cx="20" cy="33" r="7"></circle>
+</svg>
+</div>
+<span class="font-label-caps text-[10px] uppercase tracking-wider font-bold text-on-surface">PEAR</span>
+</div>
+<!-- Marquise -->
+<div class="bg-surface-container-lowest p-space-xs flex flex-col items-center text-center gap-space-2xs cursor-pointer hover:bg-surface-container-high transition-colors">
+<div class="w-12 h-14 flex items-center justify-center text-on-surface">
+<svg class="w-9 h-11 stroke-current fill-none" stroke-width="1.2" viewbox="0 0 40 50">
+<path d="M 20 5 C 36 17, 36 33, 20 45 C 4 33, 4 17, 20 5 Z"></path>
+<ellipse cx="20" cy="25" rx="6" ry="11"></ellipse>
+</svg>
+</div>
+<span class="font-label-caps text-[10px] uppercase tracking-wider font-bold text-on-surface">MARQUISE</span>
+</div>
+<!-- Heart -->
+<div class="bg-surface-container-lowest p-space-xs flex flex-col items-center text-center gap-space-2xs cursor-pointer hover:bg-surface-container-high transition-colors">
+<div class="w-12 h-14 flex items-center justify-center text-on-surface">
+<svg class="w-9 h-11 stroke-current fill-none" stroke-width="1.2" viewbox="0 0 40 50">
+<path d="M 20 15 C 20 10, 14 6, 9 9 C 4 12, 4 20, 10 27 L 20 42 L 30 27 C 36 20, 36 12, 31 9 C 26 6, 20 10, 20 15 Z"></path>
+</svg>
+</div>
+<span class="font-label-caps text-[10px] uppercase tracking-wider font-bold text-on-surface">HEART</span>
+</div>
+</div>
+</section>
+<!-- 4. THE CAEN EDIT (PRODUCT SHOWCASE) -->
+<section class="w-full bg-surface-container-lowest px-space-md py-space-xl flex flex-col gap-space-md">
+<div class="flex flex-col gap-space-3xs">
+<span class="font-label-caps text-label-caps text-primary uppercase tracking-[0.2em]">CURATED VITRINE</span>
+<h2 class="font-headline-xl-mobile text-headline-xl-mobile text-on-surface">The Caen Edit</h2>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+        A considered collection of pieces designed to move effortlessly from everyday moments to the ones worth remembering.
+      </p>
+</div>
+<!-- 2-Column Product Cards -->
+<div class="grid grid-cols-2 gap-space-sm">
+<!-- Item 1 -->
+<div class="bg-surface-container-low flex flex-col group relative">
+<button aria-label="Save Aurelia Diamond Band" class="absolute top-2 right-2 z-10 w-8 h-8 bg-surface-bright/90 backdrop-blur-sm flex items-center justify-center text-on-surface hover:text-primary">
+<span class="material-symbols-outlined text-[18px]">favorite_border</span>
+</button>
+<div class="aspect-[4/5] w-full relative overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Micro macro luxury shot of a modern 18k solid gold eternity diamond band placed on warm neutral sand stoneware" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcY-g5tbRhpKKV-aj6NWZKhgz-Orynllngt70A9WWTmH2fzkJaN7bjTWfbSbmYp7DhrgrE8N27_GQKOlXWI_sTn3J__dsAqcL10Rf6_6QyZW1vfuIVGh2ni2WL2NyZOePXLAMstHR_ozyBGqvcWMTEGaxz_dxcKd4JD_Va3ldZl4GBWGddUUkCCOYvp2SKorzf6VwfNBiVYDX4x1oTlGGDDqh6HqWvXvKei1LvUU5bCyeXctXlwJwi"/>
+<span class="absolute bottom-2 left-2 bg-on-surface text-surface font-label-caps text-[9px] px-1.5 py-0.5 uppercase tracking-widest">18K SOLID GOLD</span>
+</div>
+<div class="p-space-xs flex flex-col gap-space-3xs">
+<span class="font-headline-sm text-[14px] font-semibold text-on-surface truncate">Aurelia Diamond Band</span>
+<span class="font-caption-italic text-[11px] text-on-surface-variant">0.42 CT VVSI</span>
+<span class="font-spec-num text-spec-num text-on-surface font-bold mt-space-3xs">₹24,900</span>
+</div>
+</div>
+<!-- Item 2 -->
+<a href="product.html" class="bg-surface-container-low flex flex-col group relative block">
+<button aria-label="Save Celeste Solitaire Ring" class="absolute top-2 right-2 z-10 w-8 h-8 bg-surface-bright/90 backdrop-blur-sm flex items-center justify-center text-on-surface hover:text-primary" onclick="event.preventDefault(); event.stopPropagation(); alert('Saved to Wishlist!');">
+<span class="material-symbols-outlined text-[18px]">favorite_border</span>
+</button>
+<div class="aspect-[4/5] w-full relative overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="High jewelry photograph of an emerald cut solitaire engagement ring worn on a manicured hand with soft sheer ivory drapery background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3g8dmLEBAog8DrQ8a06nhsT-E3AqJ7LqjSFJWTjF89P9ZlVVna9qUxZQ0oXeEiWCQjGurLk-H4J3UjtdMmv3jf6mThrYAxgmn2BQp4PClOU9aVf-_QrRSuSblNNoRfMAWqX-6HOo_xb1JOlsxGjVBh3HgvLkFmfq-oHy6qTyBVRpiZhpXXgSBMGx_CLjyBvMm_lgcS7cxIXqB2WxwtsG_tTpNaP-oV2HkTVT3iBL6n8QugcyQDNAt"/>
+<span class="absolute bottom-2 left-2 bg-on-surface text-surface font-label-caps text-[9px] px-1.5 py-0.5 uppercase tracking-widest">BRILLIANT CUT</span>
+</div>
+<div class="p-space-xs flex flex-col gap-space-3xs">
+<span class="font-headline-sm text-[14px] font-semibold text-on-surface truncate group-hover:text-primary transition-colors">Celeste Solitaire Ring</span>
+<span class="font-caption-italic text-[11px] text-on-surface-variant">0.75 CT IGI</span>
+<span class="font-spec-num text-spec-num text-on-surface font-bold mt-space-3xs">₹38,500</span>
+</div>
+</a>
+<!-- Item 3 -->
+<div class="bg-surface-container-low flex flex-col group relative">
+<button aria-label="Save Mira Diamond Pendant" class="absolute top-2 right-2 z-10 w-8 h-8 bg-surface-bright/90 backdrop-blur-sm flex items-center justify-center text-on-surface hover:text-primary">
+<span class="material-symbols-outlined text-[18px]">favorite_border</span>
+</button>
+<div class="aspect-[4/5] w-full relative overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Rich burgundy velvet jewelry case open to reveal delicate two row gold pendant necklace illuminated by warm hearth candlelight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBaCONd-ayKRhhD8GBpkgx3_iksRJVz8OGg7X7VpAFVO2IglpeFMk18KDka4ISfUZPgnqMrQfhrkYc99-3K_scXwYWOfpfip3PW7IwoZ_-qbPrjwuw3OS1Q6D4Mu6lfgvIfPxtOxQm7t3NnxMFGgI6_b4TT5QZfxY6JubDMRl1B2vH0skWfdiDoA0JTvjJWwTB2mvdqjc_zyc2IH6AGa94JM_arIpbgNb7xOazKc1s_ReIH6O51bkTj"/>
+<span class="absolute bottom-2 left-2 bg-on-surface text-surface font-label-caps text-[9px] px-1.5 py-0.5 uppercase tracking-widest">NECKPIECE</span>
+</div>
+<div class="p-space-xs flex flex-col gap-space-3xs">
+<span class="font-headline-sm text-[14px] font-semibold text-on-surface truncate">Mira Diamond Pendant</span>
+<span class="font-caption-italic text-[11px] text-on-surface-variant">0.60 CT G-COLOR</span>
+<span class="font-spec-num text-spec-num text-on-surface font-bold mt-space-3xs">₹42,000</span>
+</div>
+</div>
+<!-- Item 4 -->
+<div class="bg-surface-container-low flex flex-col group relative">
+<button aria-label="Save Élan Gold Hoops" class="absolute top-2 right-2 z-10 w-8 h-8 bg-surface-bright/90 backdrop-blur-sm flex items-center justify-center text-on-surface hover:text-primary">
+<span class="material-symbols-outlined text-[18px]">favorite_border</span>
+</button>
+<div class="aspect-[4/5] w-full relative overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Sophisticated woman wearing minimalist diamond hoop earrings reflected in antique golden framed French mirror in bedroom salon" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjC2dXh71dnlD4uf8g02abt5nrPAyjEgnMKLQhX81BaPTco5mo4Fao650WaHAzPomAS1TnPsyo4ZEvZ1QGEQ272YOBujgNKozoAOozHH-JbvX7V-0SCLR1768eLVCA2685gZtDW2xopTqNs__UeKLED7Qe0ClPHceXcUzOVWQQe6n8EUseSQB_xTW0giZMgRfh8RRjPrWxGrQlFQbEJ_CJG-hYbUPHNBacSsnPjxpDJb-419O_ufm0"/>
+<span class="absolute bottom-2 left-2 bg-on-surface text-surface font-label-caps text-[9px] px-1.5 py-0.5 uppercase tracking-widest">18K SOLID GOLD</span>
+</div>
+<div class="p-space-xs flex flex-col gap-space-3xs">
+<span class="font-headline-sm text-[14px] font-semibold text-on-surface truncate">Élan Gold Hoops</span>
+<span class="font-caption-italic text-[11px] text-on-surface-variant">14.2 MM DROP</span>
+<span class="font-spec-num text-spec-num text-on-surface font-bold mt-space-3xs">₹18,750</span>
+</div>
+</div>
+</div>
+</section>
+<!-- 5. MADE FOR YOUR MOMENTS (EDITORIAL BLOCK) -->
+<section class="w-full bg-surface-container-high px-space-md py-space-xl flex flex-col gap-space-md">
+<div class="relative w-full aspect-[4/3] overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Close up of a brilliant cut diamond ring held between gently manicured fingers over soft cream colored natural linen cloth in warm sunlight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKeDCsYngK0i-XIQz2kQSSzBe_XXfimpOoJnm-O0pjLGieh1gdEA4zP67wYW19aqTnx1nqWHZnTlfjx_GNb36E5tTMLkc5rY_b1zTGM703UhgR8ptWjw7zjARF6-TXZ2vmp9DeBTpxIOY079FqHyKtkHTQkFl8uyiZK-QG567WDr4bX-PqopxIdG5_q3-Yu1Uf2WWgSpidBnQmPgE_o1P3NCZorf1vK_AfpJS0tPBqt-sT3JyjawWA"/>
+<span class="absolute top-3 left-3 bg-primary text-on-primary font-label-caps text-[9px] px-2 py-1 uppercase tracking-widest">
+        EDITORIAL EXCLUSIVE
+      </span>
+</div>
+<div class="flex flex-col gap-space-xs">
+<h3 class="font-headline-xl-mobile text-headline-xl-mobile text-on-surface leading-tight">
+        Made for Your Moments
+      </h3>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+        Jewellery that belongs in your everyday story — from quiet morning rituals to celebratory nocturnal evenings. Each silhouette is sculpted to be lived in, gathering light and memory across lifetimes.
+      </p>
+<div class="flex flex-col gap-space-2xs py-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">recycling</span>
+<span class="font-body-md text-body-md text-on-surface">100% Recycled 18K/22K Gold Archival Casts</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">verified_user</span>
+<span class="font-body-md text-body-md text-on-surface">IGI &amp; GIA Dual Certified Natural Gemstones</span>
+</div>
+</div>
+<div class="pt-space-2xs flex items-center justify-between">
+<a class="inline-flex items-center gap-space-2xs font-label-caps text-label-caps tracking-widest uppercase text-on-surface font-bold hover:text-primary" data-path="about" href="#">
+          DISCOVER CAEN →
+        </a>
+<span class="font-caption-italic text-caption-italic text-on-surface-variant uppercase tracking-wider text-[11px]">
+          AS FEATURED IN VOGUE INDIA
+        </span>
+</div>
+</div>
+</section>
+<!-- 6. BELOVED BY YOU (BESTSELLERS) -->
+<section class="w-full bg-surface px-space-md py-space-xl flex flex-col gap-space-md">
+<div class="flex flex-col gap-space-3xs">
+<span class="font-label-caps text-label-caps text-primary uppercase tracking-[0.2em]">ICONIC SELECTION</span>
+<h2 class="font-headline-xl-mobile text-headline-xl-mobile text-on-surface">Beloved by You</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Our most-loved pieces, chosen to stay with you.</p>
+</div>
+<!-- 2x2 Bestsellers Grid -->
+<div class="grid grid-cols-2 gap-space-sm">
+<!-- Item 1 -->
+<div class="bg-surface-container-lowest p-space-xs flex flex-col gap-space-2xs shadow-sm">
+<div class="aspect-square w-full relative overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Pair of classic solitaire round diamond studs resting on an unpolished sandstone plinth" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcmfXq-PBEHjI_NL9UvZbpts2KJQUeyXgokmb5_jP7WXYfs34L_KiywEvGZptiexjyuuUGY7-ANUnXTTmF43lDu_3z1SIZ4MEGce1txF-cLkCqf7pperT46x0tQxA-L6JQxMLbt0sE8MAovhuudSmQfzQ0Svq3F8t4dNlNUsAwOH4OHKv2_yBLj58-zXcgwi-nXYEnlBsCAzdTicvVnHjfzFZnjJPNFRAyTQ_vF0PqlIsdRE7Lf7Fw"/>
+<span class="absolute top-2 left-2 bg-on-surface text-surface font-label-caps text-[8px] px-1 py-0.5 uppercase tracking-wider">BESTSELLER</span>
+</div>
+<div class="flex items-center gap-space-3xs">
+<span class="material-symbols-outlined text-[14px] text-tertiary" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-spec-num text-[11px] font-bold text-on-surface">4.9</span>
+<span class="font-caption-italic text-[10px] text-on-surface-variant">(128)</span>
+</div>
+<span class="font-headline-sm text-[13px] font-semibold text-on-surface truncate">Sovereign Solitaire Studs</span>
+<span class="font-spec-num text-[13px] font-bold text-on-surface">₹31,200 <span class="font-normal text-[11px] text-on-surface-variant">Pair</span></span>
+</div>
+<!-- Item 2 -->
+<div class="bg-surface-container-lowest p-space-xs flex flex-col gap-space-2xs shadow-sm">
+<div class="aspect-square w-full relative overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Chic woman's forearm resting on a linen sofa highlighting a diamond pavé tennis bracelet and gold rings" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCauDAqbz5toe2YiOVwJrAgxnNfYItw4o8a3i4rQq0zRpcfwI8dw6jSrbmWARl8gkWp-0qZNIWQR6rTWwszwVxs7zZSiMH_5l1yEAdGegCV0M1WdUZysr_SmklH1PeN8hn7eJLMTok19SzcNzcVpAYHwLNtmCIockFEPSdB9aI-7m-hlxq5GyxnAWEbuIGa1LWiuNmUOSr_cQkX09Ho2gvd3FXTC2zZqcWMxX-lJtWu6XGBdkJqCngJ"/>
+<span class="absolute top-2 left-2 bg-primary text-on-primary font-label-caps text-[8px] px-1 py-0.5 uppercase tracking-wider">ICONIC</span>
+</div>
+<div class="flex items-center gap-space-3xs">
+<span class="material-symbols-outlined text-[14px] text-tertiary" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-spec-num text-[11px] font-bold text-on-surface">5.0</span>
+<span class="font-caption-italic text-[10px] text-on-surface-variant">(79)</span>
+</div>
+<span class="font-headline-sm text-[13px] font-semibold text-on-surface truncate">Aria Pavé Tennis Bracelet</span>
+<span class="font-spec-num text-[13px] font-bold text-on-surface">₹54,000 <span class="font-normal text-[10px] text-on-surface-variant">1.25 CT</span></span>
+</div>
+<!-- Item 3 -->
+<div class="bg-surface-container-lowest p-space-xs flex flex-col gap-space-2xs shadow-sm">
+<div class="aspect-square w-full relative overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Minimalist layered golden link necklace with floating diamond solitaire on white studio bust" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6XR47GiJDGpykPNWuTzqvcWeNKmNwvtd55mfiEjNWxZvYwdiXggWRq_Bsd-XWFEJ0SoXE9EzZ1KAXLLK1zE9klzlnh1zkHi3jNaJT_Ja0Duo3jE0YZoTqhfklAC9hIMq9gRPDUBmhqjJ0_H43UJzQmegIID-hhIFIu-OnfqUxa2Z9jlq97LfjYZateOZSy5MtbH9YcVXU_90TJNGzzC4UD0m0vMOjXBq37T02EWF7s4DZG5Xbqr5a"/>
+<span class="absolute top-2 left-2 bg-on-surface text-surface font-label-caps text-[8px] px-1 py-0.5 uppercase tracking-wider">CURATED</span>
+</div>
+<div class="flex items-center gap-space-3xs">
+<span class="material-symbols-outlined text-[14px] text-tertiary" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-spec-num text-[11px] font-bold text-on-surface">4.8</span>
+<span class="font-caption-italic text-[10px] text-on-surface-variant">(54)</span>
+</div>
+<span class="font-headline-sm text-[13px] font-semibold text-on-surface truncate">Lumina Layered Chain</span>
+<span class="font-spec-num text-[13px] font-bold text-on-surface">₹29,800 <span class="font-normal text-[10px] text-on-surface-variant">16-18"</span></span>
+</div>
+<!-- Item 4 -->
+<div class="bg-surface-container-lowest p-space-xs flex flex-col gap-space-2xs shadow-sm">
+<div class="aspect-square w-full relative overflow-hidden bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="Heirloom polki inspired modern yellow gold ring showcased over warm raw silk background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9ulHZ0kINpSzCUEXLCikf4GxKW5vddmMbjn7VY5SZYOvE_C2KvscWifqLdky6hMPZQ-qGxFaxNy_hlkFRDGWEdHU55m4X5_iMk6RqCSIoGxZ_CDP8QD4I14ZMTWEBYQ-y6JsjbFfzzxR4l6VYuUBCZ0r77zXW-VjO33O5MXjtJvPtwcIpxj34younEfMvjrAJ15WBt1e7eA1ncSiwqJyPYV5CEgrbw7y-d_yzjsBYc8XkD5gCpOsn"/>
+<span class="absolute top-2 left-2 bg-tertiary-container text-on-tertiary-container font-label-caps text-[8px] px-1 py-0.5 uppercase tracking-wider">LIMITED</span>
+</div>
+<div class="flex items-center gap-space-3xs">
+<span class="material-symbols-outlined text-[14px] text-tertiary" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-spec-num text-[11px] font-bold text-on-surface">4.9</span>
+<span class="font-caption-italic text-[10px] text-on-surface-variant">(22)</span>
+</div>
+<span class="font-headline-sm text-[13px] font-semibold text-on-surface truncate">Kavya Heirloom Ring</span>
+<span class="font-spec-num text-[13px] font-bold text-on-surface">₹46,500 <span class="font-normal text-[10px] text-on-surface-variant">0.90 CT</span></span>
+</div>
+</div>
+<div class="pt-space-xs flex justify-center">
+<a class="w-full h-11 bg-surface-container-high text-on-surface flex items-center justify-center font-label-caps text-label-caps uppercase tracking-widest hover:bg-on-surface hover:text-surface transition-colors" data-path="bestsellers" href="#">
+        VIEW ALL JEWELLERY
+      </a>
+</div>
+</section><!-- SECTION: DUAL CURATED EDITORIAL COLLECTION (DÔME & PUZZLE) -->
+<section class="w-full bg-surface-container-low px-space-md py-space-xl flex flex-col gap-space-md border-b border-surface-container-high" id="dual-editorial-collections">
+<div class="flex flex-col gap-space-xs">
+<span class="font-label-caps text-label-caps text-primary uppercase tracking-[0.2em]">CURATED EDITORIALS</span>
+<h2 class="font-headline-xl-mobile text-headline-xl-mobile text-on-surface">The Sculptural Editions</h2>
+</div>
+<div class="flex flex-col gap-space-md">
+<!-- Card 1: Dôme Collection -->
+<div class="group relative rounded-lg overflow-hidden bg-surface-container shadow-sm min-h-[360px] flex flex-col justify-end border border-outline-variant/30">
+<div class="absolute inset-0 overflow-hidden">
+<img alt="Dôme Collection - Sculptural stacked gold and diamond rings" class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out" src="https://lh3.googleusercontent.com/aida/AEtjO1VyTc0QGx3DJTbDkuaLXLCfONJKydww7PhmRQEweE-hDCUpgM15UMuxNrpbwOTIGmBnHj0V02p3nFTLpA9Uyib6XvC0AV2400XXj1mETln1g6qVzMX2roIyu9dSkjLs4eEeAv-NbgOqdUOjAHvIMQXRZ0-FevHy03or8nHD0-U8KOnyko1m-tZSimncUHQzX2CNigRYh5MBo026p9-BddtM8EpFmaqhQx6tMIqnn6UmJZKP1dBieJBTwA"/>
+</div>
+<div class="absolute inset-0 bg-gradient-to-t from-on-surface/85 via-on-surface/30 to-transparent"></div>
+<div class="relative z-10 p-space-md flex flex-col items-start text-surface">
+<p class="font-body-md text-body-md leading-relaxed drop-shadow-sm mb-space-xs text-surface">
+          A collection designed around balance—bold yet soft, artful yet organic.
+        </p>
+<a class="font-label-caps text-[11px] uppercase tracking-[0.22em] font-bold text-surface border-b border-surface pb-1 hover:text-primary transition-colors" href="#the-caen-edit">
+          SHOP DÔME →
+        </a>
+</div>
+</div>
+<!-- Card 2: Puzzle Collection -->
+<div class="group relative rounded-lg overflow-hidden bg-surface-container shadow-sm min-h-[360px] flex flex-col justify-end border border-outline-variant/30">
+<div class="absolute inset-0 overflow-hidden">
+<img alt="Puzzle Collection - Modular gold and gemstone pendant necklace" class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out" src="https://lh3.googleusercontent.com/aida/AEtjO1We_Tdyf3o1g0UZXHLm0wNWOITL0v0rtvCrRK2krL97XpIIMdQ1NF3rxTIsRXfs6iXDBrzG8Qq11mywQQuc39QJL3LRmBF-qSJYbxJkJy4VpL_dzKLpA-HP7ZzZ3dr5vLKq6SxrbslLLfKB5zSNMCZiVVj7QcD-O4dIxYZPacpsku4PwH86xopYqnBMZICncxIs8k5xnvCPZcACnWDWkeH4ym5TzgtB2-6_XFoD1Evtc793JvOscohLeg"/>
+</div>
+<div class="absolute inset-0 bg-gradient-to-t from-on-surface/85 via-on-surface/30 to-transparent"></div>
+<div class="relative z-10 p-space-md flex flex-col items-start text-surface">
+<p class="font-body-md text-body-md leading-relaxed drop-shadow-sm mb-space-xs text-surface">
+          A modular collection made to fit in endless combinations that build over time.
+        </p>
+<a class="font-label-caps text-[11px] uppercase tracking-[0.22em] font-bold text-surface border-b border-surface pb-1 hover:text-primary transition-colors" href="#the-caen-edit">
+          SHOP PUZZLE →
+        </a>
+</div>
+</div>
+</div>
+</section>
+<!-- SECTION: THE ART OF THE EAR STACK (CAMPAIGN & SHOPPABLE VITRINE) -->
+<section class="w-full bg-surface px-space-md py-space-xl flex flex-col gap-space-lg border-b border-surface-container-high" id="the-ear-stack-edit">
+<div class="flex flex-col gap-space-3xs">
+<div class="inline-flex items-center gap-space-2xs self-start">
+<span class="w-1.5 h-1.5 bg-primary rounded-full"></span>
+<span class="font-label-caps text-label-caps text-primary uppercase tracking-[0.2em]">EDITORIAL CAMPAIGN</span>
+</div>
+<h2 class="font-headline-xl-mobile text-headline-xl-mobile text-on-surface tracking-tight mt-space-2xs">
+      The Art of the Ear Stack
+    </h2>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+      Curate, layer, and redefine your daily fine jewelry rituals. Modern heirloom pieces crafted in 14K and 18K solid recycled gold for effortless layering.
+    </p>
+<div class="pt-space-2xs">
+<a class="inline-flex items-center gap-space-2xs font-label-caps text-[10px] tracking-widest uppercase text-on-surface font-bold hover:text-primary transition-colors" href="#the-caen-edit">
+        EXPLORE EAR STACKS →
+      </a>
+</div>
+</div>
+<!-- Large Shoppable Visual Editorial Banner -->
+<div class="relative w-full rounded-lg overflow-hidden shadow-lg border border-outline-variant/30 bg-surface-container group">
+<div class="aspect-[4/3] w-full overflow-hidden relative">
+<img alt="Curated luxury fine ear stack with gold huggies and diamond crawler" class="w-full h-full object-cover object-[center_35%] group-hover:scale-105 transition-transform duration-700 ease-out" src="https://lh3.googleusercontent.com/aida/AEtjO1Uv0DETp4hkBlWubdIkOHWbI5WyaiYlXAcqEWmtlYSdOmfr2f6KgWMAd4VeyeX8ZwuIKIm_ZRUnGUm66fUCYAuUwExtNqgIkBSRJMfFYD-fMyFyQop4hhAw0nC_az6Mr-_AonpOElrn8KM9EzqmAR9OJshKwRZT_3kre-fLPJX_5DkVSklWyakoGDyaApG4W1DBxc1HsOvpvLc-GzcNkd3dy21-g4ZQpadscwV75hPR6AMef5a3jDkOQAU"/>
+<div class="absolute inset-0 bg-gradient-to-t from-on-surface/90 via-on-surface/40 to-transparent"></div>
+<div class="absolute inset-x-0 bottom-0 p-space-md flex flex-col gap-space-2xs text-surface">
+<span class="font-label-caps text-[9px] uppercase tracking-widest text-tertiary-fixed font-bold">CURATED BY CAEN</span>
+<h3 class="font-headline-sm text-[18px] text-surface font-semibold leading-tight">Curate Your Ear Stack</h3>
+<p class="font-body-md text-[12px] text-surface-container-high leading-relaxed">
+          Mix delicate diamonds with sculptural solid 14K and 18K yellow gold huggies. Pierced or unpierced, design a custom stack tailored to your everyday story.
+        </p>
+<div class="flex items-center gap-space-xs pt-space-2xs">
+<a class="flex-1 h-9 bg-surface text-on-surface flex items-center justify-center font-label-caps text-[10px] uppercase tracking-wider font-bold rounded shadow-sm hover:bg-surface-container-high transition-colors" href="#the-caen-edit">
+            SHOP THE LOOK
+          </a>
+<a class="flex-1 h-9 border border-surface text-surface flex items-center justify-center font-label-caps text-[10px] uppercase tracking-wider font-bold rounded hover:bg-surface/10 transition-colors" href="tel:+912245890000">
+            BOOK STYLING
+          </a>
+</div>
+</div>
+</div>
+</div>
+<!-- 4-Item Shoppable Ear Stack Essentials Grid (2x2) -->
+<div class="grid grid-cols-2 gap-space-sm">
+<!-- Stack Item 1 -->
+<div class="bg-surface-container-low flex flex-col group relative rounded overflow-hidden border border-outline-variant/30 shadow-sm">
+<div class="aspect-square w-full relative overflow-hidden bg-surface-container">
+<img alt="Solid Gold Classic Huggie Hoop" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida/AEtjO1VoBtwYNJqmsGvW1aW_Nr5oOi1qCdKgW-rnG_u5yNTmnGU83LW6kxakj-GmSkQyvU_OgYzMIHxf8SLs4kHs1ZK50cgEyIL3fyfF6Qoi3LT77ivXIU-gCG-8PIQfL3RF5XYc4HFjThd7vwK16jHSHyuXzQ24ifU91LJg5FNIxXf-aXGXjzGte0vbwKJfZ-9k_TNdIttWJ2gWb7mVqfeBo6_kADm9euWVn3LkrMKhy2yyTAeZGe951mnJfg"/>
+<span class="absolute bottom-2 left-2 bg-on-surface text-surface font-label-caps text-[8px] px-1.5 py-0.5 uppercase tracking-wider font-semibold">14K GOLD</span>
+</div>
+<div class="p-space-xs flex flex-col flex-1 bg-surface-container-lowest justify-between">
+<div>
+<span class="font-headline-sm text-[13px] font-semibold text-on-surface truncate block">Classic Huggie Hoop</span>
+<span class="font-caption-italic text-[10px] text-on-surface-variant block">Solid 14K Yellow Gold</span>
+</div>
+<div class="mt-space-2xs pt-space-2xs border-t border-surface-container-high flex items-center justify-between">
+<span class="font-spec-num text-[12px] font-bold text-on-surface">₹11,900</span>
+<button class="font-label-caps text-[9px] uppercase tracking-wider text-primary font-bold hover:underline" type="button">+ BAG</button>
+</div>
+</div>
+</div>
+<!-- Stack Item 2 -->
+<div class="bg-surface-container-low flex flex-col group relative rounded overflow-hidden border border-outline-variant/30 shadow-sm">
+<div class="aspect-square w-full relative overflow-hidden bg-surface-container">
+<img alt="Pavé Curved Ear Crawler" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida/AEtjO1Wtw0lEffuqAwgQ6KgnMGuCkiWHLyRUCqa5B78-kNMJo3RNJOLNwWsSAkvo7rAuhSAL9rKajgbnjY3I2O2XO5y7ttELMMmtcWtmS96bHjRyPbB7OkJySd_Wi-35dgGfqihAf8kobOCQn7MvbGeyZi0vGRaa21GTQ0_TykSp-3UhDoyDNijWgdNwUGMXPuuvQtJVPqWkm5YGldwzYRH6NDXua2_Hh2GiYzGd8xVV4K9LxLdsJDXrRWC8c6k"/>
+<span class="absolute bottom-2 left-2 bg-on-surface text-surface font-label-caps text-[8px] px-1.5 py-0.5 uppercase tracking-wider font-semibold">0.28 CT</span>
+</div>
+<div class="p-space-xs flex flex-col flex-1 bg-surface-container-lowest justify-between">
+<div>
+<span class="font-headline-sm text-[13px] font-semibold text-on-surface truncate block">Pavé Curved Crawler</span>
+<span class="font-caption-italic text-[10px] text-on-surface-variant block">Natural Brilliant Diamonds</span>
+</div>
+<div class="mt-space-2xs pt-space-2xs border-t border-surface-container-high flex items-center justify-between">
+<span class="font-spec-num text-[12px] font-bold text-on-surface">₹22,500</span>
+<button class="font-label-caps text-[9px] uppercase tracking-wider text-primary font-bold hover:underline" type="button">+ BAG</button>
+</div>
+</div>
+</div>
+<!-- Stack Item 3 -->
+<div class="bg-surface-container-low flex flex-col group relative rounded overflow-hidden border border-outline-variant/30 shadow-sm">
+<div class="aspect-square w-full relative overflow-hidden bg-surface-container">
+<img alt="Minimalist Bold Ear Cuff" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida/AEtjO1UTTV4AUfU8mDO2nYLAza5XG3dnRLFNvN0W4nDIAAFgxLurf_zyxeFwoZsC-z0d2lglanQv1-tIUt9BEZbdDJfnkp-Z_MSUiiXI9_EjwRu8NNjex_1L3hPxqF5BcMnoLuOfO6pZ47nBjd-Ub5kqATf4o5-Ba0VeTWJB7CSiLJ7t8jjBvPaJ-AGEYqYx-ggVYTig8na-gpwmpXY8ZXerQTEKoef6HxIRu_inrmfjeeChK85PWIGJj2oleRs"/>
+<span class="absolute bottom-2 left-2 bg-on-surface text-surface font-label-caps text-[8px] px-1.5 py-0.5 uppercase tracking-wider font-semibold">NO PIERCING</span>
+</div>
+<div class="p-space-xs flex flex-col flex-1 bg-surface-container-lowest justify-between">
+<div>
+<span class="font-headline-sm text-[13px] font-semibold text-on-surface truncate block">Minimalist Bold Cuff</span>
+<span class="font-caption-italic text-[10px] text-on-surface-variant block">18K Gold Vermeil / Solid</span>
+</div>
+<div class="mt-space-2xs pt-space-2xs border-t border-surface-container-high flex items-center justify-between">
+<span class="font-spec-num text-[12px] font-bold text-on-surface">₹14,200</span>
+<button class="font-label-caps text-[9px] uppercase tracking-wider text-primary font-bold hover:underline" type="button">+ BAG</button>
+</div>
+</div>
+</div>
+<!-- Stack Item 4 -->
+<div class="bg-surface-container-low flex flex-col group relative rounded overflow-hidden border border-outline-variant/30 shadow-sm">
+<div class="aspect-square w-full relative overflow-hidden bg-surface-container">
+<img alt="Micro Solitaire Stud" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida/AEtjO1Xdi8XsyIilpdvjieJAm5mS_MwvUxRjxHO2nu2Pw3f-qBO5sHKewpNkJn9XpnmYVTwnckGI1t4-W5zmLUyL6AEaMmcfXk3GhyLXfedg_OaHmP8yYsH9Zo136gPOyYNBvaO6T5E6du1bV_NvDQggy2xpOe3wdLBqgFPVXNtmPIRzefsfQnIUCMgEP-PxZbnCapcPrkYkfv1Oh6IGm-fHN4imrMHb-7LzlstPp_6UvPSeWUqaq8wL9QbiomI"/>
+<span class="absolute bottom-2 left-2 bg-on-surface text-surface font-label-caps text-[8px] px-1.5 py-0.5 uppercase tracking-wider font-semibold">0.15 CT</span>
+</div>
+<div class="p-space-xs flex flex-col flex-1 bg-surface-container-lowest justify-between">
+<div>
+<span class="font-headline-sm text-[13px] font-semibold text-on-surface truncate block">Micro Solitaire Stud</span>
+<span class="font-caption-italic text-[10px] text-on-surface-variant block">IGI Certified VVS1</span>
+</div>
+<div class="mt-space-2xs pt-space-2xs border-t border-surface-container-high flex items-center justify-between">
+<span class="font-spec-num text-[12px] font-bold text-on-surface">₹16,800</span>
+<button class="font-label-caps text-[9px] uppercase tracking-wider text-primary font-bold hover:underline" type="button">+ BAG</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 7. SHOP BY OCCASION -->
+<section class="w-full bg-surface-container-lowest px-space-md py-space-xl flex flex-col gap-space-md">
+<div class="flex flex-col gap-space-3xs">
+<span class="font-label-caps text-label-caps text-primary uppercase tracking-[0.2em]">CURATED CELEBRATIONS</span>
+<h2 class="font-headline-xl-mobile text-headline-xl-mobile text-on-surface">Shop By Occasion</h2>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+        Jewelry for life's most meaningful moments.
+      </p>
+</div>
+<!-- 2x2 Occasion Grid -->
+<div class="grid grid-cols-2 gap-space-sm">
+<!-- Engagement -->
+<a class="relative group overflow-hidden bg-surface-container aspect-[3/4] flex flex-col justify-end p-space-sm" data-path="occasion-engagement" href="#">
+<img class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Happy woman with radiant smile showing off her yellow gold solitaire engagement ring near a warm light-filled window" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAB0zAOLlYIgy4adM5UM2peV7YA3NLem4xIVwV9hbb3vShyKbOs7GgQ_07dFyDgAp02p-rHzsgvBuvI3oZ0jI6A12pZbDIpYv90Nv4figbebfr4Hww-_c-3gmqqA_HZiYKt_-2FuEnwrDBVOoHpRiYIVGP_sUjRp-jxH0HMNZm64g9TidRz7OMnMhddnmBl28yEEcVX-4tpbkM6HtWGdfrcqCCAGKzwiM0WMfjMq_W0YDO72PXGuCHg"/>
+<div class="absolute inset-0 bg-gradient-to-t from-on-surface/85 via-on-surface/30 to-transparent"></div>
+<div class="relative z-10 flex flex-col gap-space-3xs text-surface">
+<span class="font-headline-sm text-[16px] font-semibold text-surface leading-tight">Engagement</span>
+<span class="font-caption-italic text-[11px] text-surface-variant">Solitaires &amp; Bands</span>
+<span class="font-label-caps text-[9px] uppercase tracking-widest text-primary-fixed mt-space-3xs">EXPLORE RINGS →</span>
+</div>
+</a>
+<!-- Wedding -->
+<a class="relative group overflow-hidden bg-surface-container aspect-[3/4] flex flex-col justify-end p-space-sm" data-path="occasion-wedding" href="#">
+<img class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Traditional Indian bride dressed in ornate golden cream lehenga and heavy handcrafted heritage diamond necklace touching her jewellery with hennae hands" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDeJhl_xrmYo992_HZTH43KJ5bRRJSh1xW__Q-hJg_KXlCg4fNmclK-kK8toYCFd2kqE6Up232b-tAtQS6HFhdAJ7FPb5OcXBWcvKEYsaQHnDR1cXT-7X4_SUixPWxXXnyjhOgnAlXwboujHu6N7O9H_ltYJ2QWM2WiFpwOMiLeAWPYG69v5Ddmi8DgHJz144zBcizeEyU1g_wS74w35srMvTStCpZthSmgG8IxidiVSuwCxfQ-R36Z"/>
+<div class="absolute inset-0 bg-gradient-to-t from-on-surface/85 via-on-surface/30 to-transparent"></div>
+<div class="relative z-10 flex flex-col gap-space-3xs text-surface">
+<span class="font-headline-sm text-[16px] font-semibold text-surface leading-tight">Wedding</span>
+<span class="font-caption-italic text-[11px] text-surface-variant">Bridal Sets &amp; Polki</span>
+<span class="font-label-caps text-[9px] uppercase tracking-widest text-primary-fixed mt-space-3xs">EXPLORE BRIDAL →</span>
+</div>
+</a>
+<!-- Valentine's -->
+<a class="relative group overflow-hidden bg-surface-container aspect-[3/4] flex flex-col justify-end p-space-sm" data-path="occasion-valentines" href="#">
+<img class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Romantic velvet jewelry gift box open with dual gold chain heart diamond necklaces surrounded by candles and rose petals" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAqjMrNIGCZeg6bwTZszZws1DZK1xmp5PYsTZSzQSsWhoGPE_98TOnqHnJmU9Xy5JbyKTWYFkBn_S2jPcPB9ImKgzhGB9c_x8TYAfphvIUJ4CiFAlICKWudJkIUnwqhrLx2Eo7LMciBAEprWXuSj1ntLM_IzU56zLQ4VSjyzdCt7COwzjhON89csG4hhalEltGTnvryto6_2TybL07eifScs6ytZgVm-Fon13reMMHpPw3wczHp8KVY"/>
+<div class="absolute inset-0 bg-gradient-to-t from-on-surface/85 via-on-surface/30 to-transparent"></div>
+<div class="relative z-10 flex flex-col gap-space-3xs text-surface">
+<span class="font-headline-sm text-[16px] font-semibold text-surface leading-tight">Valentine's</span>
+<span class="font-caption-italic text-[11px] text-surface-variant">Intimate Heart Tokens</span>
+<span class="font-label-caps text-[9px] uppercase tracking-widest text-primary-fixed mt-space-3xs">EXPLORE GIFTS →</span>
+</div>
+</a>
+<!-- Anniversary -->
+<a class="relative group overflow-hidden bg-surface-container aspect-[3/4] flex flex-col justify-end p-space-sm" data-path="occasion-anniversary" href="#">
+<img class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" data-alt="Couple sitting together holding hands lovingly with diamond eternity anniversary rings and luxury wristwatches in soft moody lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuACSyzU4vEsJpfED7nJqkBq3ZOE4zjsNQD71A-JChG3dvJkmD2awOVbmMbK-tTdKCc7KWWBm860N2hUQDdUYMn-0UjOqWRRwLq-DQgmatJeAuunZWWA0VUHoRpTQRVuxYQOPE547-7qp2EGHJBFD1mR4ophXyYX5tyPpzn1B-6E96-4vjraFhb1aGe9BfJAcABy9nOoKi8OpQtyYGUD3jp8sVUk9rZBfsesbY8h2CYhkW2v6Drz2prD"/>
+<div class="absolute inset-0 bg-gradient-to-t from-on-surface/85 via-on-surface/30 to-transparent"></div>
+<div class="relative z-10 flex flex-col gap-space-3xs text-surface">
+<span class="font-headline-sm text-[16px] font-semibold text-surface leading-tight">Anniversary</span>
+<span class="font-caption-italic text-[11px] text-surface-variant">Eternity &amp; Tennis Sets</span>
+<span class="font-label-caps text-[9px] uppercase tracking-widest text-primary-fixed mt-space-3xs">EXPLORE FOREVER →</span>
+</div>
+</a>
+</div>
+</section>
+<!-- 8. TRUST PILLARS BAR -->
+<section class="w-full bg-surface-container-high py-space-lg px-space-md">
+<div class="flex overflow-x-auto gap-space-md pb-space-2xs scrollbar-none snap-x -mx-space-md px-space-md">
+<!-- Pillar 1 -->
+<div class="flex-none w-[200px] snap-start bg-surface-bright p-space-sm flex flex-col gap-space-2xs shadow-sm">
+<span class="material-symbols-outlined text-primary text-[24px]">verified</span>
+<span class="font-headline-sm text-[13px] font-semibold text-on-surface">Certified Diamonds</span>
+<p class="font-body-md text-[12px] text-on-surface-variant leading-normal">IGI &amp; GIA authenticity documentation with every gemstone.</p>
+</div>
+<!-- Pillar 2 -->
+<div class="flex-none w-[200px] snap-start bg-surface-bright p-space-sm flex flex-col gap-space-2xs shadow-sm">
+<span class="material-symbols-outlined text-primary text-[24px]">handyman</span>
+<span class="font-headline-sm text-[13px] font-semibold text-on-surface">Crafted with Care</span>
+<p class="font-body-md text-[12px] text-on-surface-variant leading-normal">Artisanal bench jeweler finish with micron-level prong inspection.</p>
+</div>
+<!-- Pillar 3 -->
+<div class="flex-none w-[200px] snap-start bg-surface-bright p-space-sm flex flex-col gap-space-2xs shadow-sm"><span class="material-symbols-outlined text-primary text-[24px]">local_shipping</span><span class="font-headline-sm text-[13px] font-semibold text-on-surface">Secure Insured Shipping</span><p class="font-body-md text-[12px] text-on-surface-variant leading-normal">Discreet, armored express carriage fully insured door-to-door.</p></div>
+<!-- Pillar 4 -->
+<div class="flex-none w-[200px] snap-start bg-surface-bright p-space-sm flex flex-col gap-space-2xs shadow-sm"><span class="material-symbols-outlined text-primary text-[24px]">replay</span><span class="font-headline-sm text-[13px] font-semibold text-on-surface">Easy Returns</span><p class="font-body-md text-[12px] text-on-surface-variant leading-normal">Complimentary seamless returns and ring resizing adjustments.</p></div>
+<!-- Pillar 5 -->
+<div class="flex-none w-[200px] snap-start bg-surface-bright p-space-sm flex flex-col gap-space-2xs shadow-sm">
+<span class="material-symbols-outlined text-primary text-[24px]">diamond</span>
+<span class="font-headline-sm text-[13px] font-semibold text-on-surface">Lifetime Support</span>
+<p class="font-body-md text-[12px] text-on-surface-variant leading-normal">Annual ultrasonic cleaning and perpetual integrity guarantee.</p>
+</div>
+</div>
+</section>
+<!-- 9. PATRON REVIEWS CAROUSEL -->
+<section class="w-full bg-surface-container px-space-md py-space-xl flex flex-col gap-space-lg">
+<div class="flex flex-col gap-space-3xs text-center">
+<span class="font-label-caps text-label-caps text-primary uppercase tracking-[0.2em]">PATRON STORIES &amp; TESTIMONIALS</span>
+<h2 class="font-headline-xl-mobile text-headline-xl-mobile text-on-surface">Why Our Customers Love Us</h2>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+        Real moments, cherished milestones, and genuine stories from our patron collective wearing CAEN JEWEL creations every day.
+      </p>
+</div>
+<!-- Swipeable Testimonial Cards -->
+<div class="flex overflow-x-auto gap-space-md pb-space-xs scrollbar-none snap-x snap-mandatory -mx-space-md px-space-md">
+<!-- Review 1 -->
+<div class="flex-none w-[280px] snap-center bg-surface-container-lowest p-space-md flex flex-col gap-space-sm shadow-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-12 h-12 rounded-full overflow-hidden bg-surface-container flex-none">
+<img class="w-full h-full object-cover" data-alt="Portrait of Ananya Mehta smiling gently, wearing an elegant solitaire necklace in natural warm sunlight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7oTLrUGF0kh64a4vGPquiY6_6T92qRpmHD-q30_J3DpUKCdW6F8OP65iKOQE93fCVkkafOGDFvyR0CCuj9CGPBifEz-q8B43r_8ghLc5_0lrwJ7H7io7iZS49rD23JMD6PqngjFhVMtR0n4NTmYN2OaFKga1mearK7SxzD518JuaQ7Qg24vUiLs9I9Ym2DhZEx0NsFq8S7ZkhXKGveroSj16ZlKGIFTg58ixaiEoDkwI-HJLbu2Lx"/>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-[14px] font-semibold text-on-surface truncate">Ananya Mehta</span>
+<span class="font-caption-italic text-[11px] text-on-surface-variant">Mumbai • Verified Patron</span>
+</div>
+</div>
+<div class="flex text-tertiary">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<p class="font-body-md text-[13px] text-on-surface italic leading-relaxed">
+          “The Celeste Solitaire ring exceeded all expectations. The diamond fire is exceptional, and the atelier concierge helped me find the perfect ring sizing effortlessly.”
+        </p>
+<span class="font-label-caps text-[9px] uppercase tracking-wider text-primary">PATRON STORIES &amp; TESTIMONIALS</span>
+</div>
+<!-- Review 2 -->
+<div class="flex-none w-[280px] snap-center bg-surface-container-lowest p-space-md flex flex-col gap-space-sm shadow-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-12 h-12 rounded-full overflow-hidden bg-surface-container flex-none">
+<img class="w-full h-full object-cover" data-alt="Portrait of Rhea Singhania in a dark silk blouse smiling next to an ornate vanity mirror" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC3ENigBV4iutEoIsE18ao4xLFDOKp53D24IaXQbFm46v54xtfwPihiz-DLsF9_I6UpyW26qRwNd57FULbl6oczIR12C13Ki14jGuQhbDD2QtlJwjZCGzqUtFrh60HS1ZHJP4-2qscOhkdD8inwavCVCR22AJf7apUEYNvP_Hq5McXY84wgUUr6uy0ChORiNqwDjzWyx6gZlC0Isubuo2JhFYF6nluS-PVEJdyAhwEoPYaDvUlktBAY"/>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-[14px] font-semibold text-on-surface truncate">Rhea Singhania</span>
+<span class="font-caption-italic text-[11px] text-on-surface-variant">Bengaluru • Verified Patron</span>
+</div>
+</div>
+<div class="flex text-tertiary">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<p class="font-body-md text-[13px] text-on-surface italic leading-relaxed">
+          “I wear the Aria Pavé Tennis Bracelet non-stop. It catches light in the most understated yet brilliant way. Packaging was like receiving a private salon gift.”
+        </p>
+<span class="font-label-caps text-[9px] uppercase tracking-wider text-primary">PATRON STORIES &amp; TESTIMONIALS</span>
+</div>
+<!-- Review 3 -->
+<div class="flex-none w-[280px] snap-center bg-surface-container-lowest p-space-md flex flex-col gap-space-sm shadow-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-12 h-12 rounded-full overflow-hidden bg-surface-container flex-none">
+<img class="w-full h-full object-cover" data-alt="Close up portrait of Pooja Deshmukh wearing delicate layered gold jewelry and radiant smile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgLFMEQUj1j4wL5Awadkb34GzhUaZ0KgedpcxXpzk1oegRBYn9ayNx1dWub6C61iySOWh8rztb4nXmU-awM0wBtkQdmByc6Pfzb7e2d-iroPE8AoqXnD9tn7WUmVQsMklodg3fGFZWJs8yblciDUzD1DhiTCL-mSqBlra0a7LrHC0qOgoj3Fi1YYXo7SZQgkibBjZ6AZVsSxza-dC-xBeI1bed2X_CW6krNRrm8xRThyGyEcG64Qic"/>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-[14px] font-semibold text-on-surface truncate">Pooja Deshmukh</span>
+<span class="font-caption-italic text-[11px] text-on-surface-variant">New Delhi • Verified Patron</span>
+</div>
+</div>
+<div class="flex text-tertiary">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<p class="font-body-md text-[13px] text-on-surface italic leading-relaxed">
+          “Unbelievable quality of craft. The 18K solid gold feels weightier than other mainstream commercial brands. Truly heirloom grade.”
+        </p>
+<span class="font-label-caps text-[9px] uppercase tracking-wider text-primary">PATRON STORIES &amp; TESTIMONIALS</span>
+</div>
+<!-- Review 4 -->
+<div class="flex-none w-[280px] snap-center bg-surface-container-lowest p-space-md flex flex-col gap-space-sm shadow-sm">
+<div class="flex items-center gap-space-sm">
+<div class="w-12 h-12 rounded-full overflow-hidden bg-surface-container flex-none">
+<img class="w-full h-full object-cover" data-alt="Portrait of Tara Varma in terracotta raw silk tunic holding up hand to show diamond band in natural indoor lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAsr1hPPhEgv7w2vZ_YoE7EakOI2MSOfOrwn-n1GjNxW5A3CiccmXQKJ9Vsf2Czb7cBCxwD-j-ejF_rBuG7MajjZN87uSATQhOJjS4VW2IKwn37Xja8DRTMPWxfVa0zi6fcMuYbR5UjFRMUqtaetx4rGGkjfR6KVFODnJuhH0SqdBDkwZ4T8AtkjB5irHhOW3RRzR1j4xrYDJ5i7i2XavnXwsfeE5SUwPHerqaHFlrwf5hxvU2obln9"/>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-[14px] font-semibold text-on-surface truncate">Tara Varma</span>
+<span class="font-caption-italic text-[11px] text-on-surface-variant">Hyderabad • Verified Patron</span>
+</div>
+</div>
+<div class="flex text-tertiary">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<p class="font-body-md text-[13px] text-on-surface italic leading-relaxed">
+          “My fiancé worked with the bespoke concierge on a custom cushion diamond cut. It is now my favorite treasure in the world.”
+        </p>
+<span class="font-label-caps text-[9px] uppercase tracking-wider text-primary">PATRON STORIES &amp; TESTIMONIALS</span>
+</div>
+</div>
+<div class="flex justify-center">
+<a class="font-label-caps text-label-caps uppercase tracking-widest text-on-surface font-semibold hover:text-primary transition-colors" data-path="reviews" href="#">
+        EXPLORE ALL 850+ REVIEWS →
+      </a>
+</div>
+</section>
+<!-- 10. QUESTIONS, ANSWERED (FAQ ACCORDION) -->
+<section class="w-full bg-surface-container-lowest px-space-md py-space-xl flex flex-col gap-space-lg">
+<div class="flex flex-col gap-space-3xs"><span class="font-label-caps text-label-caps text-primary uppercase tracking-[0.2em]">CLIENT ASSISTANCE</span><h2 class="font-headline-xl-mobile text-headline-xl-mobile text-on-surface">Questions, Answered</h2><p class="font-body-md text-body-md text-on-surface-variant">Essential details regarding acquisition, diamond certification, bespoke sizing, and aftercare.</p></div>
+<!-- Accordion Items -->
+<div class="flex flex-col gap-space-xs" id="faqAccordion">
+<!-- Item 1 -->
+<div class="bg-surface-container-low overflow-hidden">
+<button class="w-full p-space-md flex items-center justify-between text-left font-normal text-[15px] text-on-surface faq-trigger" onclick="toggleFaq(this)" type="button">
+<span class="">How do I know my diamond is authentic?</span>
+<span class="material-symbols-outlined text-[20px] transition-transform duration-200 icon">add</span>
+</button>
+<div class="px-space-md pb-space-md text-on-surface-variant font-body-md text-[14px] leading-relaxed hidden content">
+          Every CAEN JEWEL diamond above 0.30 carat arrives with dual certification cards from IGI (International Gemological Institute) or GIA (Gemological Institute of America). Each diamond bears a microscopic laser inscription on its girdle matching the physical certificate.
+        </div>
+</div>
+<!-- Item 2 -->
+<div class="bg-surface-container-low overflow-hidden">
+<button class="w-full p-space-md flex items-center justify-between text-left font-normal text-[15px] text-on-surface faq-trigger" onclick="toggleFaq(this)" type="button">
+<span class="">What is your transit time and security?</span>
+<span class="material-symbols-outlined text-[20px] transition-transform duration-200 icon">add</span>
+</button>
+<div class="px-space-md pb-space-md text-on-surface-variant font-body-md text-[14px] leading-relaxed hidden content">
+          Orders are dispatched via specialized armored couriers (BVC or Sequel Secure) in tamper-evident, unmarked discreet packaging. Shipments are 100% insured up to point of OTP-verified physical handover. Delivery takes 3–5 business days across India.
+        </div>
+</div>
+<!-- Item 3 -->
+<div class="bg-surface-container-low overflow-hidden">
+<button class="w-full p-space-md flex items-center justify-between text-left font-normal text-[15px] text-on-surface faq-trigger" onclick="toggleFaq(this)" type="button">
+<span class="">Can I customize gold purities or ring sizes?</span>
+<span class="material-symbols-outlined text-[20px] transition-transform duration-200 icon">add</span>
+</button>
+<div class="px-space-md pb-space-md text-on-surface-variant font-body-md text-[14px] leading-relaxed hidden content">
+          Yes. All designs can be cast in your choice of 18K Rose Gold, 18K Yellow Gold, 18K White Gold, or 950 Platinum. We offer complimentary resizing within 30 days of acquisition and provide a complimentary ring sizer kit upon request.
+        </div>
+</div>
+<!-- Item 4 -->
+<div class="bg-surface-container-low overflow-hidden">
+<button class="w-full p-space-md flex items-center justify-between text-left font-normal text-[15px] text-on-surface faq-trigger" onclick="toggleFaq(this)" type="button">
+<span class="">What is your return &amp; buyback guarantee?</span>
+<span class="material-symbols-outlined text-[20px] transition-transform duration-200 icon">add</span>
+</button>
+<div class="px-space-md pb-space-md text-on-surface-variant font-body-md text-[14px] leading-relaxed hidden content">
+          We offer an unconditional 15-day return policy for standard online collection pieces in unworn condition. Additionally, we provide a lifetime buyback guarantee based on prevailing gold and diamond benchmark values.
+        </div>
+</div>
+</div>
+<!-- Concierge Assistance Banner -->
+<div class="bg-surface-container p-space-md flex flex-col gap-space-xs mt-space-xs">
+<div class="flex items-center gap-space-2xs text-primary">
+<span class="material-symbols-outlined text-[20px]">support_agent</span>
+<span class="font-label-caps text-label-caps uppercase tracking-widest font-bold">PRIVATE ATELIER CONSULT</span>
+</div>
+<p class="font-body-md text-[14px] text-on-surface-variant leading-relaxed">Need bespoke assistance? Our master gemologists are ready to guide your acquisition through private appointments or atelier salon consultations.</p>
+<a class="h-11 bg-on-surface text-surface flex items-center justify-center font-label-caps text-label-caps uppercase tracking-widest mt-space-2xs hover:bg-primary transition-colors" data-path="concierge" href="#">
+        CONNECT WITH CONCIERGE
+      </a>
+</div>
+</section>
+</div>
+<script>
+  function toggleFaq(btn) {
+    const content = btn.nextElementSibling;
+    const icon = btn.querySelector('.icon');
+    const isOpen = !content.classList.contains('hidden');
+
+    // Close all items in the accordion
+    document.querySelectorAll('#faqAccordion .content').forEach(el => el.classList.add('hidden'));
+    document.querySelectorAll('#faqAccordion .icon').forEach(el => {
+      el.textContent = 'add';
+      el.style.transform = 'rotate(0deg)';
+    });
+
+    if (!isOpen) {
+      content.classList.remove('hidden');
+      icon.textContent = 'remove';
+      icon.style.transform = 'rotate(180deg)';
+    }
+  }
+</script><section class="w-full bg-surface-container-high text-on-surface px-space-md py-space-lg flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md"><span class="font-headline-sm text-[20px] font-normal tracking-wide text-on-surface">Follow Us</span></div><div class="flex items-center gap-space-md text-on-surface"><a aria-label="Facebook" class="hover:text-primary transition-colors flex items-center justify-center" href="#"><svg class="w-5 h-5 fill-current" viewbox="0 0 24 24"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"></path></svg></a><a aria-label="Instagram" class="hover:text-primary transition-colors flex items-center justify-center" href="#"><svg class="w-5 h-5 fill-current" viewbox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"></path></svg></a><a aria-label="YouTube" class="hover:text-primary transition-colors flex items-center justify-center" href="#"><svg class="w-5 h-5 fill-current" viewbox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"></path></svg></a><a aria-label="Pinterest" class="hover:text-primary transition-colors flex items-center justify-center" href="#"><svg class="w-5 h-5 fill-current" viewbox="0 0 24 24"><path d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.207 0 1.031.397 2.138.893 2.738a.36.36 0 0 1 .083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.163 0 7.398 2.967 7.398 6.931 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z"></path></svg></a><a aria-label="LinkedIn" class="hover:text-primary transition-colors flex items-center justify-center" href="#"><svg class="w-5 h-5 fill-current" viewbox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"></path></svg></a></div></section><footer class="w-full bg-surface-container px-space-md py-space-xl mt-space-2xl"><div class="max-w-max-width mx-auto flex flex-col gap-space-lg"><div class="flex flex-col gap-space-xs"><span class="font-label-caps text-label-caps uppercase text-primary tracking-widest">ATELIER GAZETTE</span><h3 class="font-body-xl text-body-xl text-on-surface">Private Inscriptions &amp; Rare Cuts</h3><p class="font-caption-italic text-caption-italic text-on-surface-variant">© 2026 CAEN JEWEL. Handcrafted in Limited Editions.</p><div class="flex items-center gap-space-xs mt-space-xs"><input class="flex-1 h-11 px-space-sm bg-surface text-on-surface font-body-md text-body-md placeholder:text-outline focus:outline-none focus:bg-surface-bright" placeholder="Enter your correspondence email" type="email"/><button class="h-11 px-space-md bg-on-surface text-surface font-label-caps text-label-caps uppercase hover:bg-primary transition-colors">Subscribe</button></div></div><div class="grid grid-cols-2 gap-space-md pt-space-md"><div class="flex flex-col gap-space-xs"><span class="font-label-caps text-label-caps uppercase tracking-widest text-on-surface">Collections</span><ul class="flex flex-col gap-space-3xs text-on-surface-variant font-body-md text-body-md"><li class="hover:text-primary cursor-pointer">Solitaires &amp; Stones</li><li class="hover:text-primary cursor-pointer">Architectural Bands</li><li class="hover:text-primary cursor-pointer">Bespoke Commissions</li><li class="hover:text-primary cursor-pointer">High Jewelry 2025</li></ul></div><div class="flex flex-col gap-space-xs"><span class="font-label-caps text-label-caps uppercase tracking-widest text-on-surface">Client Care</span><ul class="flex flex-col gap-space-3xs text-on-surface-variant font-body-md text-body-md"><li class="hover:text-primary cursor-pointer">Ring Sizing Atelier</li><li class="hover:text-primary cursor-pointer">Private Showrooms</li><li class="hover:text-primary cursor-pointer">Lifetime Guarantee</li><li class="hover:text-primary cursor-pointer">Insured Transit</li></ul></div></div><div class="flex flex-col sm:flex-row items-center justify-between pt-space-lg text-center sm:text-left gap-space-xs"><span class="font-caption-italic text-caption-italic text-on-surface-variant">© 2026 CAEN JEWEL. Handcrafted in Limited Editions.</span><div class="flex items-center gap-space-md font-label-caps text-label-caps text-on-surface-variant text-[10px] uppercase"><span class="cursor-pointer hover:text-primary">Privacy</span><span class="cursor-pointer hover:text-primary">Terms</span><span class="cursor-pointer hover:text-primary">Provenance</span></div></div></div></footer></main><!-- FLOATING CONTACT WIDGET & POPUPS (MOBILE) -->
+<div class="fixed bottom-20 right-4 z-50 flex flex-col items-end gap-3 pointer-events-none" id="floating-contact-container">
+<!-- WhatsApp Popup Card -->
+<div class="hidden pointer-events-auto w-[310px] max-w-[calc(100vw-2rem)] bg-surface-container-lowest border border-outline-variant/30 shadow-2xl p-space-sm flex flex-col gap-space-xs rounded-lg transition-all duration-300" id="popup-whatsapp">
+<div class="flex items-center justify-between pb-space-2xs border-b border-surface-container-high">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded-full bg-[#25D366] text-white flex items-center justify-center flex-none">
+<span class="material-symbols-outlined text-[18px]">chat</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-[13px] font-semibold text-on-surface leading-tight">WhatsApp Concierge</span>
+<span class="font-caption-italic text-[11px] text-[#25D366] font-medium">Online • Instant Reply</span>
+</div>
+</div>
+<button aria-label="Close WhatsApp dialog" class="w-7 h-7 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors" onclick="document.getElementById('popup-whatsapp').classList.add('hidden')">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<p class="font-body-md text-[12px] text-on-surface-variant leading-relaxed">
+      Connect directly with our master gemologists and bridal consultants in Mumbai.
+    </p>
+<div class="bg-surface-container-low p-space-xs flex items-center justify-between rounded">
+<span class="font-spec-num text-[12px] text-on-surface font-semibold">+91 22 4589 0000</span>
+<span class="font-label-caps text-[9px] uppercase tracking-wider text-primary font-bold">ATELIER DIRECT</span>
+</div>
+<div class="flex flex-wrap gap-1.5 pt-space-3xs">
+<a class="text-[11px] font-body-md bg-surface-container px-2.5 py-1 text-on-surface hover:bg-surface-container-high transition-colors rounded-full" href="https://wa.me/912245890000?text=Hello%20CAEN%20Jewel%2C%20I%20would%20like%20to%20inquire%20about%20solitaires" target="_blank">💎 Solitaire Inquiry</a>
+<a class="text-[11px] font-body-md bg-surface-container px-2.5 py-1 text-on-surface hover:bg-surface-container-high transition-colors rounded-full" href="https://wa.me/912245890000?text=Hello%20CAEN%20Jewel%2C%20I%20would%20like%20to%20book%20a%20private%20appointment" target="_blank">📅 Atelier Booking</a>
+<a class="text-[11px] font-body-md bg-surface-container px-2.5 py-1 text-on-surface hover:bg-surface-container-high transition-colors rounded-full" href="https://wa.me/912245890000?text=Hello%20CAEN%20Jewel%2C%20I%20need%20assistance%20with%20custom%20sizing" target="_blank">📏 Ring Sizing</a>
+</div>
+<a class="w-full h-9 mt-space-3xs bg-[#25D366] text-white flex items-center justify-center gap-1.5 font-label-caps text-[10px] uppercase tracking-wider font-bold rounded hover:opacity-95 transition-opacity" href="https://wa.me/912245890000" target="_blank">
+<span class="material-symbols-outlined text-[16px]">chat</span>
+      START WHATSAPP CHAT
+    </a>
+</div>
+<!-- Live Chat & Callback Popup Card -->
+<div class="hidden pointer-events-auto w-[310px] max-w-[calc(100vw-2rem)] bg-surface-container-lowest border border-outline-variant/30 shadow-2xl p-space-sm flex flex-col gap-space-xs rounded-lg transition-all duration-300" id="popup-livechat">
+<div class="flex items-center justify-between pb-space-2xs border-b border-surface-container-high">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded-full bg-[#0077E6] text-white flex items-center justify-center flex-none">
+<span class="material-symbols-outlined text-[18px]">forum</span>
+</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-[13px] font-semibold text-on-surface leading-tight">Live Atelier Chat</span>
+<span class="font-caption-italic text-[11px] text-[#0077E6] font-medium">Available 10 AM – 9 PM IST</span>
+</div>
+</div>
+<button aria-label="Close Live Chat dialog" class="w-7 h-7 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors" onclick="document.getElementById('popup-livechat').classList.add('hidden')">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<p class="font-body-md text-[12px] text-on-surface-variant leading-relaxed">
+      Speak with a dedicated jewelry advisor for guidance on 4Cs certification, bespoke settings, and delivery.
+    </p>
+<div class="flex flex-col gap-1.5 pt-space-3xs">
+<a class="w-full h-9 bg-[#0077E6] text-white flex items-center justify-center gap-1.5 font-label-caps text-[10px] uppercase tracking-wider font-bold rounded hover:opacity-95 transition-opacity" data-path="concierge" href="#">
+<span class="material-symbols-outlined text-[16px]">chat_bubble</span>
+        START LIVE SESSION
+      </a>
+<a class="w-full h-9 bg-surface-container text-on-surface flex items-center justify-center gap-1.5 font-label-caps text-[10px] uppercase tracking-wider font-bold rounded hover:bg-surface-container-high transition-colors" href="tel:+912245890000">
+<span class="material-symbols-outlined text-[16px] text-primary">call</span>
+        REQUEST IMMEDIATE CALLBACK
+      </a>
+</div>
+</div>
+<!-- 3 Floating Circular Action Buttons Stack -->
+<div class="pointer-events-auto flex flex-col items-center gap-2.5">
+<!-- WhatsApp (Green) -->
+<button aria-label="WhatsApp Concierge" class="w-11 h-11 rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform" onclick="const wa=document.getElementById('popup-whatsapp'); const lc=document.getElementById('popup-livechat'); lc.classList.add('hidden'); wa.classList.toggle('hidden');">
+<span class="material-symbols-outlined text-[22px]">chat</span>
+</button>
+<!-- Live Chat (Blue) -->
+<button aria-label="Live Chat Concierge" class="w-11 h-11 rounded-full bg-[#0077E6] text-white flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform" onclick="const lc=document.getElementById('popup-livechat'); const wa=document.getElementById('popup-whatsapp'); wa.classList.add('hidden'); lc.classList.toggle('hidden');">
+<span class="material-symbols-outlined text-[20px]">forum</span>
+</button>
+<!-- Phone Call (Rose/Pink) -->
+<a aria-label="Direct Atelier Call" class="w-11 h-11 rounded-full bg-[#E1306C] text-white flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform" href="tel:+912245890000">
+<span class="material-symbols-outlined text-[20px]">call</span>
+</a>
+</div>
+</div><nav class="fixed bottom-0 inset-x-0 z-50 pb-safe bg-surface/90 backdrop-blur-xl shadow-[0_-2px_10px_rgba(0,0,0,0.03)]" data-active-classes="text-primary font-bold"><div class="flex items-center justify-around h-16 px-space-xs"><a aria-current="page" class="flex flex-col items-center justify-center min-w-[64px] min-h-[44px] transition-colors text-primary font-bold" data-path="catalog" href="#"><span class="material-symbols-outlined text-[22px]">diamond</span><span class="font-label-caps text-[10px] tracking-widest uppercase mt-space-3xs">Shop</span></a><a class="flex flex-col items-center justify-center min-w-[64px] min-h-[44px] text-on-surface-variant hover:text-primary transition-colors" data-path="concierge" href="#"><span class="material-symbols-outlined text-[22px]">chat_bubble</span><span class="font-label-caps text-[10px] tracking-widest uppercase mt-space-3xs">Concierge</span></a><a class="flex flex-col items-center justify-center min-w-[64px] min-h-[44px] text-on-surface-variant hover:text-primary transition-colors" data-path="wishlist" href="#"><span class="material-symbols-outlined text-[22px]">favorite_border</span><span class="font-label-caps text-[10px] tracking-widest uppercase mt-space-3xs">Wishlist</span></a><a class="flex flex-col items-center justify-center min-w-[64px] min-h-[44px] text-on-surface-variant hover:text-primary transition-colors" data-path="cart" href="#"><span class="material-symbols-outlined text-[22px]">shopping_bag</span><span class="font-label-caps text-[10px] tracking-widest uppercase mt-space-3xs">Bag</span></a></div></nav>
+</body></html>

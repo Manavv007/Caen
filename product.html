@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport">
+  <title>Celeste Solitaire Ring — CAEN JEWELS | Haute Joaillerie</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "gold": "#c5a059",
+            "gold-hover": "#b08c42",
+            "gold-light": "#f3deb2",
+            "amber-rich": "#7a4b29",
+            "surface-warm": "#faf7f2",
+            "surface-container": "#f6f2eb",
+            "surface-highest": "#efe8de",
+            "dark-luxury": "#1a1a1a",
+            "muted-text": "#666666"
+          },
+          fontFamily: {
+            "display": ["EB Garamond", "serif"],
+            "headline": ["EB Garamond", "serif"],
+            "sans": ["Plus Jakarta Sans", "sans-serif"],
+            "body": ["Plus Jakarta Sans", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #ffffff;
+      color: #1a1a1a;
+      -webkit-font-smoothing: antialiased;
+      margin: 0;
+      padding: 0;
+    }
+    .font-garamond {
+      font-family: 'EB Garamond', serif;
+    }
+    .swatch-active {
+      ring-width: 2px;
+      ring-color: #c5a059;
+      ring-offset-width: 2px;
+    }
+    .size-btn-active {
+      background-color: #1a1a1a !important;
+      color: #ffffff !important;
+      border-color: #1a1a1a !important;
+    }
+    .thumb-active {
+      border-color: #c5a059 !important;
+      opacity: 1 !important;
+    }
+    .carat-btn-active {
+      border-color: #c5a059 !important;
+      background-color: #faf7f2 !important;
+    }
+    ::-webkit-scrollbar {
+      display: none;
+    }
+    #main-product-img {
+      transition: opacity 0.25s ease-in-out, transform 0.4s ease-out;
+    }
+  </style>
+</head>
+<body class="bg-white text-dark-luxury antialiased flex flex-col min-h-screen">
+
+  <!-- 1. ANNOUNCEMENT BAR -->
+  <aside class="bg-[#F6F2EB] h-9 px-4 sm:px-8 flex items-center justify-between text-[#1A1A1A] border-b border-[#EEEEEE] select-none text-[11px] font-medium tracking-widest uppercase">
+    <div class="w-full flex items-center justify-center gap-2 text-center truncate">
+      <span class="text-[#C5A059]">✦</span>
+      <span>COMPLIMENTARY FULLY INSURED TRANSIT ON ALL ORDERS</span>
+      <span class="text-[#D1CCC4] hidden sm:inline">|</span>
+      <span class="hidden sm:inline">IGI & GIA CERTIFIED</span>
+      <span class="text-[#D1CCC4] hidden sm:inline">|</span>
+      <span class="hidden sm:inline">15-DAY RETURN WINDOW</span>
+      <span class="text-[#C5A059]">✦</span>
+    </div>
+  </aside>
+
+  <!-- 2. LUXURY STICKY HEADER -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#EEEEEE] shadow-sm">
+    <div class="max-w-[1520px] mx-auto px-4 sm:px-8 h-20 flex items-center justify-between">
+      
+      <!-- Left: Navigation Back -->
+      <div class="flex items-center gap-6">
+        <a href="desktop.html" class="flex items-center gap-1.5 text-[12px] font-medium tracking-wider text-[#666666] hover:text-[#1A1A1A] uppercase transition-colors">
+          <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+          <span class="hidden sm:inline">Back to Collection</span>
+        </a>
+      </div>
+
+      <!-- Center: Brand Emblem & Title -->
+      <div class="flex items-center justify-center">
+        <a href="desktop.html" class="flex flex-col items-center justify-center text-center group">
+          <span class="font-garamond text-[24px] sm:text-[28px] text-[#1A1A1A] tracking-[0.24em] uppercase font-normal leading-tight">CAEN JEWELS</span>
+          <span class="text-[10px] tracking-[0.28em] text-[#C5A059] font-medium uppercase">— JEWELLERY FOR YOUR STORY —</span>
+        </a>
+      </div>
+
+      <!-- Right: Action Icons (Account, Wishlist, Cart) -->
+      <div class="flex items-center gap-4">
+        <button id="header-wishlist-btn" aria-label="Wishlist" class="w-10 h-10 rounded-full hover:bg-[#FAF7F2] text-[#1A1A1A] hover:text-[#C5A059] transition-colors flex items-center justify-center relative" type="button">
+          <span class="material-symbols-outlined text-[22px]">favorite_border</span>
+        </button>
+        <button id="header-cart-btn" aria-label="Shopping Bag" class="w-10 h-10 rounded-full hover:bg-[#FAF7F2] text-[#1A1A1A] hover:text-[#C5A059] transition-colors flex items-center justify-center relative" onclick="openCartDrawer()" type="button">
+          <span class="material-symbols-outlined text-[22px]">shopping_bag</span>
+          <span id="header-cart-badge" class="absolute top-1 right-1 bg-[#1A1A1A] text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none">0</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- 3. BREADCRUMB NAVIGATION -->
+  <nav class="bg-[#FAF7F2] border-b border-[#EEEEEE] py-2.5 px-4 sm:px-8">
+    <div class="max-w-[1520px] mx-auto flex items-center gap-2 text-[12px] text-[#757575] font-medium overflow-x-auto whitespace-nowrap">
+      <a href="desktop.html" class="hover:text-[#1A1A1A] transition-colors">Home</a>
+      <span>/</span>
+      <a href="desktop.html#categories" class="hover:text-[#1A1A1A] transition-colors">Rings</a>
+      <span>/</span>
+      <a href="desktop.html#the-caen-edit" class="hover:text-[#1A1A1A] transition-colors">Archival Solitaires</a>
+      <span>/</span>
+      <span class="text-[#1A1A1A] font-medium">The Celeste Solitaire Ring</span>
+    </div>
+  </nav>
+
+  <!-- 4. MAIN PRODUCT EXPERIENCE SECTION -->
+  <main class="flex-1 max-w-[1520px] mx-auto w-full px-4 sm:px-8 py-8 lg:py-12">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-start">
+
+      <!-- LEFT COLUMN: INTERACTIVE MEDIA GALLERY (7 Cols) -->
+      <div class="lg:col-span-7 flex flex-col-reverse lg:flex-row gap-4 lg:sticky lg:top-28">
+        
+        <!-- Thumbnail Strip -->
+        <div class="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-y-auto pb-2 lg:pb-0 shrink-0">
+          <button onclick="changeProductImage(0)" class="thumb-btn thumb-active relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border-2 border-[#C5A059] bg-[#FAF7F2] shrink-0 transition-all">
+            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7OPfWs8qGNPuT9MhW85Hg0j8B78eJV77vgJq955LBddRFmoCzEF-rrGGGivVTCw-V1NbdrDV6uVZV6qvdbBcq-y4Qq5dSyd_yf0Vt7COkmZbfrVU8lsNNENUsYyFjhb3qFV3lfBm26JDowttb20nln-q6ln327KkC3a3SBAK6Lih0JKwF_xx7z1SvQouMojIWDHUBOnqq2EXOyG5Ka4oTpmbgbJHRL4ScbzT5s51K8sT60FIHV9_Q" alt="Celeste Ring Angle 1" class="w-full h-full object-cover">
+          </button>
+          <button onclick="changeProductImage(1)" class="thumb-btn relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border-2 border-transparent hover:border-[#D1CCC4] bg-[#FAF7F2] shrink-0 opacity-70 transition-all">
+            <img src="https://lh3.googleusercontent.com/aida/AEtjO1UJcRo61jKAm8_nfTiTz12l64Aj00akg5lHNVWC8zTwzaTSC0FBw4L566neH_KzElo4HR4FYBNrMcvslMz1AzuSLPs4Ei7WTlUG3b5Mck3WZhxt8r3wsnROq8ASBSn43vfVVeEkzv3JE0hg3btYoNBbKUIyoG1-cu9_XTQdG7wRODPLXRGHApjryE3-cKQEz0mBXme3q5TFaeN31GMuUlXXup6dP7OQHF_DnFU30wJkWzRudu-xlcFQkg" alt="Celeste Ring Angle 2" class="w-full h-full object-cover">
+          </button>
+          <button onclick="changeProductImage(2)" class="thumb-btn relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border-2 border-transparent hover:border-[#D1CCC4] bg-[#FAF7F2] shrink-0 opacity-70 transition-all">
+            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB3g8dmLEBAog8DrQ8a06nhsT-E3AqJ7LqjSFJWTjF89P9ZlVVna9qUxZQ0oXeEiWCQjGurLk-H4J3UjtdMmv3jf6mThrYAxgmn2BQp4PClOU9aVf-_QrRSuSblNNoRfMAWqX-6HOo_xb1JOlsxGjVBh3HgvLkFmfq-oHy6qTyBVRpiZhpXXgSBMGx_CLjyBvMm_lgcS7cxIXqB2WxwtsG_tTpNaP-oV2HkTVT3iBL6n8QugcyQDNAt" alt="Celeste Ring Model" class="w-full h-full object-cover">
+          </button>
+          <button onclick="changeProductImage(3)" class="thumb-btn relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border-2 border-transparent hover:border-[#D1CCC4] bg-[#FAF7F2] shrink-0 opacity-70 transition-all">
+            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCKeDCsYngK0i-XIQz2kQSSzBe_XXfimpOoJnm-O0pjLGieh1gdEA4zP67wYW19aqTnx1nqWHZnTlfjx_GNb36E5tTMLkc5rY_b1zTGM703UhgR8ptWjw7zjARF6-TXZ2vmp9DeBTpxIOY079FqHyKtkHTQkFl8uyiZK-QG567WDr4bX-PqopxIdG5_q3-Yu1Uf2WWgSpidBnQmPgE_o1P3NCZorf1vK_AfpJS0tPBqt-sT3JyjawWA" alt="Celeste Detail Hand" class="w-full h-full object-cover">
+          </button>
+          <button onclick="changeProductImage(4)" class="thumb-btn relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border-2 border-transparent hover:border-[#D1CCC4] bg-[#FAF7F2] shrink-0 opacity-70 transition-all">
+            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCu67EzGCQ6HVOB4SLpa5CWGxbjMpLfHsZX9cWw7fT-2jNuVMHfajOGCbXdkaieYouOJNLMQrBGZt_75LUWtohvmyQeFtLqYU7WlpJ20GXUnzN-75zE8Sjo0zojsjWRPolimEzY_RHHMujK133T3ujl1YB7l0QuER6BxJLWoplU1yc8kAgUAivRnmZk54NaynTdBEQ8Mm0sPnTtr0PEcuIYsHHslxQIlAIdlBytS-McsGvEhdzuO_Dt" alt="Diamond Macro" class="w-full h-full object-cover">
+          </button>
+        </div>
+
+        <!-- Main Display Frame with Zoom & Badges -->
+        <div class="relative flex-1 aspect-[4/5] rounded-2xl overflow-hidden bg-[#FAF7F2] border border-[#EEEEEE] shadow-sm group">
+          
+          <img id="main-product-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7OPfWs8qGNPuT9MhW85Hg0j8B78eJV77vgJq955LBddRFmoCzEF-rrGGGivVTCw-V1NbdrDV6uVZV6qvdbBcq-y4Qq5dSyd_yf0Vt7COkmZbfrVU8lsNNENUsYyFjhb3qFV3lfBm26JDowttb20nln-q6ln327KkC3a3SBAK6Lih0JKwF_xx7z1SvQouMojIWDHUBOnqq2EXOyG5Ka4oTpmbgbJHRL4ScbzT5s51K8sT60FIHV9_Q" alt="Celeste Solitaire Ring" class="w-full h-full object-cover object-center group-hover:scale-105">
+          
+          <!-- Badges -->
+          <div class="absolute top-4 left-4 flex flex-col gap-2">
+            <span class="bg-[#1A1A1A] text-white text-[10px] px-3 py-1 uppercase tracking-widest font-semibold rounded shadow-sm">
+              ARCHIVAL PIECE
+            </span>
+            <span class="bg-white/90 backdrop-blur-md text-[#7A4B29] border border-[#E5E0D8] text-[10px] px-2.5 py-0.5 uppercase tracking-wider font-semibold rounded shadow-xs flex items-center gap-1">
+              <span class="material-symbols-outlined text-[14px] text-[#C5A059]">verified</span>
+              IGI & GIA CERTIFIED
+            </span>
+          </div>
+
+          <!-- Quick Actions: Wishlist -->
+          <div class="absolute top-4 right-4 flex flex-col gap-2">
+            <button id="product-wishlist-toggle" onclick="toggleWishlist()" class="w-10 h-10 rounded-full bg-white/90 backdrop-blur-md text-[#666666] hover:text-[#C5A059] flex items-center justify-center transition-transform hover:scale-110 shadow-md" title="Add to Wishlist">
+              <span id="wishlist-icon" class="material-symbols-outlined text-[22px]">favorite_border</span>
+            </button>
+          </div>
+
+          <!-- Bottom Visual Hallmark Banner -->
+          <div class="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-md p-3 rounded-xl border border-[#E5E0D8] shadow-md flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-[#C5A059] animate-ping"></span>
+              <span class="text-[11px] font-semibold text-[#1A1A1A] uppercase tracking-wider">Hallmarked 750 Pure Gold</span>
+            </div>
+            <span class="text-[11px] text-[#757575] font-mono">№ 8402-CEL</span>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- RIGHT COLUMN: PRODUCT CONFIGURATOR & COMMERCIAL SUITE (5 Cols) -->
+      <div class="lg:col-span-5 flex flex-col">
+
+        <!-- Brand Capsule Header -->
+        <div class="inline-flex items-center gap-2 self-start px-3 py-1 rounded-full bg-[#FAF7F2] text-[#7A4B29] border border-[#E5E0D8] mb-3">
+          <span class="text-[#C5A059] text-[12px]">✦</span>
+          <span class="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#7A4B29]">FLAGSHIP SOLITAIRE COLLECTION</span>
+        </div>
+
+        <!-- Product Title & Narrative -->
+        <h1 class="font-garamond text-[32px] sm:text-[40px] text-[#1A1A1A] font-normal leading-[1.1] tracking-tight">
+          The Celeste Solitaire Ring
+        </h1>
+        <p class="text-[14px] text-[#666666] mt-2 leading-relaxed font-normal">
+          Handcrafted in our master Mumbai atelier with a brilliant-cut center diamond elevated in an iconic 4-prong cathedral setting, finished with our signature recessed gold comfort band.
+        </p>
+
+        <!-- Rating & Reviews -->
+        <div class="flex items-center gap-3 mt-3 pb-4 border-b border-[#EEEEEE]">
+          <div class="flex items-center gap-0.5 text-[#C5A059]">
+            <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+            <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+            <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+            <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+            <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+          </div>
+          <span class="text-[12px] font-semibold text-[#1A1A1A]">4.9 / 5.0</span>
+          <span class="text-[#D1CCC4]">•</span>
+          <a href="#patron-reviews" class="text-[12px] text-[#757575] hover:text-[#C5A059] underline underline-offset-2 transition-colors">42 Patron Reviews</a>
+        </div>
+
+        <!-- Price Section & EMI Calculator -->
+        <div class="py-4 border-b border-[#EEEEEE]">
+          <div class="flex items-baseline gap-3">
+            <span id="product-display-price" class="text-[28px] sm:text-[32px] font-semibold text-[#1A1A1A] tracking-tight">₹38,500</span>
+            <span id="product-original-price" class="text-[15px] text-[#999999] line-through font-normal">₹44,000</span>
+            <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[11px] font-semibold uppercase tracking-wider">Save ₹5,500</span>
+          </div>
+          <p class="text-[12px] text-[#757575] mt-1">
+            Inclusive of all taxes, hallmarking fees & complimentary insured vault shipping.
+          </p>
+          <div class="mt-2.5 p-2.5 bg-[#FAF7F2] rounded-lg border border-[#E5E0D8] flex items-center justify-between text-[12px]">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-[#C5A059]">credit_card</span>
+              <span class="text-[#1A1A1A]">Or pay <span class="font-semibold text-[#1A1A1A]">₹3,208/month</span> with 0% Interest EMI</span>
+            </div>
+            <button onclick="alert('EMI available across HDFC, ICICI, Axis & Amex up to 12 months.')" class="text-[#C5A059] font-semibold hover:underline text-[11px] uppercase tracking-wider">Plans</button>
+          </div>
+        </div>
+
+        <!-- CONFIGURATOR OPTIONS -->
+        <div class="py-5 space-y-6 border-b border-[#EEEEEE]">
+          
+          <!-- 1. METAL / GOLD TYPE SELECTOR -->
+          <div>
+            <div class="flex items-center justify-between mb-2.5">
+              <span class="text-[11px] font-semibold uppercase tracking-wider text-[#1A1A1A]">
+                1. Metal Purity & Tone: <span id="selected-metal-label" class="text-[#C5A059] font-semibold">18K Solid Yellow Gold</span>
+              </span>
+            </div>
+            <div class="grid grid-cols-3 gap-2.5">
+              <button onclick="selectMetal('18K Yellow Gold', 0, this)" class="metal-btn ring-2 ring-[#C5A059] p-2.5 rounded-lg border border-[#E5E0D8] bg-[#FAF7F2] flex items-center gap-2 transition-all text-left">
+                <span class="w-5 h-5 rounded-full bg-gradient-to-tr from-[#D4AF37] to-[#F3E5AB] border border-white shadow-xs shrink-0"></span>
+                <div>
+                  <span class="block text-[12px] font-semibold text-[#1A1A1A] leading-tight">18K Yellow</span>
+                  <span class="text-[10px] text-[#757575]">Warm Glow</span>
+                </div>
+              </button>
+              <button onclick="selectMetal('18K Rose Gold', 0, this)" class="metal-btn p-2.5 rounded-lg border border-[#EEEEEE] hover:border-[#D1CCC4] bg-white flex items-center gap-2 transition-all text-left">
+                <span class="w-5 h-5 rounded-full bg-gradient-to-tr from-[#B76E79] to-[#FAD6D6] border border-white shadow-xs shrink-0"></span>
+                <div>
+                  <span class="block text-[12px] font-semibold text-[#1A1A1A] leading-tight">18K Rose</span>
+                  <span class="text-[10px] text-[#757575]">Blush Tone</span>
+                </div>
+              </button>
+              <button onclick="selectMetal('Platinum / 18K White', 2500, this)" class="metal-btn p-2.5 rounded-lg border border-[#EEEEEE] hover:border-[#D1CCC4] bg-white flex items-center gap-2 transition-all text-left">
+                <span class="w-5 h-5 rounded-full bg-gradient-to-tr from-[#D1D5DB] to-[#F9FAFB] border border-white shadow-xs shrink-0"></span>
+                <div>
+                  <span class="block text-[12px] font-semibold text-[#1A1A1A] leading-tight">White Gold</span>
+                  <span class="text-[10px] text-[#757575]">+₹2,500</span>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- 2. DIAMOND CARAT WEIGHT SELECTOR -->
+          <div>
+            <div class="flex items-center justify-between mb-2.5">
+              <span class="text-[11px] font-semibold uppercase tracking-wider text-[#1A1A1A]">
+                2. Solitaire Carat Weight: <span id="selected-carat-label" class="text-[#C5A059] font-semibold">0.75 CT (Signature)</span>
+              </span>
+              <span class="text-[11px] text-[#757575]">Color D-E • VVS1 Clarity</span>
+            </div>
+            <div class="grid grid-cols-4 gap-2">
+              <button onclick="selectCarat('0.50 CT', -10000, this)" class="carat-btn p-2.5 rounded-lg border border-[#EEEEEE] hover:border-[#D1CCC4] bg-white text-center transition-all">
+                <span class="block text-[13px] font-semibold text-[#1A1A1A]">0.50 CT</span>
+                <span class="text-[11px] text-[#757575]">₹28,500</span>
+              </button>
+              <button onclick="selectCarat('0.75 CT (Signature)', 0, this)" class="carat-btn carat-btn-active ring-1 ring-[#C5A059] p-2.5 rounded-lg border border-[#C5A059] bg-[#FAF7F2] text-center transition-all">
+                <span class="block text-[13px] font-semibold text-[#1A1A1A]">0.75 CT</span>
+                <span class="text-[11px] text-[#C5A059] font-semibold">₹38,500</span>
+              </button>
+              <button onclick="selectCarat('1.00 CT (Archival)', 28000, this)" class="carat-btn p-2.5 rounded-lg border border-[#EEEEEE] hover:border-[#D1CCC4] bg-white text-center transition-all">
+                <span class="block text-[13px] font-semibold text-[#1A1A1A]">1.00 CT</span>
+                <span class="text-[11px] text-[#757575]">₹66,500</span>
+              </button>
+              <button onclick="selectCarat('1.50 CT (Museum)', 65000, this)" class="carat-btn p-2.5 rounded-lg border border-[#EEEEEE] hover:border-[#D1CCC4] bg-white text-center transition-all">
+                <span class="block text-[13px] font-semibold text-[#1A1A1A]">1.50 CT</span>
+                <span class="text-[11px] text-[#757575]">₹1,03,500</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 3. RING SIZE SELECTOR -->
+          <div>
+            <div class="flex items-center justify-between mb-2.5">
+              <span class="text-[11px] font-semibold uppercase tracking-wider text-[#1A1A1A]">
+                3. Select Ring Size: <span id="selected-size-label" class="text-[#C5A059] font-semibold">US 6 (16.5 mm)</span>
+              </span>
+              <button onclick="openSizeGuideModal()" class="text-[11px] text-[#C5A059] font-semibold hover:underline uppercase tracking-wider flex items-center gap-1">
+                <span class="material-symbols-outlined text-[15px]">straighten</span> Ring Size Guide
+              </button>
+            </div>
+            <div class="grid grid-cols-6 gap-2">
+              <button onclick="selectSize('US 4 (14.9 mm)', this)" class="size-btn py-2.5 rounded-lg border border-[#EEEEEE] hover:border-[#1A1A1A] text-[13px] font-semibold transition-colors">4</button>
+              <button onclick="selectSize('US 5 (15.7 mm)', this)" class="size-btn py-2.5 rounded-lg border border-[#EEEEEE] hover:border-[#1A1A1A] text-[13px] font-semibold transition-colors">5</button>
+              <button onclick="selectSize('US 6 (16.5 mm)', this)" class="size-btn size-btn-active py-2.5 rounded-lg border border-[#1A1A1A] bg-[#1A1A1A] text-white text-[13px] font-semibold transition-colors">6</button>
+              <button onclick="selectSize('US 7 (17.3 mm)', this)" class="size-btn py-2.5 rounded-lg border border-[#EEEEEE] hover:border-[#1A1A1A] text-[13px] font-semibold transition-colors">7</button>
+              <button onclick="selectSize('US 8 (18.1 mm)', this)" class="size-btn py-2.5 rounded-lg border border-[#EEEEEE] hover:border-[#1A1A1A] text-[13px] font-semibold transition-colors">8</button>
+              <button onclick="selectSize('Custom Size', this)" class="size-btn py-2.5 rounded-lg border border-[#EEEEEE] hover:border-[#1A1A1A] text-[12px] font-semibold transition-colors">Bespoke</button>
+            </div>
+            <p class="text-[11px] text-[#757575] mt-1.5 flex items-center gap-1">
+              <span class="material-symbols-outlined text-[14px] text-emerald-600">check_circle</span>
+              Complimentary 1-time size exchange included within 60 days.
+            </p>
+          </div>
+
+          <!-- 4. COMPLIMENTARY CUSTOM ENGRAVING TOGGLE -->
+          <div class="p-3.5 bg-[#FAF7F2] rounded-xl border border-[#E5E0D8]">
+            <div class="flex items-center justify-between cursor-pointer" onclick="toggleEngraving()">
+              <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-[#C5A059] text-[18px]">draw</span>
+                <div>
+                  <span class="text-[12px] font-semibold text-[#1A1A1A] block leading-tight">Complimentary Inner Ring Engraving</span>
+                  <span class="text-[10px] text-[#757575]">Add names, initials or special date (Max 20 chars)</span>
+                </div>
+              </div>
+              <span id="engraving-toggle-icon" class="material-symbols-outlined text-[#757575] transition-transform">expand_more</span>
+            </div>
+            <div id="engraving-input-box" class="hidden mt-3 pt-3 border-t border-[#E5E0D8]">
+              <input id="engraving-text" type="text" maxlength="20" placeholder="e.g., FOREVER ✦ 24.10" class="w-full px-3 py-2 text-[13px] border border-[#D1CCC4] rounded-lg focus:ring-1 focus:ring-[#C5A059] focus:outline-none bg-white font-mono uppercase">
+              <div class="flex items-center justify-between mt-1 text-[10px] text-[#757575]">
+                <span>Laser engraved inside the comfort shank</span>
+                <span id="engraving-char-count">0/20</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 5. PURCHASE & BAG ACTIONS -->
+        <div class="py-6 space-y-3">
+          
+          <div class="flex gap-3">
+            <!-- Quantity Counter -->
+            <div class="flex items-center border border-[#D1CCC4] rounded-lg bg-[#FAF7F2] px-2">
+              <button onclick="updateQty(-1)" class="w-8 h-10 flex items-center justify-center text-[#1A1A1A] hover:text-[#C5A059] font-bold text-[16px]">−</button>
+              <span id="product-qty" class="w-8 text-center text-[13px] font-semibold text-[#1A1A1A]">1</span>
+              <button onclick="updateQty(1)" class="w-8 h-10 flex items-center justify-center text-[#1A1A1A] hover:text-[#C5A059] font-bold text-[16px]">+</button>
+            </div>
+
+            <!-- Primary Add to Bag Button -->
+            <button id="add-to-bag-btn" onclick="addToBag()" class="flex-1 py-3.5 px-6 bg-[#1A1A1A] hover:bg-[#333333] active:scale-[0.99] text-white rounded font-medium text-[12px] uppercase tracking-[0.22em] shadow-md transition-all flex items-center justify-center gap-2">
+              <span class="material-symbols-outlined text-[18px]">shopping_bag</span>
+              <span id="add-to-bag-text">ADD TO BAG — ₹38,500</span>
+            </button>
+          </div>
+
+          <!-- Virtual Try-On Button -->
+          <button id="try-on-btn" onclick="openTryOn('ring', 'CELESTE-SOLITAIRE-RING')" class="w-full py-3 px-4 bg-[#FAF7F2] hover:bg-[#F0EBE1] active:scale-[0.99] text-[#1A1A1A] border border-[#C5A059]/50 rounded text-[11px] font-semibold uppercase tracking-[0.18em] transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-[18px] text-[#C5A059]">videocam</span>
+            Try It On — Live Camera
+          </button>
+
+          <!-- Secondary Atelier Consultation Button -->
+          <div class="grid grid-cols-2 gap-3">
+            <button onclick="window.open('https://api.whatsapp.com/send?phone=912245890000&text=Hello%20Caen%20Jewels,%20I%20am%20interested%20in%20The%20Celeste%20Solitaire%20Ring', '_blank')" class="py-3 px-4 bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#128C7E] border border-[#25D366]/30 rounded text-[11px] font-medium uppercase tracking-[0.14em] transition-colors flex items-center justify-center gap-1.5">
+              <span class="material-symbols-outlined text-[16px]">chat</span>
+              WhatsApp Gemologist
+            </button>
+            <button onclick="alert('Appointment requested! Our private jewelry stylist will contact you.')" class="py-3 px-4 bg-[#FAF7F2] hover:bg-[#F0EBE1] text-[#1A1A1A] border border-[#D1CCC4] rounded text-[11px] font-medium uppercase tracking-[0.14em] transition-colors flex items-center justify-center gap-1.5">
+              <span class="material-symbols-outlined text-[16px]">calendar_month</span>
+              Book Salon Viewing
+            </button>
+          </div>
+
+        </div>
+
+        <!-- 6. VALUE GUARANTEES & TRUST PILLARS -->
+        <div class="grid grid-cols-2 gap-3 py-4 border-t border-[#EEEEEE] text-[11px] text-[#666666]">
+          <div class="flex items-start gap-2">
+            <span class="material-symbols-outlined text-[18px] text-[#C5A059] shrink-0">local_shipping</span>
+            <span>Insured armoured transit dispatched within 48 hours</span>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="material-symbols-outlined text-[18px] text-[#C5A059] shrink-0">verified_user</span>
+            <span>IGI & GIA laser-inscribed authentic certificate</span>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="material-symbols-outlined text-[18px] text-[#C5A059] shrink-0">cached</span>
+            <span>15-day vault returns & 100% lifetime diamond exchange</span>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="material-symbols-outlined text-[18px] text-[#C5A059] shrink-0">cleaning_services</span>
+            <span>Lifetime complimentary salon cleaning & prong care</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- 5. DETAILED TECHNICAL SPECIFICATIONS -->
+    <section class="mt-16 pt-12 border-t border-[#EEEEEE]">
+      <div class="max-w-4xl mx-auto">
+        
+        <div class="text-center mb-10">
+          <span class="text-[11px] font-semibold text-[#C5A059] tracking-[0.25em] uppercase block mb-1">CRAFT & PROVENANCE</span>
+          <h2 class="font-garamond text-[28px] sm:text-[34px] text-[#1A1A1A] font-normal">Master Specifications</h2>
+          <p class="text-[13px] text-[#666666] mt-1">Every facet evaluated under 40x gemological magnification.</p>
+        </div>
+
+        <!-- Specs Tabs / Cards -->
+        <div class="space-y-3">
+          
+          <!-- Diamond Spec Card -->
+          <div class="bg-[#FAF7F2] rounded-xl border border-[#EEEEEE] overflow-hidden p-6 shadow-xs">
+            <h3 class="text-[13px] font-semibold uppercase tracking-wider text-[#1A1A1A] mb-4 flex items-center gap-2">
+              <span class="material-symbols-outlined text-[#C5A059] text-[20px]">diamond</span>
+              Solitaire Diamond Report
+            </h3>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-[13px]">
+              <div class="p-3 bg-white rounded-lg border border-[#EEEEEE]">
+                <span class="text-[10px] text-[#757575] uppercase tracking-wider block font-medium">Cut Grade</span>
+                <span class="font-semibold text-[#1A1A1A]">Round Brilliant (3EX)</span>
+              </div>
+              <div class="p-3 bg-white rounded-lg border border-[#EEEEEE]">
+                <span class="text-[10px] text-[#757575] uppercase tracking-wider block font-medium">Color & Clarity</span>
+                <span class="font-semibold text-[#1A1A1A]">D-E Color / VVS1</span>
+              </div>
+              <div class="p-3 bg-white rounded-lg border border-[#EEEEEE]">
+                <span class="text-[10px] text-[#757575] uppercase tracking-wider block font-medium">Fluorescence</span>
+                <span class="font-semibold text-[#1A1A1A]">None (Inert)</span>
+              </div>
+              <div class="p-3 bg-white rounded-lg border border-[#EEEEEE]">
+                <span class="text-[10px] text-[#757575] uppercase tracking-wider block font-medium">Certification</span>
+                <span class="font-semibold text-[#C5A059]">IGI & GIA Laser Seal</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Metal & Setting Spec Card -->
+          <div class="bg-[#FAF7F2] rounded-xl border border-[#EEEEEE] overflow-hidden p-6 shadow-xs">
+            <h3 class="text-[13px] font-semibold uppercase tracking-wider text-[#1A1A1A] mb-4 flex items-center gap-2">
+              <span class="material-symbols-outlined text-[#C5A059] text-[20px]">architecture</span>
+              Setting & Band Anatomy
+            </h3>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-[13px]">
+              <div class="p-3 bg-white rounded-lg border border-[#EEEEEE]">
+                <span class="text-[10px] text-[#757575] uppercase tracking-wider block font-medium">Metal Purity</span>
+                <span class="font-semibold text-[#1A1A1A]">18K Hallmarked 750</span>
+              </div>
+              <div class="p-3 bg-white rounded-lg border border-[#EEEEEE]">
+                <span class="text-[10px] text-[#757575] uppercase tracking-wider block font-medium">Approx. Weight</span>
+                <span class="font-semibold text-[#1A1A1A]">3.85 Grams Solid Gold</span>
+              </div>
+              <div class="p-3 bg-white rounded-lg border border-[#EEEEEE]">
+                <span class="text-[10px] text-[#757575] uppercase tracking-wider block font-medium">Band Width</span>
+                <span class="font-semibold text-[#1A1A1A]">1.8 mm Comfort Taper</span>
+              </div>
+              <div class="p-3 bg-white rounded-lg border border-[#EEEEEE]">
+                <span class="text-[10px] text-[#757575] uppercase tracking-wider block font-medium">Setting Style</span>
+                <span class="font-semibold text-[#1A1A1A]">4-Prong Cathedral</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Unboxing & Archival Box Spec -->
+          <div class="bg-[#FAF7F2] rounded-xl border border-[#EEEEEE] overflow-hidden p-6 shadow-xs">
+            <h3 class="text-[13px] font-semibold uppercase tracking-wider text-[#1A1A1A] mb-4 flex items-center gap-2">
+              <span class="material-symbols-outlined text-[#C5A059] text-[20px]">featured_seasonal_and_gifts</span>
+              Signature Presentation Casket Included
+            </h3>
+            <p class="text-[13px] text-[#666666] leading-relaxed">
+              Every creation arrives in our signature champagne presentation box lined in custom velvet, accompanied by an embossed wax-sealed certificate, high-density polishing chamois, travel pouch, and individual GIA/IGI laboratory cards.
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 6. COMPLETE THE ARCHIVAL LOOK (PAIRING CAROUSEL) -->
+    <section class="mt-16 pt-12 border-t border-[#EEEEEE]">
+      <div class="flex flex-col md:flex-row md:items-end justify-between mb-8">
+        <div>
+          <span class="text-[11px] font-semibold text-[#C5A059] tracking-[0.25em] uppercase block mb-1">CURATED STACK</span>
+          <h2 class="font-garamond text-[28px] sm:text-[34px] text-[#1A1A1A] font-normal">Complete The Look</h2>
+        </div>
+        <p class="text-[13px] text-[#666666] max-w-md">Sculptural companion pieces engineered to stack flush with the Celeste band.</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        
+        <!-- Companion 1: Aurelia Band -->
+        <div class="group bg-white rounded-xl overflow-hidden border border-[#EEEEEE] shadow-sm hover:shadow-md transition-all p-4 flex flex-col">
+          <div class="aspect-square w-full rounded-lg overflow-hidden bg-[#FAF7F2] mb-3">
+            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuCGMIuYSCoKrsbVLREpaDlIvrrHhatO3pj52Ttgqp1drZYNjv8brgl56gDODvye8v0fptKa-r6zW5vaI6XbK157ONN0ogV8BzrDOExmvHZfSZkLDX_sDCYXYj9-m2jdPJpB5JILubaw64CvM8Vt89-UoUOwaaysV3SMBHFeP-BLmPYf0N3MyXe-fwCavYv-_58pUjdEZjBMsP_MZmgzWqqyW3fKuFfLAr3SWsS79lDNEhsLIUB_93I0" alt="Aurelia Diamond Band" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+          </div>
+          <span class="text-[10px] text-[#C5A059] uppercase font-semibold tracking-wider mb-1">18K SOLID GOLD</span>
+          <h4 class="font-garamond text-[18px] font-medium text-[#1A1A1A] mb-1">Aurelia Diamond Band</h4>
+          <span class="text-[11px] text-[#757575] mb-3">0.42 CT VVS1 Pavé</span>
+          <div class="mt-auto pt-3 border-t border-[#EEEEEE] flex items-center justify-between">
+            <span class="text-[15px] font-semibold text-[#1A1A1A]">₹24,900</span>
+            <button onclick="alert('Aurelia Diamond Band added to bag!')" class="text-[11px] font-semibold uppercase tracking-wider text-[#1A1A1A] hover:text-[#C5A059]">+ ADD</button>
+          </div>
+        </div>
+
+        <!-- Companion 2: Élan Gold Hoops -->
+        <div class="group bg-white rounded-xl overflow-hidden border border-[#EEEEEE] shadow-sm hover:shadow-md transition-all p-4 flex flex-col">
+          <div class="aspect-square w-full rounded-lg overflow-hidden bg-[#FAF7F2] mb-3">
+            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBjfrntns5HS3ebx-jCE4hZDaXssFZuM99H3MDwJju04FOVR2zdhhz1-YiVUSBg_NkhiIVEGauLJi5XlxV1rHb6cA_0Yk4pNtHbGX5GJBu2i9iBt7E3UIZh3F-NTe7kHEVmzzmqrNzsTYBbJ1CL-uX6noj4IdAPJ4t5X3XhRrXymFzi86PtjcAcV6V1z-DgHMnvVPYcCug3J58lCiHxOXIsgHV_tKgq0t5nX1t1khEVkmOJOoko9yjJ" alt="Élan Gold Hoops" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+          </div>
+          <span class="text-[10px] text-[#C5A059] uppercase font-semibold tracking-wider mb-1">EARRINGS</span>
+          <h4 class="font-garamond text-[18px] font-medium text-[#1A1A1A] mb-1">Élan Gold Hoops</h4>
+          <span class="text-[11px] text-[#757575] mb-3">14.2 mm Solid 18K</span>
+          <div class="mt-auto pt-3 border-t border-[#EEEEEE] flex items-center justify-between">
+            <span class="text-[15px] font-semibold text-[#1A1A1A]">₹18,750</span>
+            <button onclick="alert('Élan Gold Hoops added to bag!')" class="text-[11px] font-semibold uppercase tracking-wider text-[#1A1A1A] hover:text-[#C5A059]">+ ADD</button>
+          </div>
+        </div>
+
+        <!-- Companion 3: Aria Tennis Bracelet -->
+        <div class="group bg-white rounded-xl overflow-hidden border border-[#EEEEEE] shadow-sm hover:shadow-md transition-all p-4 flex flex-col">
+          <div class="aspect-square w-full rounded-lg overflow-hidden bg-[#FAF7F2] mb-3">
+            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIRXBTkl_aHR0xL-zjt06R3e7p6c9f4wZMVjiBWLQHTUoKWTBwRQFLOVday-Vfev8vLcaNqEjGdfB6cAnYOvSrooQJTZTb7fBF-jC56r1tMdTATG9Tbgdq0A6PCGCh6jBa4QLx-BVYdB-nmGtBmJ09Lsc2OFenqL15DOxtcyAxkKhX_AxqCDnhBBf2o210dhU7vfHWw4mL1F0yu1fTBBiXkoI3hDtasMK12WtdgrnB6jhD5jeHJcKI" alt="Aria Tennis Bracelet" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+          </div>
+          <span class="text-[10px] text-[#C5A059] uppercase font-semibold tracking-wider mb-1">WRISTWEAR</span>
+          <h4 class="font-garamond text-[18px] font-medium text-[#1A1A1A] mb-1">Aria Pavé Bracelet</h4>
+          <span class="text-[11px] text-[#757575] mb-3">1.25 CT Total Diamonds</span>
+          <div class="mt-auto pt-3 border-t border-[#EEEEEE] flex items-center justify-between">
+            <span class="text-[15px] font-semibold text-[#1A1A1A]">₹54,000</span>
+            <button onclick="alert('Aria Pavé Bracelet added to bag!')" class="text-[11px] font-semibold uppercase tracking-wider text-[#1A1A1A] hover:text-[#C5A059]">+ ADD</button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 7. PATRON REVIEWS & TESTIMONIALS -->
+    <section id="patron-reviews" class="mt-16 pt-12 border-t border-[#EEEEEE]">
+      <div class="max-w-4xl mx-auto">
+        <div class="flex items-center justify-between mb-8">
+          <div>
+            <span class="text-[11px] font-semibold text-[#C5A059] tracking-[0.25em] uppercase block mb-1">VERIFIED TESTIMONIALS</span>
+            <h2 class="font-garamond text-[28px] sm:text-[34px] text-[#1A1A1A] font-normal">Patron Impressions</h2>
+          </div>
+          <button onclick="alert('Review submission portal open for verified patrons.')" class="px-4 py-2 border border-[#1A1A1A] text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white rounded text-[11px] font-semibold uppercase tracking-wider transition-colors">
+            Write A Review
+          </button>
+        </div>
+
+        <div class="space-y-4">
+          <!-- Review 1 -->
+          <div class="p-6 bg-[#FAF7F2] rounded-xl border border-[#EEEEEE]">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <span class="font-semibold text-[#1A1A1A] text-[14px]">Ananya Mehta</span>
+                <span class="px-2 py-0.5 rounded bg-white text-[#7A4B29] border border-[#E5E0D8] text-[10px] font-semibold">Verified Buyer</span>
+              </div>
+              <span class="text-[11px] text-[#757575]">2 weeks ago</span>
+            </div>
+            <div class="flex text-[#C5A059] text-[14px] mb-2">★★★★★</div>
+            <p class="text-[13px] text-[#666666] italic leading-relaxed">
+              “The sparkle on the solitaire is unmatched. Wearing it every single day feels like carrying a piece of quiet elegance. Master craftsmanship and the certification made it feel truly special.”
+            </p>
+          </div>
+
+          <!-- Review 2 -->
+          <div class="p-6 bg-[#FAF7F2] rounded-xl border border-[#EEEEEE]">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <span class="font-semibold text-[#1A1A1A] text-[14px]">Vikram & Maya Sen</span>
+                <span class="px-2 py-0.5 rounded bg-white text-[#7A4B29] border border-[#E5E0D8] text-[10px] font-semibold">Engagement Acquisition</span>
+              </div>
+              <span class="text-[11px] text-[#757575]">1 month ago</span>
+            </div>
+            <div class="flex text-[#C5A059] text-[14px] mb-2">★★★★★</div>
+            <p class="text-[13px] text-[#666666] italic leading-relaxed">
+              “Chosen as our engagement ring. The 4-prong cathedral basket lets maximum light enter the diamond from all angles. Highly recommend Caen's personal sizing consultation.”
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 8. LUXURY FOOTER -->
+  <footer class="bg-[#141312] text-[#E5E0D8] mt-20 pt-16 pb-12 border-t border-[#2D2A24]">
+    <div class="max-w-[1520px] mx-auto px-4 sm:px-8">
+      
+      <!-- 1. MAIN FOOTER COLUMNS (Top) -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-10 pb-12 border-b border-[#2D2A24]">
+        <div class="space-y-3">
+          <span class="font-garamond text-[22px] tracking-[0.24em] text-white uppercase block">CAEN JEWELS</span>
+          <p class="text-[12px] text-[#A69F94] leading-relaxed">
+            High jewelry crafted with intention, sculpted in solid recycled gold and conflict-free natural diamonds.
+          </p>
+        </div>
+
+        <div>
+          <span class="text-[11px] font-semibold text-[#C5A059] uppercase tracking-widest block mb-4">The Collections</span>
+          <ul class="space-y-2 text-[12px] text-[#A69F94]">
+            <li><a href="desktop.html#the-caen-edit" class="hover:text-white transition-colors">Solitaire Rings</a></li>
+            <li><a href="desktop.html#the-ear-stack-edit" class="hover:text-white transition-colors">Ear Stack Capsules</a></li>
+            <li><a href="desktop.html#diamond-cuts" class="hover:text-white transition-colors">Diamond Cuts Guide</a></li>
+            <li><a href="desktop.html#categories" class="hover:text-white transition-colors">High Necklaces &amp; Collars</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <span class="text-[11px] font-semibold text-[#C5A059] uppercase tracking-widest block mb-4">Client Care</span>
+          <ul class="space-y-2 text-[12px] text-[#A69F94]">
+            <li><a href="desktop.html#patron-stories" class="hover:text-white transition-colors">Certificate Verification</a></li>
+            <li><a href="desktop.html#patron-stories" class="hover:text-white transition-colors">Complimentary Cleaning</a></li>
+            <li><a href="desktop.html#patron-stories" class="hover:text-white transition-colors">Insured Courier Tracking</a></li>
+            <li><a href="desktop.html#patron-stories" class="hover:text-white transition-colors">15-Day Return Policy</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <span class="text-[11px] font-semibold text-[#C5A059] uppercase tracking-widest block mb-4">Private Concierge</span>
+          <p class="text-[12px] text-[#A69F94] mb-3">Salon &amp; Virtual Consultation available Monday through Saturday.</p>
+          <a href="https://api.whatsapp.com/send?phone=912245890000" target="_blank" class="inline-flex items-center gap-2 text-[12px] text-[#C5A059] hover:underline font-semibold uppercase tracking-wider">
+            <span>+91 22 4589 0000</span>
+            <span class="material-symbols-outlined text-[15px]">arrow_forward</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- 2. HORIZONTAL STRIP: Private Salon Inquiries & Atelier Gazette Side-by-Side (Below Columns) -->
+      <div class="py-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8 border-b border-[#2D2A24]">
+        <!-- Left: Private Salon Inquiries -->
+        <div class="flex-1 max-w-xl">
+          <span class="text-[11px] font-semibold text-[#C5A059] uppercase tracking-widest block mb-1.5">Private Salon Inquiries</span>
+          <a class="font-garamond text-[22px] text-white hover:text-[#C5A059] transition-colors block" href="mailto:salon@caenjewel.com">salon@caenjewel.com • +91 (0) 22 4589 0000</a>
+          <p class="text-[12px] text-[#A69F94] mt-1">Direct private salon access, bespoke diamond allocations, and tailored appointments.</p>
+        </div>
+
+        <!-- Right: Atelier Gazette (Horizontal to Private Salon Inquiries) -->
+        <div class="flex-1 max-w-lg">
+          <div class="text-[12px] font-semibold text-white uppercase tracking-widest mb-1">Atelier Gazette</div>
+          <p class="text-[12px] text-[#A69F94] leading-relaxed mb-3">Receive private invitations to seasonal salon previews and limited carat allocations.</p>
+          <form class="space-y-1.5" onsubmit="event.preventDefault()">
+            <div class="relative">
+              <input class="w-full bg-[#1A1A1A] text-white text-[13px] px-4 py-2.5 rounded-lg focus:outline-none focus:ring-1 focus:ring-[#C5A059] text-left placeholder:text-[#666666] border border-[#333333]" placeholder="Enter your correspondence email" type="email">
+              <button aria-label="Subscribe" class="absolute right-2 top-1/2 -translate-y-1/2 text-[#C5A059] hover:text-white p-1 transition-colors" type="submit">
+                <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+              </button>
+            </div>
+            <span class="text-[11px] text-[#757575] block">Privately held • Discretion assured</span>
+          </form>
+        </div>
+      </div>
+
+      <!-- 3. BOTTOM LEGAL BAR -->
+      <div class="pt-8 flex flex-col sm:flex-row items-center justify-between text-[11px] text-[#757575] gap-4">
+        <span>© 2026 CAEN JEWELS HAUTE JOAILLERIE. ALL RIGHTS RESERVED.</span>
+        <div class="flex items-center gap-6">
+          <span>HALLMARKED 750</span>
+          <span>IGI CERTIFIED</span>
+          <span>GIA NATURAL DIAMONDS</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- 9. RING SIZE GUIDE MODAL -->
+  <div id="size-guide-modal" class="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-[#E5E0D8] relative animate-in fade-in zoom-in-95">
+      <button onclick="closeSizeGuideModal()" class="absolute top-4 right-4 text-[#757575] hover:text-[#1A1A1A] p-1">
+        <span class="material-symbols-outlined text-[24px]">close</span>
+      </button>
+
+      <div class="text-center mb-6">
+        <span class="text-[10px] font-semibold text-[#C5A059] uppercase tracking-widest block mb-1">PRECISION FIT</span>
+        <h3 class="font-garamond text-[24px] text-[#1A1A1A] font-normal">Ring Sizing Guide</h3>
+        <p class="text-[12px] text-[#666666] mt-1">Measure the inside diameter of your existing ring in millimeters.</p>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-[12px] text-left border-collapse">
+          <thead>
+            <tr class="bg-[#FAF7F2] border-b border-[#EEEEEE] text-[#1A1A1A]">
+              <th class="p-2.5 font-semibold">Indian Size</th>
+              <th class="p-2.5 font-semibold">US Size</th>
+              <th class="p-2.5 font-semibold">Inside Diameter</th>
+              <th class="p-2.5 font-semibold">Circumference</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[#EEEEEE]">
+            <tr><td class="p-2.5">Size 7</td><td class="p-2.5 font-semibold">US 4</td><td class="p-2.5">14.9 mm</td><td class="p-2.5 text-[#757575]">46.8 mm</td></tr>
+            <tr><td class="p-2.5">Size 10</td><td class="p-2.5 font-semibold">US 5</td><td class="p-2.5">15.7 mm</td><td class="p-2.5 text-[#757575]">49.3 mm</td></tr>
+            <tr class="bg-[#FAF7F2]/60 font-medium"><td class="p-2.5 text-[#C5A059]">Size 12 (Standard)</td><td class="p-2.5 text-[#C5A059] font-semibold">US 6</td><td class="p-2.5 text-[#C5A059]">16.5 mm</td><td class="p-2.5 text-[#C5A059]">51.9 mm</td></tr>
+            <tr><td class="p-2.5">Size 14</td><td class="p-2.5 font-semibold">US 7</td><td class="p-2.5">17.3 mm</td><td class="p-2.5 text-[#757575]">54.4 mm</td></tr>
+            <tr><td class="p-2.5">Size 17</td><td class="p-2.5 font-semibold">US 8</td><td class="p-2.5">18.1 mm</td><td class="p-2.5 text-[#757575]">57.0 mm</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mt-6 pt-4 border-t border-[#EEEEEE] flex items-center justify-between">
+        <span class="text-[11px] text-[#757575]">Unsure about size? We offer 60-day free resizing.</span>
+        <button onclick="closeSizeGuideModal()" class="px-4 py-2 bg-[#1A1A1A] text-white rounded text-[11px] font-semibold uppercase tracking-wider">Got It</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 10. SHOPPING BAG DRAWER MODAL -->
+  <div id="cart-drawer-backdrop" onclick="closeCartDrawer()" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden transition-opacity"></div>
+  <div id="cart-drawer" class="fixed top-0 right-0 bottom-0 w-full max-w-[420px] bg-white z-50 shadow-2xl border-l border-[#E5E0D8] transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+    
+    <!-- Drawer Header -->
+    <div class="p-5 border-b border-[#EEEEEE] flex items-center justify-between bg-[#FAF7F2]">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-[#C5A059] text-[20px]">shopping_bag</span>
+        <span class="text-[14px] font-semibold uppercase tracking-wider text-[#1A1A1A]">Your Shopping Bag</span>
+      </div>
+      <button onclick="closeCartDrawer()" class="p-1 hover:text-[#C5A059] text-[#757575] transition-colors">
+        <span class="material-symbols-outlined text-[22px]">close</span>
+      </button>
+    </div>
+
+    <!-- Drawer Items List -->
+    <div id="cart-drawer-body" class="flex-1 p-5 overflow-y-auto space-y-4">
+      <div class="p-3.5 rounded-xl bg-[#FAF7F2] border border-[#EEEEEE] flex gap-3.5">
+        <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7OPfWs8qGNPuT9MhW85Hg0j8B78eJV77vgJq955LBddRFmoCzEF-rrGGGivVTCw-V1NbdrDV6uVZV6qvdbBcq-y4Qq5dSyd_yf0Vt7COkmZbfrVU8lsNNENUsYyFjhb3qFV3lfBm26JDowttb20nln-q6ln327KkC3a3SBAK6Lih0JKwF_xx7z1SvQouMojIWDHUBOnqq2EXOyG5Ka4oTpmbgbJHRL4ScbzT5s51K8sT60FIHV9_Q" alt="Celeste Ring" class="w-20 h-20 rounded-lg object-cover bg-white">
+        <div class="flex-1 flex flex-col justify-between">
+          <div>
+            <span class="text-[10px] font-semibold text-[#C5A059] uppercase">ARCHIVAL RING</span>
+            <h4 class="font-garamond text-[15px] font-medium text-[#1A1A1A] leading-snug">The Celeste Solitaire Ring</h4>
+            <span id="cart-item-specs" class="text-[11px] text-[#757575]">18K Yellow Gold • 0.75 CT • US 6</span>
+          </div>
+          <div class="flex items-center justify-between mt-2 pt-2 border-t border-[#E5E0D8]">
+            <span id="cart-item-price" class="text-[14px] font-semibold text-[#1A1A1A]">₹38,500</span>
+            <span class="text-[11px] text-[#757575]">Qty: 1</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Drawer Footer -->
+    <div class="p-5 border-t border-[#EEEEEE] bg-[#FAF7F2] space-y-3">
+      <div class="flex items-center justify-between text-[13px]">
+        <span class="text-[#757575]">Subtotal</span>
+        <span id="cart-drawer-subtotal" class="font-semibold text-[#1A1A1A] text-[16px]">₹38,500</span>
+      </div>
+      <div class="flex items-center justify-between text-[11px] text-emerald-700">
+        <span>Insured Vault Shipping</span>
+        <span class="font-semibold uppercase">Free</span>
+      </div>
+      <button onclick="alert('Proceeding to secure 256-bit encrypted checkout with Razorpay / Cards / UPI.')" class="w-full py-3.5 bg-[#1A1A1A] hover:bg-[#333333] text-white rounded font-medium text-[12px] uppercase tracking-[0.22em] shadow-lg transition-all flex items-center justify-center gap-2">
+        <span class="material-symbols-outlined text-[16px]">lock</span>
+        PROCEED TO CHECKOUT
+      </button>
+      <p class="text-[10px] text-center text-[#757575]">
+        🔒 Guaranteed 100% Authentic IGI/GIA Diamond Certification
+      </p>
+    </div>
+
+  </div>
+
+  <!-- 11. MOBILE STICKY BOTTOM ACTIONS -->
+  <div class="lg:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-[#EEEEEE] p-3 z-40 flex items-center justify-between gap-3 shadow-lg">
+    <div>
+      <span class="text-[10px] text-[#757575] uppercase block font-medium">Total Price</span>
+      <span id="mobile-sticky-price" class="text-[18px] font-semibold text-[#1A1A1A]">₹38,500</span>
+    </div>
+    <button onclick="addToBag()" class="flex-1 py-3 px-4 bg-[#1A1A1A] active:scale-95 text-white rounded text-[12px] font-medium uppercase tracking-[0.16em] flex items-center justify-center gap-2 shadow-md">
+      <span class="material-symbols-outlined text-[18px]">shopping_bag</span>
+      <span>ADD TO BAG</span>
+    </button>
+  </div>
+
+  <!-- JAVASCRIPT PRODUCT LOGIC -->
+  <script>
+    const productGallery = [
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuB7OPfWs8qGNPuT9MhW85Hg0j8B78eJV77vgJq955LBddRFmoCzEF-rrGGGivVTCw-V1NbdrDV6uVZV6qvdbBcq-y4Qq5dSyd_yf0Vt7COkmZbfrVU8lsNNENUsYyFjhb3qFV3lfBm26JDowttb20nln-q6ln327KkC3a3SBAK6Lih0JKwF_xx7z1SvQouMojIWDHUBOnqq2EXOyG5Ka4oTpmbgbJHRL4ScbzT5s51K8sT60FIHV9_Q",
+      "https://lh3.googleusercontent.com/aida/AEtjO1UJcRo61jKAm8_nfTiTz12l64Aj00akg5lHNVWC8zTwzaTSC0FBw4L566neH_KzElo4HR4FYBNrMcvslMz1AzuSLPs4Ei7WTlUG3b5Mck3WZhxt8r3wsnROq8ASBSn43vfVVeEkzv3JE0hg3btYoNBbKUIyoG1-cu9_XTQdG7wRODPLXRGHApjryE3-cKQEz0mBXme3q5TFaeN31GMuUlXXup6dP7OQHF_DnFU30wJkWzRudu-xlcFQkg",
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuB3g8dmLEBAog8DrQ8a06nhsT-E3AqJ7LqjSFJWTjF89P9ZlVVna9qUxZQ0oXeEiWCQjGurLk-H4J3UjtdMmv3jf6mThrYAxgmn2BQp4PClOU9aVf-_QrRSuSblNNoRfMAWqX-6HOo_xb1JOlsxGjVBh3HgvLkFmfq-oHy6qTyBVRpiZhpXXgSBMGx_CLjyBvMm_lgcS7cxIXqB2WxwtsG_tTpNaP-oV2HkTVT3iBL6n8QugcyQDNAt",
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuCKeDCsYngK0i-XIQz2kQSSzBe_XXfimpOoJnm-O0pjLGieh1gdEA4zP67wYW19aqTnx1nqWHZnTlfjx_GNb36E5tTMLkc5rY_b1zTGM703UhgR8ptWjw7zjARF6-TXZ2vmp9DeBTpxIOY079FqHyKtkHTQkFl8uyiZK-QG567WDr4bX-PqopxIdG5_q3-Yu1Uf2WWgSpidBnQmPgE_o1P3NCZorf1vK_AfpJS0tPBqt-sT3JyjawWA",
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuCu67EzGCQ6HVOB4SLpa5CWGxbjMpLfHsZX9cWw7fT-2jNuVMHfajOGCbXdkaieYouOJNLMQrBGZt_75LUWtohvmyQeFtLqYU7WlpJ20GXUnzN-75zE8Sjo0zojsjWRPolimEzY_RHHMujK133T3ujl1YB7l0QuER6BxJLWoplU1yc8kAgUAivRnmZk54NaynTdBEQ8Mm0sPnTtr0PEcuIYsHHslxQIlAIdlBytS-McsGvEhdzuO_Dt"
+    ];
+
+    let basePrice = 38500;
+    let metalDelta = 0;
+    let caratDelta = 0;
+    let selectedMetal = '18K Solid Yellow Gold';
+    let selectedCarat = '0.75 CT (Signature)';
+    let selectedSize = 'US 6 (16.5 mm)';
+    let quantity = 1;
+    let isWishlisted = false;
+    let cartCount = 0;
+
+    // Image switcher
+    function changeProductImage(index) {
+      const mainImg = document.getElementById('main-product-img');
+      mainImg.style.opacity = '0';
+      setTimeout(() => {
+        mainImg.src = productGallery[index];
+        mainImg.style.opacity = '1';
+      }, 150);
+
+      const thumbBtns = document.querySelectorAll('.thumb-btn');
+      thumbBtns.forEach((btn, i) => {
+        if (i === index) {
+          btn.className = 'thumb-btn thumb-active relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border-2 border-[#C5A059] bg-[#FAF7F2] shrink-0 transition-all opacity-100';
+        } else {
+          btn.className = 'thumb-btn relative w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden border-2 border-transparent hover:border-[#D1CCC4] bg-[#FAF7F2] shrink-0 opacity-70 transition-all';
+        }
+      });
+    }
+
+    // Metal selector
+    function selectMetal(metalName, extraPrice, btn) {
+      selectedMetal = metalName;
+      metalDelta = extraPrice;
+      document.getElementById('selected-metal-label').textContent = metalName;
+      
+      document.querySelectorAll('.metal-btn').forEach(b => {
+        b.classList.remove('ring-2', 'ring-[#C5A059]', 'bg-[#FAF7F2]');
+        b.classList.add('bg-white');
+      });
+      btn.classList.add('ring-2', 'ring-[#C5A059]', 'bg-[#FAF7F2]');
+      btn.classList.remove('bg-white');
+      updatePrice();
+    }
+
+    // Carat selector
+    function selectCarat(caratName, delta, btn) {
+      selectedCarat = caratName;
+      caratDelta = delta;
+      document.getElementById('selected-carat-label').textContent = caratName;
+
+      document.querySelectorAll('.carat-btn').forEach(b => {
+        b.classList.remove('carat-btn-active', 'ring-1', 'ring-[#C5A059]', 'bg-[#FAF7F2]');
+        b.classList.add('bg-white');
+      });
+      btn.classList.add('carat-btn-active', 'ring-1', 'ring-[#C5A059]', 'bg-[#FAF7F2]');
+      btn.classList.remove('bg-white');
+      updatePrice();
+    }
+
+    // Size selector
+    function selectSize(sizeName, btn) {
+      selectedSize = sizeName;
+      document.getElementById('selected-size-label').textContent = sizeName;
+
+      document.querySelectorAll('.size-btn').forEach(b => {
+        b.classList.remove('size-btn-active', 'bg-[#1A1A1A]', 'text-white', 'border-[#1A1A1A]');
+        b.classList.add('bg-white', 'text-[#1A1A1A]', 'border-[#EEEEEE]');
+      });
+      btn.classList.add('size-btn-active', 'bg-[#1A1A1A]', 'text-white', 'border-[#1A1A1A]');
+      btn.classList.remove('bg-white', 'text-[#1A1A1A]', 'border-[#EEEEEE]');
+    }
+
+    // Update calculated price
+    function updatePrice() {
+      const currentUnit = (basePrice + metalDelta + caratDelta);
+      const total = currentUnit * quantity;
+      const formatted = '₹' + total.toLocaleString('en-IN');
+      const unitFormatted = '₹' + currentUnit.toLocaleString('en-IN');
+
+      document.getElementById('product-display-price').textContent = unitFormatted;
+      document.getElementById('add-to-bag-text').textContent = `ADD TO BAG — ${formatted}`;
+      document.getElementById('mobile-sticky-price').textContent = formatted;
+      document.getElementById('cart-item-price').textContent = formatted;
+      document.getElementById('cart-drawer-subtotal').textContent = formatted;
+    }
+
+    // Quantity Counter
+    function updateQty(delta) {
+      if (quantity + delta >= 1) {
+        quantity += delta;
+        document.getElementById('product-qty').textContent = quantity;
+        updatePrice();
+      }
+    }
+
+    // Engraving Accordion Toggle
+    function toggleEngraving() {
+      const box = document.getElementById('engraving-input-box');
+      const icon = document.getElementById('engraving-toggle-icon');
+      box.classList.toggle('hidden');
+      if (box.classList.contains('hidden')) {
+        icon.textContent = 'expand_more';
+      } else {
+        icon.textContent = 'expand_less';
+      }
+    }
+
+    // Engraving text counter
+    const engInput = document.getElementById('engraving-text');
+    if (engInput) {
+      engInput.addEventListener('input', (e) => {
+        document.getElementById('engraving-char-count').textContent = `${e.target.value.length}/20`;
+      });
+    }
+
+    // Wishlist Toggle
+    function toggleWishlist() {
+      isWishlisted = !isWishlisted;
+      const icon = document.getElementById('wishlist-icon');
+      if (isWishlisted) {
+        icon.textContent = 'favorite';
+        icon.classList.add('text-red-500');
+        alert('Added The Celeste Solitaire Ring to your Wishlist!');
+      } else {
+        icon.textContent = 'favorite_border';
+        icon.classList.remove('text-red-500');
+      }
+    }
+
+    // Add To Bag Drawer trigger
+    function addToBag() {
+      cartCount += quantity;
+      document.getElementById('header-cart-badge').textContent = cartCount;
+      document.getElementById('cart-item-specs').textContent = `${selectedMetal} • ${selectedCarat} • ${selectedSize}`;
+      openCartDrawer();
+    }
+
+    function openCartDrawer() {
+      document.getElementById('cart-drawer-backdrop').classList.remove('hidden');
+      document.getElementById('cart-drawer').classList.remove('translate-x-full');
+    }
+
+    function closeCartDrawer() {
+      document.getElementById('cart-drawer-backdrop').classList.add('hidden');
+      document.getElementById('cart-drawer').classList.add('translate-x-full');
+    }
+
+    // Size Guide Modal
+    function openSizeGuideModal() {
+      document.getElementById('size-guide-modal').classList.remove('hidden');
+    }
+
+    function closeSizeGuideModal() {
+      document.getElementById('size-guide-modal').classList.add('hidden');
+    }
+
+    // Virtual Try-On launcher.
+    // category: 'ring' | 'necklace' | 'earring' — determines which
+    // tracking pipeline (hand vs. face) the try-on view will use.
+    // sku: product identifier, used later to look up the correct
+    // GLB model + anchor metadata from the catalog.
+    function openTryOn(category, sku) {
+      const params = new URLSearchParams({ category, sku });
+      window.location.href = `try-on/try-on.html?${params.toString()}`;
+    }
+  </script>
+
+  <!-- FLOATING ASSISTANCE / CONCIERGE WIDGET (Bottom-Right) -->
+  <div class="fixed bottom-6 right-6 z-50 flex flex-col items-end pointer-events-none" id="caen-concierge-widget" style="bottom: 24px;">
+    <!-- WhatsApp Popup Dialog -->
+    <div class="hidden pointer-events-auto mb-3 w-[360px] max-w-[calc(100vw-2rem)] bg-white rounded-xl shadow-2xl border border-[#E5E0D8] overflow-hidden transition-all duration-300 animate-in fade-in slide-in-from-bottom-3" id="whatsapp-popup">
+      <div class="bg-[#25D366] text-white p-4 flex items-start justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+            <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766 0-3.18-2.587-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.694.072-2.025-.48-1.583-.655-2.61-2.26-2.69-2.366-.08-.107-.643-.855-.643-1.63 0-.775.405-1.157.549-1.316.143-.16.312-.2.416-.2.104 0 .208.001.3.006.096.005.224-.037.351.267.13.31.442 1.077.481 1.156.04.08.067.173.013.279-.053.107-.08.173-.16.266-.08.093-.168.208-.24.28-.08.08-.163.167-.07.327.094.16.417.688.895 1.114.614.548 1.133.718 1.293.798.16.08.254.067.347-.04.094-.107.4-.467.507-.627.107-.16.214-.133.361-.08.147.053.935.44 1.095.52.16.08.267.12.307.187.04.067.04.387-.104.792zM12 2C6.477 2 2 6.477 2 12c0 1.821.487 3.53 1.338 5.002L2 22l5.176-1.328A9.954 9.954 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"></path></svg>
+          </div>
+          <div>
+            <h4 class="font-headline-sm text-[16px] text-white font-medium leading-snug">WhatsApp Concierge</h4>
+            <span class="inline-flex items-center gap-1.5 text-[11px] text-white/90 font-medium">
+              <span class="w-2 h-2 rounded-full bg-emerald-200 animate-pulse"></span> Typically replies in &lt; 5 mins
+            </span>
+          </div>
+        </div>
+        <button class="text-white/80 hover:text-white p-1 transition-colors" onclick="document.getElementById('whatsapp-popup').classList.add('hidden')">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+      <div class="p-4 bg-[#FAF7F2] border-b border-[#EEEEEE]">
+        <div class="bg-white p-3 rounded-lg border border-[#E5E0D8] shadow-xs">
+          <p class="text-[#666666] text-[13px] leading-relaxed">Namaste! Inquiring about The Celeste Solitaire Ring? Our gemologist is online to guide you on diamond cut, carat clarity & custom atelier crafting.</p>
+          <span class="text-[10px] text-[#999999] block text-right mt-1">Private Atelier Line: +91 22 4589 0000</span>
+        </div>
+      </div>
+      <div class="p-4 bg-white space-y-3">
+        <span class="text-[11px] font-semibold text-[#757575] uppercase tracking-wider block">Quick Consultation Topics</span>
+        <div class="flex flex-col gap-1.5">
+          <button class="text-left text-[13px] text-[#1A1A1A] hover:text-[#C5A059] p-2.5 rounded border border-[#EEEEEE] hover:border-[#C5A059] hover:bg-[#FAF7F2] transition-colors flex items-center justify-between group" onclick="window.open('https://api.whatsapp.com/send?phone=912245890000&amp;text=Hello%20Caen%20Jewels,%20I%20would%20like%20to%20inquire%20about%20The%20Celeste%20Solitaire%20Ring', '_blank')">
+            <span>✦ Celeste Solitaire Ring Inquiry</span>
+            <span class="material-symbols-outlined text-[16px] text-[#757575] group-hover:text-[#C5A059]">arrow_forward</span>
+          </button>
+          <button class="text-left text-[13px] text-[#1A1A1A] hover:text-[#C5A059] p-2.5 rounded border border-[#EEEEEE] hover:border-[#C5A059] hover:bg-[#FAF7F2] transition-colors flex items-center justify-between group" onclick="window.open('https://api.whatsapp.com/send?phone=912245890000&amp;text=Hello%20Caen%20Jewels,%20I%20have%20questions%20regarding%20GIA/IGI%20Certification%20and%20Pricing', '_blank')">
+            <span>✦ Diamond Certification &amp; Pricing</span>
+            <span class="material-symbols-outlined text-[16px] text-[#757575] group-hover:text-[#C5A059]">arrow_forward</span>
+          </button>
+          <button class="text-left text-[13px] text-[#1A1A1A] hover:text-[#C5A059] p-2.5 rounded border border-[#EEEEEE] hover:border-[#C5A059] hover:bg-[#FAF7F2] transition-colors flex items-center justify-between group" onclick="window.open('https://api.whatsapp.com/send?phone=912245890000&amp;text=Hello%20Caen%20Jewels,%20I%20would%20like%20to%20request%20a%20Private%20Salon%20Viewing', '_blank')">
+            <span>✦ Book Private Salon Viewing</span>
+            <span class="material-symbols-outlined text-[16px] text-[#757575] group-hover:text-[#C5A059]">arrow_forward</span>
+          </button>
+        </div>
+        <a class="w-full py-2.5 bg-[#25D366] hover:bg-[#20b858] text-white rounded font-label-caps-sm text-[12px] uppercase tracking-wider font-semibold shadow-md flex items-center justify-center gap-2 transition-all" href="https://api.whatsapp.com/send?phone=912245890000&amp;text=Hello%20Caen%20Jewels%20Concierge" target="_blank">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766 0-3.18-2.587-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.694.072-2.025-.48-1.583-.655-2.61-2.26-2.69-2.366-.08-.107-.643-.855-.643-1.63 0-.775.405-1.157.549-1.316.143-.16.312-.2.416-.2.104 0 .208.001.3.006.096.005.224-.037.351.267.13.31.442 1.077.481 1.156.04.08.067.173.013.279-.053.107-.08.173-.16.266-.08.093-.168.208-.24.28-.08.08-.163.167-.07.327.094.16.417.688.895 1.114.614.548 1.133.718 1.293.798.16.08.254.067.347-.04.094-.107.4-.467.507-.627.107-.16.214-.133.361-.08.147.053.935.44 1.095.52.16.08.267.12.307.187.04.067.04.387-.104.792zM12 2C6.477 2 2 6.477 2 12c0 1.821.487 3.53 1.338 5.002L2 22l5.176-1.328A9.954 9.954 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"></path></svg>
+          <span>Start WhatsApp Chat</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Live Chat / Callback Modal -->
+    <div class="hidden pointer-events-auto mb-3 w-[380px] max-w-[calc(100vw-2rem)] bg-white rounded-xl shadow-2xl border border-[#E5E0D8] overflow-hidden transition-all duration-300 animate-in fade-in slide-in-from-bottom-3" id="chat-callback-popup">
+      <div class="p-4 text-white flex items-start justify-between" id="popup-header-bg" style="background: linear-gradient(135deg, #0077E6 0%, #0056b3 100%);">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center" id="popup-header-icon">
+            <svg class="w-5 h-5 fill-white" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"></path></svg>
+          </div>
+          <div>
+            <h4 class="font-headline-sm text-[16px] text-white font-medium leading-snug" id="popup-header-title">Live Atelier Concierge</h4>
+            <span class="text-[11px] text-white/90 font-medium" id="popup-header-subtitle">Private Fine Jewelry Advisory</span>
+          </div>
+        </div>
+        <button class="text-white/80 hover:text-white p-1 transition-colors" onclick="document.getElementById('chat-callback-popup').classList.add('hidden')">
+          <span class="material-symbols-outlined text-[20px]">close</span>
+        </button>
+      </div>
+      <div class="flex border-b border-[#EEEEEE] bg-[#FAF7F2]">
+        <button class="flex-1 py-2.5 text-center text-[12px] font-semibold tracking-wider uppercase transition-colors border-b-2 border-[#0077E6] text-[#0077E6] bg-white" id="tab-livechat" onclick="switchConciergeTab('chat')">Live Chat</button>
+        <button class="flex-1 py-2.5 text-center text-[12px] font-semibold tracking-wider uppercase transition-colors border-b-2 border-transparent text-[#666666] hover:text-[#1A1A1A]" id="tab-callback" onclick="switchConciergeTab('callback')">Instant Callback</button>
+      </div>
+      <div class="p-4 space-y-3" id="view-livechat">
+        <div class="h-40 overflow-y-auto space-y-2.5 p-2.5 bg-[#FAF7F2] rounded-lg border border-[#EEEEEE] text-[13px]">
+          <div class="flex items-start gap-2">
+            <div class="w-6 h-6 rounded-full bg-[#0077E6] text-white flex items-center justify-center shrink-0 text-[10px] font-bold">CJ</div>
+            <div class="bg-white p-2.5 rounded-lg border border-[#E5E0D8] shadow-xs text-[#1A1A1A]">
+              <p>Welcome to Caen Jewels. Our fine jewelry specialists are online. What kind of diamond or gold piece can we curate for you today?</p>
+            </div>
+          </div>
+          <div class="text-center text-[10px] text-[#999999] pt-1">Live encrypted atelier session</div>
+        </div>
+        <form class="space-y-2" onsubmit="event.preventDefault(); alert('Message sent! Our gemologist concierge will respond momentarily.');">
+          <div class="relative">
+            <textarea class="w-full p-2.5 text-[13px] border border-[#D1CCC4] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#0077E6] resize-none" placeholder="Write your message or inquiry..." rows="2"></textarea>
+          </div>
+          <button class="w-full py-2.5 bg-[#0077E6] hover:bg-[#005fb8] text-white rounded font-label-caps-sm text-[12px] uppercase tracking-wider font-semibold shadow-sm flex items-center justify-center gap-1.5 transition-colors" type="submit">
+            <span class="material-symbols-outlined text-[16px]">send</span>
+            <span>Send Message</span>
+          </button>
+        </form>
+      </div>
+      <div class="hidden p-4 space-y-3" id="view-callback">
+        <p class="text-[13px] text-[#666666] leading-relaxed">Receive an immediate call from our dedicated diamond specialist in Mumbai or schedule your preferred private consultation window.</p>
+        <form class="space-y-2.5" onsubmit="event.preventDefault(); alert('Thank you. A master gemologist will call you at the requested time.'); document.getElementById('chat-callback-popup').classList.add('hidden');">
+          <input class="w-full px-3 py-2 text-[13px] border border-[#D1CCC4] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#C5A059]" placeholder="Your Full Name" required="" type="text">
+          <input class="w-full px-3 py-2 text-[13px] border border-[#D1CCC4] rounded-lg focus:outline-none focus:ring-1 focus:ring-[#C5A059]" placeholder="Phone Number (+91 ...)" required="" type="tel">
+          <div class="pt-1">
+            <label class="text-[11px] font-semibold text-[#757575] uppercase tracking-wider block mb-1.5">Preferred Window</label>
+            <div class="grid grid-cols-3 gap-1.5 text-[11px]">
+              <label class="flex items-center justify-center p-2 rounded border border-[#E5E0D8] hover:border-[#C5A059] cursor-pointer text-center">
+                <input checked="" class="sr-only" name="calltime" type="radio" value="now">
+                <span class="font-medium text-[#1A1A1A]">Call Now</span>
+              </label>
+              <label class="flex items-center justify-center p-2 rounded border border-[#E5E0D8] hover:border-[#C5A059] cursor-pointer text-center">
+                <input class="sr-only" name="calltime" type="radio" value="afternoon">
+                <span class="font-medium text-[#1A1A1A]">This Afternoon</span>
+              </label>
+              <label class="flex items-center justify-center p-2 rounded border border-[#E5E0D8] hover:border-[#C5A059] cursor-pointer text-center">
+                <input class="sr-only" name="calltime" type="radio" value="tomorrow">
+                <span class="font-medium text-[#1A1A1A]">Tomorrow</span>
+              </label>
+            </div>
+          </div>
+          <button class="w-full py-2.5 bg-[#1A1A1A] hover:bg-[#2A2620] text-[#C5A059] border border-[#C5A059] rounded font-label-caps-sm text-[12px] uppercase tracking-wider font-semibold shadow-sm flex items-center justify-center gap-1.5 transition-colors mt-2" type="submit">
+            <span class="material-symbols-outlined text-[16px]">call</span>
+            <span>Request Call Now</span>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- POP-OUT OPTIONS TRAY (Glass effect with thin golden border) -->
+    <div class="hidden pointer-events-auto mb-3 flex flex-col items-end gap-2.5 transition-all duration-300 origin-bottom-right animate-in fade-in slide-in-from-bottom-2" id="concierge-options-tray">
+      <!-- WhatsApp Concierge Option (Glass) -->
+      <button aria-label="WhatsApp Concierge" class="group relative flex items-center gap-3 pl-4 pr-2.5 py-2 bg-[#141312]/60 hover:bg-[#141312]/80 backdrop-blur-xl border border-[#C5A059]/60 hover:border-[#C5A059] text-white rounded-full shadow-[0_8px_30px_rgba(0,0,0,0.3),inset_0_1px_1px_rgba(255,255,255,0.12)] transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer" id="btn-whatsapp" onclick="togglePopup('whatsapp')" title="Chat on WhatsApp">
+        <span class="text-[12px] font-medium tracking-wide text-[#FAF7F2] group-hover:text-[#DFBA73] transition-colors">WhatsApp Concierge</span>
+        <span class="w-8 h-8 rounded-full bg-[#25D366]/20 border border-[#C5A059]/50 text-[#25D366] flex items-center justify-center shadow-inner backdrop-blur-md">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766 0-3.18-2.587-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.694.072-2.025-.48-1.583-.655-2.61-2.26-2.69-2.366-.08-.107-.643-.855-.643-1.63 0-.775.405-1.157.549-1.316.143-.16.312-.2.416-.2.104 0 .208.001.3.006.096.005.224-.037.351.267.13.31.442 1.077.481 1.156.04.08.067.173.013.279-.053.107-.08.173-.16.266-.08.093-.168.208-.24.28-.08.08-.163.167-.07.327.094.16.417.688.895 1.114.614.548 1.133.718 1.293.798.16.08.254.067.347-.04.094-.107.4-.467.507-.627.107-.16.214-.133.361-.08.147.053.935.44 1.095.52.16.08.267.12.307.187.04.067.04.387-.104.792zM12 2C6.477 2 2 6.477 2 12c0 1.821.487 3.53 1.338 5.002L2 22l5.176-1.328A9.954 9.954 0 0 0 12 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"></path></svg>
+        </span>
+      </button>
+
+      <!-- Live Chat Concierge Option (Glass) -->
+      <button aria-label="Live Chat Concierge" class="group relative flex items-center gap-3 pl-4 pr-2.5 py-2 bg-[#141312]/60 hover:bg-[#141312]/80 backdrop-blur-xl border border-[#C5A059]/60 hover:border-[#C5A059] text-white rounded-full shadow-[0_8px_30px_rgba(0,0,0,0.3),inset_0_1px_1px_rgba(255,255,255,0.12)] transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer" id="btn-chat" onclick="openChatDialog('chat')" title="Live Chat">
+        <span class="text-[12px] font-medium tracking-wide text-[#FAF7F2] group-hover:text-[#DFBA73] transition-colors">Live Gemologist Chat</span>
+        <span class="w-8 h-8 rounded-full bg-[#0077E6]/20 border border-[#C5A059]/50 text-[#0077E6] flex items-center justify-center shadow-inner backdrop-blur-md">
+          <svg class="w-4 h-4 fill-white" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"></path></svg>
+        </span>
+      </button>
+
+      <!-- Instant Callback Option (Glass) -->
+      <button aria-label="Request Callback" class="group relative flex items-center gap-3 pl-4 pr-2.5 py-2 bg-[#141312]/60 hover:bg-[#141312]/80 backdrop-blur-xl border border-[#C5A059]/60 hover:border-[#C5A059] text-white rounded-full shadow-[0_8px_30px_rgba(0,0,0,0.3),inset_0_1px_1px_rgba(255,255,255,0.12)] transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer" id="btn-call" onclick="openChatDialog('callback')" title="Direct Call">
+        <span class="text-[12px] font-medium tracking-wide text-[#FAF7F2] group-hover:text-[#DFBA73] transition-colors">Request Atelier Call</span>
+        <span class="w-8 h-8 rounded-full bg-[#C5A059]/20 border border-[#C5A059]/60 text-[#C5A059] flex items-center justify-center shadow-inner backdrop-blur-md">
+          <svg class="w-4 h-4 fill-none stroke-current stroke-2" viewBox="0 0 24 24"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" stroke-linecap="round" stroke-linejoin="round"></path><path d="M15 7a4 4 0 014 4" stroke-linecap="round" stroke-linejoin="round"></path><path d="M15 3a8 8 0 018 8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        </span>
+      </button>
+    </div>
+
+    <!-- MAIN TRIGGER: FROSTED GLASS BACKGROUND WITH THIN GOLD CHATBOT LOGO -->
+    <button id="btn-concierge-toggle" onclick="toggleConciergeIsland()" class="group relative w-14 h-14 rounded-full bg-[#141312]/60 hover:bg-[#141312]/80 backdrop-blur-xl border border-[#C5A059]/60 hover:border-[#C5A059] shadow-[0_8px_32px_rgba(0,0,0,0.37),inset_0_1px_1px_rgba(255,255,255,0.15)] flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 pointer-events-auto cursor-pointer focus:outline-none" aria-label="Open Atelier Concierge" title="Atelier Concierge">
+      <!-- Subtle Gold Glow Background -->
+      <span class="absolute inset-0 rounded-full bg-[#C5A059]/15 group-hover:bg-[#C5A059]/25 blur-md transition-all pointer-events-none"></span>
+      
+      <!-- Thin Gold Chatbot Logo -->
+      <svg id="concierge-bot-icon" class="w-7 h-7 text-[#C5A059] transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2v2"></path>
+        <path d="M12 4a8 8 0 0 0-8 8v2a4 4 0 0 0 4 4h1l2 2 2-2h3a4 4 0 0 0 4-4v-2a8 8 0 0 0-8-8z"></path>
+        <circle cx="9" cy="11.5" r="1" fill="#C5A059"></circle>
+        <circle cx="15" cy="11.5" r="1" fill="#C5A059"></circle>
+        <path d="M9.5 15c.8.6 1.7.9 2.5.9s1.7-.3 2.5-.9" stroke-width="1.1"></path>
+      </svg>
+
+      <!-- Close Icon (When Popped Out) -->
+      <svg id="concierge-close-icon" class="w-6 h-6 text-[#C5A059] hidden transition-transform duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+
+      <!-- Tooltip -->
+      <span id="concierge-tooltip" class="absolute right-16 whitespace-nowrap bg-[#141312]/80 backdrop-blur-md text-[#E5E0D8] border border-[#C5A059]/50 text-[11px] font-medium py-1 px-2.5 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">Atelier Concierge</span>
+    </button>
+
+    <script>
+      function toggleConciergeIsland() {
+        const tray = document.getElementById('concierge-options-tray');
+        const botIcon = document.getElementById('concierge-bot-icon');
+        const closeIcon = document.getElementById('concierge-close-icon');
+        const isHidden = tray.classList.contains('hidden');
+        
+        if (isHidden) {
+          tray.classList.remove('hidden');
+          botIcon.classList.add('hidden');
+          closeIcon.classList.remove('hidden');
+        } else {
+          tray.classList.add('hidden');
+          botIcon.classList.remove('hidden');
+          closeIcon.classList.add('hidden');
+          document.getElementById('whatsapp-popup')?.classList.add('hidden');
+          document.getElementById('chat-callback-popup')?.classList.add('hidden');
+        }
+      }
+
+      function togglePopup(type) {
+        const wa = document.getElementById('whatsapp-popup');
+        const chat = document.getElementById('chat-callback-popup');
+        if (type === 'whatsapp') {
+          chat?.classList.add('hidden');
+          wa?.classList.toggle('hidden');
+        } else {
+          wa?.classList.add('hidden');
+          chat?.classList.toggle('hidden');
+        }
+      }
+
+      function openChatDialog(tab) {
+        const wa = document.getElementById('whatsapp-popup');
+        const chat = document.getElementById('chat-callback-popup');
+        wa?.classList.add('hidden');
+        chat?.classList.remove('hidden');
+        switchConciergeTab(tab);
+      }
+
+      function switchConciergeTab(tab) {
+        const tabLive = document.getElementById('tab-livechat');
+        const tabCall = document.getElementById('tab-callback');
+        const viewLive = document.getElementById('view-livechat');
+        const viewCall = document.getElementById('view-callback');
+        const headerBg = document.getElementById('popup-header-bg');
+        const headerTitle = document.getElementById('popup-header-title');
+        const headerSub = document.getElementById('popup-header-subtitle');
+        const headerIcon = document.getElementById('popup-header-icon');
+        if (!tabLive || !tabCall) return;
+
+        if (tab === 'chat') {
+          tabLive.className = 'flex-1 py-2.5 text-center text-[12px] font-semibold tracking-wider uppercase transition-colors border-b-2 border-[#0077E6] text-[#0077E6] bg-white';
+          tabCall.className = 'flex-1 py-2.5 text-center text-[12px] font-semibold tracking-wider uppercase transition-colors border-b-2 border-transparent text-[#666666] hover:text-[#1A1A1A]';
+          viewLive.classList.remove('hidden');
+          viewCall.classList.add('hidden');
+          headerBg.style.background = 'linear-gradient(135deg, #0077E6 0%, #0056b3 100%)';
+          headerTitle.textContent = 'Live Atelier Concierge';
+          headerSub.textContent = 'Private Fine Jewelry Advisory';
+          headerIcon.innerHTML = '<svg class="w-5 h-5 fill-white" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H5.17L4 17.17V4h16v12z"/></svg>';
+        } else {
+          tabCall.className = 'flex-1 py-2.5 text-center text-[12px] font-semibold tracking-wider uppercase transition-colors border-b-2 border-[#C5A059] text-[#C5A059] bg-white';
+          tabLive.className = 'flex-1 py-2.5 text-center text-[12px] font-semibold tracking-wider uppercase transition-colors border-b-2 border-transparent text-[#666666] hover:text-[#1A1A1A]';
+          viewCall.classList.remove('hidden');
+          viewLive.classList.add('hidden');
+          headerBg.style.background = 'linear-gradient(135deg, #1A1A1A 0%, #2A2620 100%)';
+          headerTitle.textContent = 'Instant Atelier Callback';
+          headerSub.textContent = 'Speak directly with our Master Gemologist';
+          headerIcon.innerHTML = '<svg class="w-5 h-5 fill-none stroke-[#C5A059] stroke-2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 7a4 4 0 014 4"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 3a8 8 0 018 8"/></svg>';
+        }
+      }
+    </script>
+  </div>
+</body>
+</html>
