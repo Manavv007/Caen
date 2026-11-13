@@ -7,7 +7,7 @@ See [PLAN.md](PLAN.md) for the production plan and its progress.
 
 | Path | What |
 |---|---|
-| `apps/web` | Astro site (deploys to Cloudflare Pages). `src/pages/try-on.astro` is the try-on page; `public/*.html` are the legacy Stitch pages until the storefront is rebuilt. |
+| `apps/web` | Astro site (deploys to Cloudflare Pages): storefront pages in `src/pages`, catalogue in `src/data/catalog.js` (placeholder data until the database), try-on at `src/pages/try-on.astro`. |
 | `packages/tryon` | Try-on engine: MediaPipe tracking, solvers (pure, testable), three.js scenes. |
 | `assets-src/models` | Source 3D models (glTF + licences). Not shipped directly. |
 | `scripts/build-models.mjs` | Compresses source models to small `.glb` files in `apps/web/public/models` (committed). |
@@ -26,7 +26,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:4321/try-on?category=ring (also `earring`, `necklace`, `nose`).
+Open http://localhost:4321 for the store, or http://localhost:4321/try-on?category=ring (also `earring`, `necklace`, `nose`).
 
 - `&debug=1`: landmark overlay, session recorder, and a "Debug details" panel with tracking fps, dropped frames, worker vs main-thread mode and quality tier.
 - `&vision=main`: run tracking on the main thread instead of the Web Worker (to compare smoothness).

@@ -1,0 +1,21 @@
+---
+import Base from '../../layouts/Base.astro';
+import ProductGrid from '../../components/ProductGrid.astro';
+import CategoryNav from '../../components/CategoryNav.astro';
+import { getCategories, getProducts } from '../../lib/catalog.js';
+
+export function getStaticPaths() {
+  return getCategories().map((category) => ({ params: { category: category.slug }, props: { category } }));
+}
+const { category } = Astro.props;
+const products = getProducts({ category: category.slug });
+---
+<Base title={category.name} description={`${category.blurb} in hallmarked gold and certified diamonds.`}>
+  <section class="container-page py-10 lg:py-14">
+    <nav class="text-[12px] text-subtle" aria-label="Breadcrumb"><a href="/" class="hover:text-ink">Home</a> / <a href="/collections" class="hover:text-ink">Collections</a> / <span class="text-ink">{category.name}</span></nav>
+    <h1 class="mt-4 font-garamond text-[40px] lg:text-[48px]">{category.name}</h1>
+    <p class="mt-1 text-[14px] text-muted">{category.blurb} · {products.length} {products.length === 1 ? 'piece' : 'pieces'}</p>
+    <div class="mt-6"><CategoryNav active={category.slug} /></div>
+    <div class="mt-8"><ProductGrid products={products} /></div>
+  </section>
+</Base>

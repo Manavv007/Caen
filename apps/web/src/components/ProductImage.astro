@@ -1,0 +1,18 @@
+---
+import { Image } from 'astro:assets';
+import { resolveImage } from '../lib/catalog.js';
+
+interface Props {
+  image: { src?: string; local?: string; alt: string };
+  class?: string;
+  sizes?: string;
+  eager?: boolean;
+  width?: number;
+}
+const { image, class: className = '', sizes = '(min-width: 1024px) 25vw, 50vw', eager = false, width = 800 } = Astro.props;
+const img = resolveImage(image);
+const loading = eager ? 'eager' : 'lazy';
+---
+{img.asset
+  ? <Image src={img.asset} alt={img.alt} widths={[400, 800]} sizes={sizes} class={className} loading={loading} fetchpriority={eager ? 'high' : 'auto'} />
+  : <img src={img.src} alt={img.alt} width={width} height={width} class={className} loading={loading} decoding="async" fetchpriority={eager ? 'high' : 'auto'} referrerpolicy="no-referrer" />}

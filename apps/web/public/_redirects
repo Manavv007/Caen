@@ -1,0 +1,5 @@
+# Old prototype pages -> new storefront
+/desktop.html  /                                 301
+/mobile.html   /                                 301
+/product.html  /products/celeste-solitaire-ring  301
+/try-on/try-on.html  /try-on  301

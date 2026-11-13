@@ -1,0 +1,61 @@
+---
+import Icon from './Icon.astro';
+import { SITE } from '../data/site.js';
+import { getCategories, categoryUrl } from '../lib/catalog.js';
+import { formatInr } from '../lib/format.js';
+
+const categories = getCategories();
+const path = Astro.url.pathname;
+---
+<header class="sticky top-0 z-40 border-b border-line bg-white/95 backdrop-blur">
+  <p class="bg-ink px-4 py-2 text-center text-[10px] font-medium uppercase tracking-[0.2em] text-white/90">
+    Free insured shipping above {formatInr(SITE.freeShippingAboveInr)} · {SITE.returnDays}-day returns · Certified diamonds
+  </p>
+  <div class="container-page flex h-16 items-center justify-between gap-4 lg:h-20">
+    <details class="group lg:hidden">
+      <summary class="flex h-11 w-11 cursor-pointer list-none items-center justify-center [&::-webkit-details-marker]:hidden" aria-label="Menu">
+        <Icon name="menu" class="h-6 w-6 group-open:hidden" />
+        <Icon name="close" class="hidden h-6 w-6 group-open:block" />
+      </summary>
+      <nav class="absolute inset-x-0 top-full max-h-[80vh] overflow-y-auto border-b border-line bg-white px-6 py-4 shadow-lg" aria-label="Main">
+        <ul class="flex flex-col">
+          {categories.map((c) => (
+            <li><a href={categoryUrl(c)} class="block py-3 font-garamond text-[22px]">{c.name}</a></li>
+          ))}
+          <li><a href="/collections" class="block py-3 font-garamond text-[22px]">All jewellery</a></li>
+        </ul>
+      </nav>
+    </details>
+
+    <a href="/" class="flex flex-col items-center text-center lg:items-start" aria-label={`${SITE.name} home`}>
+      <span class="font-garamond text-[22px] leading-none tracking-[0.28em] lg:text-[26px]">CAEN JEWELS</span>
+      <span class="mt-1 text-[9px] uppercase tracking-[0.3em] text-gold">{SITE.tagline}</span>
+    </a>
+
+    <nav class="hidden lg:block" aria-label="Main">
+      <ul class="flex items-center gap-8 text-[12px] font-medium uppercase tracking-[0.16em]">
+        {categories.map((c) => (
+          <li>
+            <a href={categoryUrl(c)} class:list={['transition-colors hover:text-gold', path.startsWith(categoryUrl(c)) && 'text-gold']}>{c.name}</a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <a href="/cart" class="relative flex h-11 w-11 items-center justify-center transition-colors hover:text-gold" aria-label="Shopping bag">
+      <Icon name="shopping_bag" class="h-6 w-6" />
+      <span data-cart-count class="absolute right-1 top-1 hidden h-[18px] min-w-[18px] items-center justify-center rounded-full bg-gold px-1 text-[10px] font-semibold text-white"></span>
+    </a>
+  </div>
+</header>
+
+<script>
+  import { onCartChange } from '../scripts/cart.js';
+  const badge = document.querySelector('[data-cart-count]');
+  onCartChange((items) => {
+    const n = items.reduce((s, i) => s + i.qty, 0);
+    badge.textContent = String(n);
+    badge.classList.toggle('hidden', n === 0);
+    badge.classList.toggle('flex', n > 0);
+  });
+</script>

@@ -1,0 +1,72 @@
+---
+import Base from '../layouts/Base.astro';
+import { cartCatalog } from '../lib/cart-catalog.js';
+---
+<Base title="Your bag" noindex>
+  <section class="container-page py-10 lg:py-14">
+    <h1 class="font-garamond text-[40px]">Your bag</h1>
+    <div id="cart-empty" class="mt-10 hidden rounded-lg border border-line p-10 text-center">
+      <p class="font-garamond text-[24px]">Your bag is empty.</p>
+      <a href="/collections" class="btn-primary mt-6">Explore the collection</a>
+    </div>
+    <div id="cart-full" class="mt-8 hidden gap-10 lg:grid lg:grid-cols-[1fr_380px]">
+      <ul id="cart-lines" class="divide-y divide-line border-y border-line"></ul>
+      <aside class="mt-8 h-fit rounded-lg bg-cream p-6 lg:mt-0">
+        <h2 class="font-garamond text-[24px]">Summary</h2>
+        <dl class="mt-4 space-y-2 text-[14px]">
+          <div class="flex justify-between"><dt>Subtotal</dt><dd id="cart-subtotal"></dd></div>
+          <div class="flex justify-between"><dt>Shipping</dt><dd id="cart-shipping"></dd></div>
+          <div class="flex justify-between border-t border-line-strong pt-3 text-[16px] font-semibold"><dt>Total</dt><dd id="cart-total"></dd></div>
+        </dl>
+        <p class="mt-2 text-[12px] text-subtle">Prices include GST.</p>
+        <a href="/checkout" class="btn-primary mt-6 w-full">Checkout</a>
+      </aside>
+    </div>
+  </section>
+  <script type="application/json" id="cart-catalog" set:html={JSON.stringify(cartCatalog())} />
+</Base>
+
+<script>
+  import { onCartChange, setQty, removeLine } from '../scripts/cart.js';
+  import { readCatalog, priceCart, formatInr, optionsText, esc } from '../scripts/cart-lines.js';
+
+  const catalog = readCatalog();
+  const $ = (id) => document.getElementById(id);
+
+  onCartChange((items) => {
+    const cart = priceCart(items, catalog);
+    $('cart-empty').classList.toggle('hidden', cart.count > 0);
+    $('cart-full').classList.toggle('hidden', cart.count === 0);
+    $('cart-lines').innerHTML = cart.lines.map((l) => `
+      <li class="flex gap-4 py-5" data-key="${esc(l.key)}">
+        <a href="${esc(l.product.url)}" class="h-24 w-24 shrink-0 overflow-hidden rounded bg-cream">
+          <img src="${esc(l.product.image)}" alt="" class="h-full w-full object-cover" referrerpolicy="no-referrer" loading="lazy">
+        </a>
+        <div class="flex flex-1 flex-col">
+          <a href="${esc(l.product.url)}" class="font-garamond text-[20px] leading-tight">${esc(l.product.name)}</a>
+          <span class="text-[12px] text-subtle">${esc(optionsText(l.options))}</span>
+          <div class="mt-auto flex items-center justify-between gap-3 pt-3">
+            <label class="text-[12px] text-subtle">Qty
+              <select data-qty class="ml-1 rounded border border-line px-2 py-1 text-[13px] text-ink">
+                ${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => `<option ${n === l.qty ? 'selected' : ''}>${n}</option>`).join('')}
+              </select>
+            </label>
+            <button data-remove class="text-[12px] underline underline-offset-2">Remove</button>
+            <span class="text-[15px] font-semibold">${formatInr(l.lineTotal)}</span>
+          </div>
+        </div>
+      </li>`).join('');
+    $('cart-subtotal').textContent = formatInr(cart.subtotal);
+    $('cart-shipping').textContent = cart.shipping ? formatInr(cart.shipping) : 'Free';
+    $('cart-total').textContent = formatInr(cart.total);
+  });
+
+  $('cart-lines').addEventListener('change', (e) => {
+    const li = e.target.closest('[data-key]');
+    if (li && e.target.matches('[data-qty]')) setQty(li.dataset.key, Number(e.target.value));
+  });
+  $('cart-lines').addEventListener('click', (e) => {
+    const li = e.target.closest('[data-key]');
+    if (li && e.target.matches('[data-remove]')) removeLine(li.dataset.key);
+  });
+</script>

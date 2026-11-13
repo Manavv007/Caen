@@ -1,0 +1,143 @@
+---
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import { cartCatalog } from '../lib/cart-catalog.js';
+import { INDIAN_STATES } from '../data/india.js';
+import { SITE } from '../data/site.js';
+
+const field = 'mt-1 w-full rounded border border-line-strong px-3 py-2.5 text-[14px] focus:border-ink focus:outline-none';
+const label = 'block text-[12px] font-medium uppercase tracking-[0.1em] text-muted';
+---
+<Base title="Checkout" noindex>
+  <section class="container-page py-10 lg:py-14">
+    <h1 class="font-garamond text-[40px]">Checkout</h1>
+
+    <div id="checkout-empty" class="mt-10 hidden rounded-lg border border-line p-10 text-center">
+      <p class="font-garamond text-[24px]">Your bag is empty.</p>
+      <a href="/collections" class="btn-primary mt-6">Explore the collection</a>
+    </div>
+
+    <div id="checkout-body" class="mt-8 hidden gap-10 lg:grid lg:grid-cols-[1fr_380px]">
+      <form id="checkout-form" class="space-y-8" novalidate>
+        <fieldset class="space-y-4">
+          <legend class="font-garamond text-[24px]">Contact</legend>
+          <div><label class={label} for="name">Full name</label><input class={field} id="name" name="name" autocomplete="name" required maxlength="100" /></div>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div><label class={label} for="email">Email</label><input class={field} id="email" name="email" type="email" autocomplete="email" required maxlength="200" /></div>
+            <div><label class={label} for="phone">Mobile (10 digits)</label><input class={field} id="phone" name="phone" type="tel" inputmode="numeric" autocomplete="tel-national" required pattern="[6-9][0-9]{9}" maxlength="10" /></div>
+          </div>
+        </fieldset>
+        <fieldset class="space-y-4">
+          <legend class="font-garamond text-[24px]">Delivery address</legend>
+          <div><label class={label} for="address1">Address</label><input class={field} id="address1" name="address1" autocomplete="address-line1" required maxlength="200" /></div>
+          <div><label class={label} for="address2">Apartment, landmark (optional)</label><input class={field} id="address2" name="address2" autocomplete="address-line2" maxlength="200" /></div>
+          <div class="grid gap-4 sm:grid-cols-3">
+            <div><label class={label} for="city">City</label><input class={field} id="city" name="city" autocomplete="address-level2" required maxlength="100" /></div>
+            <div><label class={label} for="state">State</label>
+              <select class={field} id="state" name="state" autocomplete="address-level1" required>
+                <option value="">Select</option>
+                {INDIAN_STATES.map((s) => <option>{s}</option>)}
+              </select>
+            </div>
+            <div><label class={label} for="pincode">PIN code</label><input class={field} id="pincode" name="pincode" inputmode="numeric" autocomplete="postal-code" required pattern="[1-9][0-9]{5}" maxlength="6" /></div>
+          </div>
+        </fieldset>
+        <label class="flex gap-3 text-[13px] text-muted">
+          <input type="checkbox" name="consent" required class="mt-0.5 h-4 w-4 accent-ink" />
+          <span>I agree to the <a href="/shipping-returns" class="underline" target="_blank">shipping &amp; returns</a> terms and to my details being used to fulfil this order, as described in the <a href="/privacy" class="underline" target="_blank">privacy notice</a>.</span>
+        </label>
+        <p id="checkout-error" class="hidden rounded bg-red-50 px-4 py-3 text-[13px] text-red-800" role="alert"></p>
+        <button id="pay-btn" type="submit" class="btn-primary w-full"><Icon name="lock" class="h-4 w-4" /> <span id="pay-label">Pay securely</span></button>
+        <p class="text-center text-[12px] text-subtle">Payments by Razorpay — UPI, cards, netbanking and EMI. We never see your card details.</p>
+      </form>
+
+      <aside class="mt-10 h-fit rounded-lg bg-cream p-6 lg:mt-0">
+        <h2 class="font-garamond text-[24px]">Order summary</h2>
+        <ul id="summary-lines" class="mt-4 space-y-3 text-[14px]"></ul>
+        <dl class="mt-4 space-y-2 border-t border-line-strong pt-4 text-[14px]">
+          <div class="flex justify-between"><dt>Subtotal</dt><dd id="sum-subtotal"></dd></div>
+          <div class="flex justify-between"><dt>Shipping</dt><dd id="sum-shipping"></dd></div>
+          <div class="flex justify-between text-[16px] font-semibold"><dt>Total</dt><dd id="sum-total"></dd></div>
+        </dl>
+      </aside>
+    </div>
+  </section>
+  <script type="application/json" id="cart-catalog" set:html={JSON.stringify(cartCatalog())} />
+  <script type="application/json" id="site-config" set:html={JSON.stringify({ whatsapp: SITE.whatsapp })} />
+</Base>
+
+<script>
+  import { readCart, onCartChange, clearCart } from '../scripts/cart.js';
+  import { readCatalog, priceCart, formatInr, optionsText, esc } from '../scripts/cart-lines.js';
+  import { startPayment, PAYMENTS_UNAVAILABLE } from '../scripts/checkout.js';
+
+  const catalog = readCatalog();
+  const site = JSON.parse(document.getElementById('site-config').textContent);
+  const $ = (id) => document.getElementById(id);
+  const form = $('checkout-form');
+  const errorEl = $('checkout-error');
+
+  onCartChange((items) => {
+    const cart = priceCart(items, catalog);
+    $('checkout-empty').classList.toggle('hidden', cart.count > 0);
+    $('checkout-body').classList.toggle('hidden', cart.count === 0);
+    $('summary-lines').innerHTML = cart.lines.map((l) => `
+      <li class="flex justify-between gap-3"><span>${esc(l.product.name)} × ${l.qty}<span class="block text-[12px] text-subtle">${esc(optionsText(l.options))}</span></span><span>${formatInr(l.lineTotal)}</span></li>`).join('');
+    $('sum-subtotal').textContent = formatInr(cart.subtotal);
+    $('sum-shipping').textContent = cart.shipping ? formatInr(cart.shipping) : 'Free';
+    $('sum-total').textContent = formatInr(cart.total);
+  });
+
+  function showError(msg) {
+    errorEl.innerHTML = msg;
+    errorEl.classList.remove('hidden');
+    errorEl.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }
+
+  /** Order by WhatsApp while online payment is not switched on. */
+  function whatsappOrder(customer) {
+    const cart = priceCart(readCart(), catalog);
+    const lines = cart.lines.map((l) => `• ${l.product.name}${l.options && Object.keys(l.options).length ? ` (${optionsText(l.options)})` : ''} × ${l.qty} — ${formatInr(l.lineTotal)}`);
+    const text = [
+      'Hello CAEN JEWELS, I would like to place an order:',
+      ...lines,
+      `Total: ${formatInr(cart.total)}`,
+      '',
+      `${customer.name}, ${customer.phone}`,
+      `${customer.address1}${customer.address2 ? `, ${customer.address2}` : ''}, ${customer.city}, ${customer.state} ${customer.pincode}`,
+    ].join('\n');
+    return `https://wa.me/${site.whatsapp}?text=${encodeURIComponent(text)}`;
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errorEl.classList.add('hidden');
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
+    const data = Object.fromEntries(new FormData(form));
+    const customer = {
+      name: data.name.trim(), email: data.email.trim(), phone: data.phone.trim(),
+      address1: data.address1.trim(), address2: (data.address2 || '').trim(),
+      city: data.city.trim(), state: data.state, pincode: data.pincode.trim(),
+    };
+    const btn = $('pay-btn');
+    btn.disabled = true;
+    $('pay-label').textContent = 'Starting payment…';
+    try {
+      const result = await startPayment({ items: readCart(), customer });
+      clearCart();
+      location.href = `/order/success?order=${encodeURIComponent(result.orderNumber)}`;
+    } catch (err) {
+      if (err === PAYMENTS_UNAVAILABLE) {
+        showError(`Online payment is being set up. You can place this order on WhatsApp instead — we'll confirm availability and share a secure payment link. <a class="font-semibold underline" target="_blank" rel="noopener" href="${esc(whatsappOrder(customer))}">Order on WhatsApp</a>`);
+      } else {
+        showError(esc(err.message || 'Something went wrong. Please try again.'));
+      }
+    } finally {
+      btn.disabled = false;
+      $('pay-label').textContent = 'Pay securely';
+    }
+  });
+</script>

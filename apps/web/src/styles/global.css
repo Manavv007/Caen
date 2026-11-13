@@ -12,4 +12,44 @@
 @theme {
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
   --font-garamond: "EB Garamond", ui-serif, Georgia, serif;
+
+  /* Brand palette (from the product page / desktop mockups) */
+  --color-ink: #1a1a1a;
+  --color-ink-soft: #333333;
+  --color-muted: #666666;
+  --color-subtle: #757575;
+  --color-gold: #c5a059;
+  --color-gold-hover: #b08c42;
+  --color-cream: #faf7f2;
+  --color-sand: #f6f2eb;
+  --color-line: #eeeeee;
+  --color-line-strong: #d1ccc4;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.18em] text-gold;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded bg-ink px-6 py-3.5 text-[12px] font-semibold uppercase tracking-[0.18em] text-white transition-colors hover:bg-ink-soft disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 rounded border border-ink/80 px-6 py-3.5 text-[12px] font-semibold uppercase tracking-[0.18em] text-ink transition-colors hover:bg-ink hover:text-white;
+  }
+  .btn-gold {
+    @apply inline-flex items-center justify-center gap-2 rounded border border-gold/60 bg-cream px-6 py-3.5 text-[12px] font-semibold uppercase tracking-[0.18em] text-ink transition-colors hover:bg-sand;
+  }
+  .container-page {
+    @apply mx-auto w-full max-w-[1320px] px-4 sm:px-6 lg:px-10;
+  }
 }

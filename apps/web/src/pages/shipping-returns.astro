@@ -1,0 +1,23 @@
+---
+import Base from '../layouts/Base.astro';
+import Prose from '../components/Prose.astro';
+import { SITE } from '../data/site.js';
+import { formatInr } from '../lib/format.js';
+---
+<Base title="Shipping & returns">
+  <Prose title="Shipping & returns" updated="November 2026">
+    <h2>Shipping</h2>
+    <ul>
+      <li>Free, fully insured shipping across India on orders above {formatInr(SITE.freeShippingAboveInr)}; {formatInr(SITE.shippingFeeInr)} below that.</li>
+      <li>Ready-to-ship pieces are dispatched within 48 business hours. Made-to-order pieces take 7–10 working days.</li>
+      <li>You'll receive tracking details by email once your order ships.</li>
+    </ul>
+    <h2>Returns</h2>
+    <ul>
+      <li>Unworn pieces in original packaging, with certificates, can be returned within {SITE.returnDays} days of delivery.</li>
+      <li>Engraved, resized and made-to-order pieces can't be returned unless faulty.</li>
+      <li>Refunds go back to the original payment method within 7 working days of the return passing inspection.</li>
+    </ul>
+    <p>To start a return, email <a class="underline" href={`mailto:${SITE.email}`}>{SITE.email}</a> with your order number.</p>
+  </Prose>
+</Base>
