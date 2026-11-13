@@ -62,10 +62,75 @@ export function analyzeNecklace(pts) {
 }
 
 /**
+ * Cuts the backside of the necklace chain so only the front drape and
+ * side arcs around the neck are kept. Triangles with normalized Z < cutZ
+ * are omitted.
+ *
+ * @param {import('three').Object3D} model
+ * @param {Object} a - analysis from analyzeNecklace
+ * @param {number} cutZ - normalized Z cutoff (front is +Z, back is -Z, coronal plane is 0)
+ * @param {typeof import('three')} THREE
+ */
+export function cutNecklaceBackside(model, a, cutZ = -0.02, THREE) {
+  const s = 1 / a.width;
+  const zSign = a.flipped ? -1 : 1;
+  const v = new THREE.Vector3();
+
+  model.traverse((o) => {
+    if (!o.isMesh || !o.geometry) return;
+    const geo = o.geometry;
+    const pos = geo.attributes.position;
+    if (!pos) return;
+    const mw = o.matrixWorld;
+
+    const getNormZ = (index) => {
+      v.fromBufferAttribute(pos, index).applyMatrix4(mw);
+      return (v.z - a.ringCenter.z) * zSign * s;
+    };
+
+    if (geo.index) {
+      const oldIdx = geo.index.array;
+      const newIdx = [];
+      for (let i = 0; i < oldIdx.length; i += 3) {
+        const i0 = oldIdx[i], i1 = oldIdx[i + 1], i2 = oldIdx[i + 2];
+        const z0 = getNormZ(i0);
+        const z1 = getNormZ(i1);
+        const z2 = getNormZ(i2);
+        if ((z0 + z1 + z2) / 3 >= cutZ) {
+          newIdx.push(i0, i1, i2);
+        }
+      }
+      const ArrayType = oldIdx instanceof Uint16Array ? Uint16Array : Uint32Array;
+      geo.setIndex(new THREE.BufferAttribute(new ArrayType(newIdx), 1));
+      geo.index.needsUpdate = true;
+    } else {
+      const count = pos.count;
+      const newIndices = [];
+      for (let i = 0; i < count; i += 3) {
+        const z0 = getNormZ(i);
+        const z1 = getNormZ(i + 1);
+        const z2 = getNormZ(i + 2);
+        if ((z0 + z1 + z2) / 3 >= cutZ) {
+          newIndices.push(i, i + 1, i + 2);
+        }
+      }
+      geo.setIndex(new THREE.BufferAttribute(new Uint32Array(newIndices), 1));
+    }
+
+    geo.computeVertexNormals();
+    geo.computeBoundingBox();
+    geo.computeBoundingSphere();
+  });
+}
+
+/**
  * Loads and normalizes a necklace model.
  * @param {typeof import('three')} THREE
  * @param {Function} GLTFLoader - three/addons GLTFLoader class
  * @param {string} url - .gltf or .glb
+ * @param {Object} [opts]
+ * @param {boolean} [opts.cutBackside=true] - cut the back loop of the chain
+ * @param {number} [opts.cutZ=-0.02] - normalized Z cutoff for cutting backside
  * @returns {Promise<{object: import('three').Group, info: Object}>}
  *   object: origin at the ring centre (top edge), +Z front, ring width 1.
  *   info (ring-width units, after normalization):
@@ -74,7 +139,8 @@ export function analyzeNecklace(pts) {
  *     tip     - lowest point (front drop), {x, y, z}
  *     ringFrontZ / ringBackZ - where the ring top passes the front / back of the neck
  */
-export async function loadNecklaceModel(THREE, GLTFLoader, url) {
+export async function loadNecklaceModel(THREE, GLTFLoader, url, opts = {}) {
+  const { cutBackside = true, cutZ = -0.02 } = opts;
   const gltf = await new GLTFLoader().loadAsync(url);
   const model = gltf.scene;
 
@@ -98,6 +164,10 @@ export async function loadNecklaceModel(THREE, GLTFLoader, url) {
   if (!pts.length) throw new Error(`Necklace model ${url}: no geometry`);
   const a = analyzeNecklace(pts);
 
+  if (cutBackside) {
+    cutNecklaceBackside(model, a, cutZ, THREE);
+  }
+
   const offset = new THREE.Group(); // ring centre -> origin
   offset.position.set(-a.ringCenter.x, -a.ringCenter.y, -a.ringCenter.z);
   offset.add(model);
@@ -118,6 +188,8 @@ export async function loadNecklaceModel(THREE, GLTFLoader, url) {
     tip: { x: (a.tip.x - a.ringCenter.x) * zSign * s, y: (a.tip.y - a.ringCenter.y) * s, z: zRel(a.tip.z) },
     ringFrontZ: a.flipped ? zRel(a.ringBackZ) : zRel(a.ringFrontZ),
     ringBackZ: a.flipped ? zRel(a.ringFrontZ) : zRel(a.ringBackZ),
+    cutBackside,
+    cutZ,
   };
   return { object, info };
 }

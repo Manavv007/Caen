@@ -182,7 +182,15 @@
       FaceTrackingSession,
       getFaceLandmarkerDelegate,
     } from './face-tracking.js';
+    import {
+      loadPoseLandmarker,
+      disposePoseLandmarker,
+      PoseTrackingSession,
+      getPoseLandmarkerDelegate,
+    } from './pose-tracking.js';
     import { FaceTryOnPipeline } from './face-tryon-pipeline.js';
+    import { NecklaceTryOnPipeline } from './necklace-tryon-pipeline.js';
+    import { NoseRingTryOnPipeline } from './nose-ring-pipeline.js';
 
     // Minimal SKU -> ring model catalog (Task 7 moves this to catalog JSON).
     //  - the_ring_1_carat: CC-BY-4.0, commercial use allowed with credit.
@@ -210,18 +218,48 @@
     };
     const DEFAULT_EARRING_SKU = 'GOLDEN-BALL-CRYSTAL-DROP-EARRINGS';
 
+    // Necklaces (Task 7 moves this to catalog JSON). lengthMm = real chain
+    // length (front arc that is visible on the wearer).
+    const NECKLACE_CATALOG = {
+      'GOLD-NECKLACE-CHAIN': {
+        url: '../gold_necklace__chain/scene.gltf',
+        lengthMm: 450,
+        credit: '"Gold necklace / chain" by Mckai (sketchfab.com/Mckai), CC-BY-4.0',
+        creditUrl: 'https://sketchfab.com/3d-models/gold-necklace-chain-8bb2ebea4fbd4a3a9b21cba9f5d5fdc8',
+      },
+    };
+    const DEFAULT_NECKLACE_SKU = 'GOLD-NECKLACE-CHAIN';
+
+    // Nose rings (Task 7 moves this to catalog JSON). diameterMm = real outer
+    // diameter of the ring; sets its size relative to the face.
+    const NOSE_RING_CATALOG = {
+      'POINTY-NOSE-RING': {
+        url: '../pointy_nose_ring/scene.gltf',
+        diameterMm: 12,
+        credit: '"Pointy Nose Ring" by Tiko (sketchfab.com/tikoavp), CC-BY-4.0',
+        creditUrl: 'https://sketchfab.com/3d-models/pointy-nose-ring-c1edf8f97caa4b019aa57cbe24566e34',
+      },
+    };
+    const DEFAULT_NOSE_RING_SKU = 'POINTY-NOSE-RING';
+
     const urlParams = new URLSearchParams(window.location.search);
-    // Face-tracked categories share one tracker; 'earrings' accepted as an alias.
+    // Face-tracked categories share one tracker; 'earrings' / 'necklaces' accepted as aliases.
     const rawCategory = (urlParams.get('category') || 'ring').toLowerCase();
-    const category = rawCategory === 'earrings' ? 'earring' : rawCategory;
-    const FACE_CATEGORIES = ['earring'];
+    const CATEGORY_ALIASES = {
+      earrings: 'earring', necklaces: 'necklace',
+      nosering: 'nose', 'nose-ring': 'nose', nose_ring: 'nose', nosepin: 'nose', 'nose-pin': 'nose', nosepiercing: 'nose',
+    };
+    const category = CATEGORY_ALIASES[rawCategory] || rawCategory;
+    const FACE_CATEGORIES = ['earring', 'necklace', 'nose'];
     const sku = urlParams.get('sku') || 'UNKNOWN-SKU';
     // ?ring=solitaire | ?ring=one switches the model directly (testing).
     const ringKey = RING_ALIASES[urlParams.get('ring')] || (RING_CATALOG[sku] ? sku : DEFAULT_RING_SKU);
     const RING_ENTRY = RING_CATALOG[ringKey];
     const RING_MODEL_URL = RING_ENTRY.url;
     const EARRING_ENTRY = EARRING_CATALOG[sku] || EARRING_CATALOG[DEFAULT_EARRING_SKU];
-    const CREDIT_ENTRY = category === 'ring' ? RING_ENTRY : category === 'earring' ? EARRING_ENTRY : null;
+    const NECKLACE_ENTRY = NECKLACE_CATALOG[sku] || NECKLACE_CATALOG[DEFAULT_NECKLACE_SKU];
+    const NOSE_RING_ENTRY = NOSE_RING_CATALOG[sku] || NOSE_RING_CATALOG[DEFAULT_NOSE_RING_SKU];
+    const CREDIT_ENTRY = category === 'ring' ? RING_ENTRY : category === 'earring' ? EARRING_ENTRY : category === 'necklace' ? NECKLACE_ENTRY : category === 'nose' ? NOSE_RING_ENTRY : null;
     if (CREDIT_ENTRY && CREDIT_ENTRY.credit) {
       const creditEl = document.getElementById('model-credit');
       const a = document.createElement('a');
@@ -306,19 +344,70 @@
       alert('360° product viewer fallback will be wired up in a later step.');
     }
 
-    // Face tracking for earrings (Phase 2: tracking + debug outline only;
-    // the 3D earrings are added in Phase 3).
+    // Face tracking for earrings and necklaces (necklaces also use pose tracking).
     async function startFaceTracking() {
       modelLoadingIndicator.classList.remove('hidden');
       modelLoadingIndicator.lastChild.textContent = ' Loading face tracking…';
       try {
         await loadFaceLandmarker();
-        pipeline = new FaceTryOnPipeline({
-          overlayCanvas,
-          debugCanvas: SHOW_DEBUG_SKELETON ? debugCanvas : null,
-          modelUrl: EARRING_ENTRY.url,
-          lengthMm: EARRING_ENTRY.lengthMm,
-        });
+        
+        // Necklaces also load pose tracking for body-anchored placement.
+        if (category === 'necklace') {
+          modelLoadingIndicator.lastChild.textContent = ' Loading pose tracking…';
+          await loadPoseLandmarker();
+        }
+        
+        if (category === 'necklace') {
+          const cutBackside = urlParams.get('cutBackside') !== '0';
+          const cutZParam = urlParams.get('cutZ');
+          const cutZ = cutZParam !== null ? parseFloat(cutZParam) : -0.02;
+          const neckDownParam = urlParams.get('neckDown');
+          const neckDown = neckDownParam !== null ? parseFloat(neckDownParam) : 0.80;
+          // Sideways nudge in face widths (+ = right), e.g. ?neckX=-0.03
+          const neckXParam = urlParams.get('neckX');
+          const neckX = neckXParam !== null ? parseFloat(neckXParam) : 0;
+          pipeline = new NecklaceTryOnPipeline({
+            overlayCanvas,
+            debugCanvas: SHOW_DEBUG_SKELETON ? debugCanvas : null,
+            modelUrl: NECKLACE_ENTRY.url,
+            lengthMm: NECKLACE_ENTRY.lengthMm,
+            neckDown,
+            neckX,
+            cutBackside,
+            cutZ,
+          });
+        } else if (category === 'nose') {
+          // Tuning from the URL while the placement is being refined:
+          //   ?side=right|left  ?noseTilt=deg  ?noseRoll=deg (gap turned toward the nose centre; 180 = gap down)
+          //   ?noseCut=-0.34  ring height hidden below (diameters from the centre, toward the gap; -1 = hide nothing)
+          //   ?noseX= ?noseY= ?noseZ=  piercing offset in face widths (X out, Y down, Z forward)
+          //   ?noseDrop=  ring centre below the piercing, in ring diameters
+          //   ?noseMm=  ring outer diameter in mm
+          const num = (k) => { const v = urlParams.get(k); return v !== null && v !== '' && Number.isFinite(parseFloat(v)) ? parseFloat(v) : undefined; };
+          const offset = {};
+          if (num('noseX') !== undefined) offset.out = num('noseX');
+          if (num('noseY') !== undefined) offset.down = num('noseY');
+          if (num('noseZ') !== undefined) offset.forward = num('noseZ');
+          pipeline = new NoseRingTryOnPipeline({
+            overlayCanvas,
+            debugCanvas: SHOW_DEBUG_SKELETON ? debugCanvas : null,
+            modelUrl: NOSE_RING_ENTRY.url,
+            diameterMm: num('noseMm') ?? NOSE_RING_ENTRY.diameterMm,
+            side: urlParams.get('side') === 'right' ? 'right' : 'left',
+            tiltDeg: num('noseTilt'),
+            rollDeg: num('noseRoll'),
+            offset,
+            drop: num('noseDrop'),
+            cutHidden: num('noseCut'),
+          });
+        } else {
+          pipeline = new FaceTryOnPipeline({
+            overlayCanvas,
+            debugCanvas: SHOW_DEBUG_SKELETON ? debugCanvas : null,
+            modelUrl: EARRING_ENTRY.url,
+            lengthMm: EARRING_ENTRY.lengthMm,
+          });
+        }
         await pipeline.init();
       } catch (err) {
         modelLoadingIndicator.classList.add('hidden');
@@ -327,42 +416,127 @@
         return;
       }
       modelLoadingIndicator.classList.add('hidden');
-      statusPill.textContent = 'Show your face to the camera';
 
-      trackingSession = new FaceTrackingSession(videoEl, (result) => {
-        const rect = overlayCanvas.getBoundingClientRect();
-        const info = pipeline.processFrame({
-          source: videoEl,
-          sourceWidth: videoEl.videoWidth,
-          sourceHeight: videoEl.videoHeight,
-          displaySize: { width: rect.width, height: rect.height },
-          faceResult: result,
-          mirror: currentFacingMode === 'user',
-          timestampMs: performance.now(),
+      const isNecklace = category === 'necklace';
+      const isNose = category === 'nose';
+      const idleMsg = isNecklace ? 'Show your face and neck to the camera' : 'Show your face to the camera';
+      const activeMsg = isNecklace ? 'Necklace on — turn your head to see it'
+        : isNose ? 'Nose ring on — turn your head to see it'
+          : 'Earrings on — turn your head to see them';
+      statusPill.textContent = idleMsg;
+
+      // Dual tracking for necklaces: run face + pose in parallel.
+      if (isNecklace) {
+        let lastFaceResult = null;
+        let lastPoseResult = null;
+        let lastVideoTime = -1;
+        
+        const faceSession = new FaceTrackingSession(videoEl, (result) => {
+          lastFaceResult = result;
         });
-        const status = info.faceDetected ? 'Earrings on — turn your head to see them' : 'Show your face to the camera';
-        if (status !== lastStatus) {
-          lastStatus = status;
-          statusPill.textContent = status;
-        }
-        window.__faceInfo = info; // last frame's info, for automated checks
-        if (SHOW_DEBUG_SKELETON) window.__faceResult = result;
-        if (SHOW_DEBUG_SKELETON && performance.now() - lastDebugLog > 500) {
-          lastDebugLog = performance.now();
-          const r = (v, d = 1) => (Number.isFinite(v) ? Number(v.toFixed(d)) : v);
-          logDebug({
-            category, sku,
-            faceDelegate: getFaceLandmarkerDelegate(),
-            faceDetected: info.faceDetected,
-            landmarks: info.landmarkCount,
-            yawDeg: r(info.yawDeg), pitchDeg: r(info.pitchDeg), rollDeg: r(info.rollDeg),
-            faceWidthPx: r(info.faceWidthPx),
-            earringLengthPx: r(info.earringLengthPx),
-            earringLengthMm: EARRING_ENTRY.lengthMm,
+        const poseSession = new PoseTrackingSession(videoEl, (result) => {
+          lastPoseResult = result;
+        });
+        
+        faceSession.start();
+        poseSession.start();
+        
+        const loop = () => {
+          if (!trackingSession) return;
+          if (videoEl.readyState >= 2 && videoEl.currentTime !== lastVideoTime) {
+            lastVideoTime = videoEl.currentTime;
+            const rect = overlayCanvas.getBoundingClientRect();
+            const info = pipeline.processFrame({
+              source: videoEl,
+              sourceWidth: videoEl.videoWidth,
+              sourceHeight: videoEl.videoHeight,
+              displaySize: { width: rect.width, height: rect.height },
+              faceResult: lastFaceResult,
+              poseResult: lastPoseResult,
+              mirror: currentFacingMode === 'user',
+              timestampMs: performance.now(),
+            });
+            const status = info.faceDetected ? activeMsg : idleMsg;
+            if (status !== lastStatus) {
+              lastStatus = status;
+              statusPill.textContent = status;
+            }
+            window.__faceInfo = info;
+            if (SHOW_DEBUG_SKELETON) window.__faceResult = lastFaceResult;
+            if (SHOW_DEBUG_SKELETON && performance.now() - lastDebugLog > 500) {
+              lastDebugLog = performance.now();
+              const r = (v, d = 1) => (Number.isFinite(v) ? Number(v.toFixed(d)) : v);
+              logDebug({
+                category, sku,
+                faceDelegate: getFaceLandmarkerDelegate(),
+                poseDelegate: getPoseLandmarkerDelegate(),
+                faceDetected: info.faceDetected,
+                poseDetected: info.poseDetected,
+                trackingMode: info.trackingMode,
+                landmarks: info.landmarkCount,
+                poseLandmarks: info.poseLandmarkCount,
+                yawDeg: r(info.yawDeg), pitchDeg: r(info.pitchDeg), rollDeg: r(info.rollDeg),
+                faceWidthPx: r(info.faceWidthPx),
+                necklaceScale: r(info.necklaceScale, 4),
+                necklaceVisibility: r(info.necklaceVisibility, 2),
+              });
+            }
+          }
+          requestAnimationFrame(loop);
+        };
+        requestAnimationFrame(loop);
+        
+        trackingSession = { stop: () => { faceSession.stop(); poseSession.stop(); trackingSession = null; } };
+      } else {
+        // Earrings and nose rings: face-only tracking.
+        trackingSession = new FaceTrackingSession(videoEl, (result) => {
+          const rect = overlayCanvas.getBoundingClientRect();
+          const info = pipeline.processFrame({
+            source: videoEl,
+            sourceWidth: videoEl.videoWidth,
+            sourceHeight: videoEl.videoHeight,
+            displaySize: { width: rect.width, height: rect.height },
+            faceResult: result,
+            mirror: currentFacingMode === 'user',
+            timestampMs: performance.now(),
           });
-        }
-      });
-      trackingSession.start();
+          const status = info.faceDetected ? activeMsg : idleMsg;
+          if (status !== lastStatus) {
+            lastStatus = status;
+            statusPill.textContent = status;
+          }
+          window.__faceInfo = info;
+          if (SHOW_DEBUG_SKELETON) window.__faceResult = result;
+          if (SHOW_DEBUG_SKELETON && performance.now() - lastDebugLog > 500) {
+            lastDebugLog = performance.now();
+            const r = (v, d = 1) => (Number.isFinite(v) ? Number(v.toFixed(d)) : v);
+            if (category === 'nose') {
+              logDebug({
+                category, sku,
+                faceDelegate: getFaceLandmarkerDelegate(),
+                faceDetected: info.faceDetected,
+                side: info.side,
+                yawDeg: r(info.yawDeg), pitchDeg: r(info.pitchDeg), rollDeg: r(info.rollDeg),
+                faceWidthPx: r(info.faceWidthPx),
+                ringDiameterPx: r(info.ringDiameterPx),
+                ringVisibility: r(info.ringVisibility, 2),
+              });
+              return;
+            }
+            logDebug({
+              category, sku,
+              faceDelegate: getFaceLandmarkerDelegate(),
+              faceDetected: info.faceDetected,
+              landmarks: info.landmarkCount,
+              yawDeg: r(info.yawDeg), pitchDeg: r(info.pitchDeg), rollDeg: r(info.rollDeg),
+              faceWidthPx: r(info.faceWidthPx),
+              earringLengthPx: r(info.earringLengthPx),
+              earringLengthMm: EARRING_ENTRY.lengthMm,
+            });
+          }
+        });
+        trackingSession.start();
+      }
 
       if (SHOW_DEBUG_SKELETON) {
         recorder = new SessionRecorder({
@@ -370,14 +544,13 @@
           overlayCanvas,
           isMirrored: () => currentFacingMode === 'user',
           pipeline,
-          filePrefix: 'earringtryon',
+          filePrefix: isNecklace ? 'necklacetryon' : isNose ? 'noseringtryon' : 'earringtryon',
         });
         recordBtn.classList.remove('hidden');
       }
     }
 
-    // Rings use hand tracking; earrings use face tracking. Necklaces will
-    // join the face path later.
+    // Rings use hand tracking; earrings and necklaces use face tracking.
     async function startTrackingForCategory() {
       if (FACE_CATEGORIES.includes(category)) {
         await startFaceTracking();
@@ -542,6 +715,7 @@
       stopTracking();
       disposeHandLandmarker();
       disposeFaceLandmarker();
+      disposePoseLandmarker();
       stopCamera(videoEl, currentStream);
       history.back();
     });
@@ -552,6 +726,7 @@
       stopTracking();
       disposeHandLandmarker();
       disposeFaceLandmarker();
+      disposePoseLandmarker();
       stopCamera(videoEl, currentStream);
     });
 
