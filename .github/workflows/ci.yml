@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Solver replay tests
+        run: npm test
+
+      # MediaPipe models (~34 MB) are downloaded by the prebuild step; cache them.
+      - uses: actions/cache@v4
+        with:
+          path: apps/web/public/mediapipe/models
+          key: mediapipe-models-${{ hashFiles('scripts/fetch-mediapipe.mjs') }}
+
+      - name: Build site
+        run: npm run build
+
+      # Fails if any model is over its size budget. (Not diffed against the
+      # committed .glb files: WebP encoding can differ slightly across platforms.)
+      - name: Model size budgets
+        run: npm run models

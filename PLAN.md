@@ -7,6 +7,17 @@ Goal: a production site, Indian audience, that loads fast, keeps try-on smooth (
 
 Decisions (confirmed): **Supabase + Cloudflare Pages Functions** backend · **Astro + Vite** storefront · **budget-Android ≥24fps** target · **Razorpay Standard Checkout** at v1 (fixed SKU prices; live gold rate later).
 
+## Progress (2026-11-13)
+**Done — Phase 0 + Phase 1 quick wins (items 1, 5, 8):**
+- Monorepo: `apps/web` (Astro 7 + Tailwind 4, no runtime CDN), `packages/tryon`, `assets-src`, `fixtures`, `scripts`. Old dev server removed.
+- Try-on page ported to `/try-on`, fonts self-hosted (Latin subset), Material Symbols inlined as SVG. Legacy pages served as-is from `apps/web/public` until Phase 2.
+- **Fully self-hosted:** MediaPipe bundle + wasm from npm, models pinned to `/1/` and sha256-checked, three.js bundled. Zero third-party requests on `/try-on` (verified in Chromium); strict CSP in `_headers` verified not to break tracking.
+- **Renderer:** `preserveDrawingBuffer` off (on only with `?debug=1`), `powerPreference: 'high-performance'`, one shared factory (`three-runtime.js`). Debug recorder lazy-loaded.
+- **Models:** ring 3.9 MB → 219 KB, earrings 3.0 MB → 590 KB, necklace 2.0 MB → 307 KB, nose ring 1.2 MB → 134 KB (Meshopt + WebP, content-hashed, immutable cache). Renders compared against the originals pixel-wise. Fixed a necklace normals bug that compressed geometry exposed.
+- **Tests/CI:** solver replay snapshot tests on the recorded sessions; GitHub Actions runs tests, build and model size budgets.
+
+**Not done yet from Phase 1:** worker + single scheduler (2), extrapolation (3), cheaper segmentation (4), shared PMREM / render-on-demand (rest of 5), quality tiers incl. camera resolution (6), prefetch + service worker (7), telemetry (10). three.js is bundled whole (~174 KB gzip); tree-shaking needs named imports in the scenes.
+
 ## Why try-on is laggy today (from the code)
 1. **Everything runs on the main thread, in several independent rAF loops.** `HandTrackingSession` / `FaceTrackingSession` / `PoseTrackingSession` (`hand-tracking.js:131`, `face-tracking.js`, `pose-tracking.js`) each call the blocking `detectForVideo` from their own `requestAnimationFrame`. The necklace runs face + pose + a third render loop (`try-on.html:428-470`), so two models plus WebGL compete for one thread every frame.
 2. **Skin segmentation is heavy.** `selfie_multiclass_256x256` **float32** (~16 MB) runs every **2 frames** until the size locks (`ring-solver.js:125`). `getAsFloat32Array()` forces a GPU→CPU readback stall every time.

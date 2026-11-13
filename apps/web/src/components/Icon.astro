@@ -1,0 +1,19 @@
+---
+/**
+ * Inline Material Symbols (outlined) icon, read at build time — no icon
+ * font download. Usage: <Icon name="arrow_back" class="w-5 h-5" />
+ */
+import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
+
+interface Props {
+  name: string;
+  class?: string;
+}
+const { name, class: className = 'w-5 h-5' } = Astro.props;
+if (!/^[a-z0-9_]+$/.test(name)) throw new Error(`Bad icon name: ${name}`);
+const require = createRequire(import.meta.url);
+const raw = readFileSync(require.resolve(`@material-symbols/svg-400/outlined/${name}.svg`), 'utf8');
+const inner = raw.replace(/^<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '');
+---
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true" class={className} set:html={inner} />

@@ -1,0 +1,16 @@
+{
+  "name": "@caen/tryon",
+  "private": true,
+  "type": "module",
+  "exports": { "./*": "./src/*" },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@mediapipe/tasks-vision": "1.0.1",
+    "three": "0.180.0"
+  },
+  "devDependencies": {
+    "vitest": "5.1.0"
+  }
+}
