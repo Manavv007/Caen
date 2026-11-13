@@ -8,6 +8,9 @@ import { RingTryOnPipeline } from '@caen/tryon/ring-tryon-pipeline.js';
 import { FaceTryOnPipeline } from '@caen/tryon/face-tryon-pipeline.js';
 import { NecklaceTryOnPipeline } from '@caen/tryon/necklace-tryon-pipeline.js';
 import { NoseRingTryOnPipeline } from '@caen/tryon/nose-ring-pipeline.js';
+import { registerAssetCache, warmAssetCache, assetCacheStatus } from '@caen/tryon/asset-cache.js';
+import { mediapipeModelUrl } from '@caen/tryon/asset-urls.js';
+import { visionWasmUrls } from '@caen/tryon/mediapipe-vision.js';
 import MODELS from '../data/models.json';
 
 // Product catalogs below move to the database in Phase 3. Model URLs come
@@ -191,6 +194,8 @@ const VISION_PREFER = urlParams.get('vision') === 'main' ? 'main' : 'worker';
 // Render on requestAnimationFrame and extrapolate between detections
 // (render-smoothing.js); ?smooth=0 renders once per detection, as before (A/B).
 const SMOOTH = urlParams.get('smooth') !== '0';
+// ?sw=0 unregisters the asset-cache service worker (cold-start comparisons).
+const USE_SW = urlParams.get('sw') !== '0';
 const MODEL_URL = { ring: RING_MODEL_URL, earring: EARRING_ENTRY.url, necklace: NECKLACE_ENTRY.url, nose: NOSE_RING_ENTRY.url }[category];
 
 let visionPromise = null;
@@ -306,6 +311,7 @@ function perfDebug(vision) {
     workerDetectMs: vision.lastWorkerMs != null ? r1(vision.lastWorkerMs) : undefined,
     qualityTier: governor.tier.name,
     smooth: SMOOTH,
+    sw: assetCacheStatus(),
   };
 }
 
@@ -471,6 +477,7 @@ async function startTracking() {
   });
   trackingLoop.start();
   if (SMOOTH) startRenderLoop(pipeline);
+  warmCacheAfterLoad(vision, pipeline);
 
   if (SHOW_DEBUG_SKELETON) {
     const SessionRecorder = await loadSessionRecorder();
@@ -510,6 +517,22 @@ recordBtn.addEventListener('click', async () => {
 });
 
 let renderLoopHandle = null;
+
+/**
+ * First visit: the asset-cache service worker wasn't in control yet when the
+ * models downloaded, so hand it the URLs this session used (it re-reads them
+ * from the HTTP cache). Later visits fill and use the cache directly.
+ */
+async function warmCacheAfterLoad(vision, p) {
+  if (!USE_SW) return;
+  const urls = [MODEL_URL, ...VISION_KINDS.map(mediapipeModelUrl), ...(vision.wasmUrls || [])];
+  if (p.segmenterReady) {
+    await p.segmenterReady;
+    // The skin segmenter runs on the main thread, with its own wasm variant.
+    if (p.segmenter && p.segmenter.ready) urls.push(mediapipeModelUrl('skin'), ...(await visionWasmUrls().catch(() => [])));
+  }
+  warmAssetCache(urls.filter(Boolean));
+}
 
 /**
  * Smooth mode: renders on requestAnimationFrame (skipped by the scene when
@@ -602,6 +625,8 @@ document.getElementById('back-btn').addEventListener('click', () => {
 window.addEventListener('pagehide', releaseAll);
 
 async function boot() {
+  // Cache-first service worker for /mediapipe/* and /models/* (asset-cache-sw.js).
+  registerAssetCache({ enabled: USE_SW });
   showView('checking');
   const capability = await checkCapability();
   logDebug({ category, sku, capability });

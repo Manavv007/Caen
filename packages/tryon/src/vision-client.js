@@ -17,6 +17,7 @@
 import { loadHandLandmarker, detectHandsForVideoFrame, getHandLandmarkerDelegate, disposeHandLandmarker } from './hand-tracking.js';
 import { loadFaceLandmarker, detectFaceForVideoFrame, getFaceLandmarkerDelegate, disposeFaceLandmarker } from './face-tracking.js';
 import { loadPoseLandmarker, detectPoseForVideoFrame, getPoseLandmarkerDelegate, disposePoseLandmarker } from './pose-tracking.js';
+import { visionWasmUrls } from './mediapipe-vision.js';
 
 const MAIN_TASKS = {
   hand: { load: loadHandLandmarker, detect: detectHandsForVideoFrame, delegate: getHandLandmarkerDelegate, dispose: disposeHandLandmarker },
@@ -38,6 +39,7 @@ class MainThreadVision {
     this.mode = 'main';
     this.kinds = kinds;
     this.delegates = {};
+    this.wasmUrls = []; // MediaPipe wasm files this client loaded (asset cache warm-up)
     this.fallbackReason = null;
   }
 
@@ -46,6 +48,7 @@ class MainThreadVision {
       await MAIN_TASKS[kind].load();
       this.delegates[kind] = MAIN_TASKS[kind].delegate();
     }
+    this.wasmUrls = await visionWasmUrls().catch(() => []);
     return this;
   }
 
@@ -65,6 +68,7 @@ class WorkerVision {
     this.mode = 'worker';
     this.kinds = kinds;
     this.delegates = {};
+    this.wasmUrls = [];
     this.lastWorkerMs = null; // detection time inside the worker, for the debug panel
     this._nextId = 1;
     this._pending = new Map();
@@ -97,8 +101,9 @@ class WorkerVision {
       timer = setTimeout(() => reject(new Error('vision worker init timed out')), WORKER_INIT_TIMEOUT_MS);
     });
     try {
-      const { delegates } = await Promise.race([this._request({ type: 'init', kinds: this.kinds }), timeout]);
+      const { delegates, wasmUrls } = await Promise.race([this._request({ type: 'init', kinds: this.kinds }), timeout]);
       this.delegates = delegates;
+      this.wasmUrls = wasmUrls || [];
     } finally {
       clearTimeout(timer);
     }
