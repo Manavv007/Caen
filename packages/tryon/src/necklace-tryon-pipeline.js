@@ -18,6 +18,7 @@ import { FACE_OVAL_CONNECTIONS, headAnglesFromMatrix } from './face-tracking.js'
 import { NecklaceSolver } from './necklace-solver.js';
 import { NecklaceScene } from './necklace-scene.js';
 import { LightingEstimator } from './lighting-estimator.js';
+import { PoseSmoother } from './render-smoothing.js';
 
 export class NecklaceTryOnPipeline {
   /**
@@ -30,7 +31,7 @@ export class NecklaceTryOnPipeline {
    * @param {boolean} [opts.cutBackside=true] - cut the back loop of the chain
    * @param {number} [opts.cutZ=-0.02] - normalized Z cutoff for cutting backside
    */
-  constructor({ overlayCanvas, debugCanvas = null, modelUrl, lengthMm, neckDown, neckX, cutBackside = true, cutZ = -0.02 }) {
+  constructor({ overlayCanvas, debugCanvas = null, modelUrl, lengthMm, neckDown, neckX, cutBackside = true, cutZ = -0.02, smooth = false }) {
     this.debugCanvas = debugCanvas;
     this.debugCtx = debugCanvas ? debugCanvas.getContext('2d') : null;
     this.modelUrl = modelUrl;
@@ -39,6 +40,18 @@ export class NecklaceTryOnPipeline {
     this.scene = new NecklaceScene(overlayCanvas);
     this.solver = new NecklaceSolver({ lengthMm, neckDown, neckX });
     this.lighting = new LightingEstimator();
+    // smooth: render from renderFrame() on rAF, extrapolating between detections.
+    this.smoother = smooth ? new PoseSmoother({
+      getPoints: (s) => (s.tracked && s.necklace
+        ? [s.necklace.position, s.neckOccluder.center, s.chestOccluder.center]
+        : null),
+      withPoints: (s, [necklace, neck, chest]) => ({
+        ...s,
+        necklace: { ...s.necklace, position: necklace },
+        neckOccluder: { ...s.neckOccluder, center: neck },
+        chestOccluder: { ...s.chestOccluder, center: chest },
+      }),
+    }) : null;
     this.recording = null;
   }
 
@@ -53,6 +66,13 @@ export class NecklaceTryOnPipeline {
   reset() {
     this.solver.reset();
     this.lighting.reset();
+    if (this.smoother) this.smoother.reset();
+  }
+
+  /** Smooth mode only: draws the latest placement, extrapolated to `nowMs` (call on rAF). */
+  renderFrame(nowMs) {
+    const s = this.smoother && this.smoother.at(nowMs);
+    if (s) this.scene.render(s);
   }
 
   startRecording() {
@@ -129,7 +149,8 @@ export class NecklaceTryOnPipeline {
     const videoAspect = f.sourceWidth > 0 && f.sourceHeight > 0 ? f.sourceWidth / f.sourceHeight : s.crop.containerAspect;
     this.scene.resize(s.crop, videoAspect);
     if (f.source) this.scene.setLighting(this.lighting.update(f.source));
-    this.scene.render(s);
+    if (this.smoother) this.smoother.push(s, f.timestampMs, performance.now());
+    else this.scene.render(s);
     this._drawDebug(lm, poseLm, s, f.mirror);
     if (this.recording) this._record(f, lm, matrix, s);
 

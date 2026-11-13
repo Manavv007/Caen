@@ -14,6 +14,7 @@ import { FACE_OVAL_CONNECTIONS, EAR_LANDMARKS, headAnglesFromMatrix } from './fa
 import { EarringSolver } from './earring-solver.js';
 import { EarringScene } from './earring-scene.js';
 import { LightingEstimator } from './lighting-estimator.js';
+import { PoseSmoother } from './render-smoothing.js';
 
 export class FaceTryOnPipeline {
   /**
@@ -22,14 +23,27 @@ export class FaceTryOnPipeline {
    * @param {HTMLCanvasElement|null} [opts.debugCanvas]
    * @param {string} opts.modelUrl - earring model
    * @param {number} [opts.lengthMm] - real earring length (attachment point to bottom)
+   * @param {boolean} [opts.smooth=false] - render from renderFrame() on rAF, extrapolating between detections
    */
-  constructor({ overlayCanvas, debugCanvas = null, modelUrl, lengthMm }) {
+  constructor({ overlayCanvas, debugCanvas = null, modelUrl, lengthMm, smooth = false }) {
     this.debugCanvas = debugCanvas;
     this.debugCtx = debugCanvas ? debugCanvas.getContext('2d') : null;
     this.modelUrl = modelUrl;
     this.scene = new EarringScene(overlayCanvas);
     this.solver = new EarringSolver({ lengthMm });
     this.lighting = new LightingEstimator();
+    this.smoother = smooth ? new PoseSmoother({
+      // Both earrings and the head/neck occluders that hide them.
+      getPoints: (s) => (s.faceDetected
+        ? [s.earrings.right.position, s.earrings.left.position, s.head.center, s.neck.center]
+        : null),
+      withPoints: (s, [r, l, head, neck]) => ({
+        ...s,
+        earrings: { right: { ...s.earrings.right, position: r }, left: { ...s.earrings.left, position: l } },
+        head: { ...s.head, center: head },
+        neck: { ...s.neck, center: neck },
+      }),
+    }) : null;
     this.recording = null; // array of frame records while recording
   }
 
@@ -41,6 +55,13 @@ export class FaceTryOnPipeline {
   reset() {
     this.solver.reset();
     this.lighting.reset();
+    if (this.smoother) this.smoother.reset();
+  }
+
+  /** Smooth mode only: draws the latest placement, extrapolated to `nowMs` (call on rAF). */
+  renderFrame(nowMs) {
+    const s = this.smoother && this.smoother.at(nowMs);
+    if (s) this.scene.render(s);
   }
 
   startRecording() {
@@ -104,7 +125,8 @@ export class FaceTryOnPipeline {
     const videoAspect = f.sourceWidth > 0 && f.sourceHeight > 0 ? f.sourceWidth / f.sourceHeight : s.crop.containerAspect;
     this.scene.resize(s.crop, videoAspect);
     if (f.source) this.scene.setLighting(this.lighting.update(f.source));
-    this.scene.render(s);
+    if (this.smoother) this.smoother.push(s, f.timestampMs, performance.now());
+    else this.scene.render(s);
     this._drawDebug(lm, s, f.mirror);
     if (this.recording) this._record(f, lm, matrix, s);
 

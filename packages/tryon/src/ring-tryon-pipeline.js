@@ -16,6 +16,7 @@ import { LightingEstimator } from './lighting-estimator.js';
 import { SkinSegmenter, computeHandRoi } from './skin-segmentation.js';
 import { measureFingerWidth } from './finger-measure.js';
 import { RingSolver } from './ring-solver.js';
+import { PoseSmoother } from './render-smoothing.js';
 
 const round = (v, d = 5) => (Number.isFinite(v) ? Math.round(v * 10 ** d) / 10 ** d : v);
 const packPoints = (pts) => pts.map((p) => [round(p.x), round(p.y), round(p.z || 0)]);
@@ -27,8 +28,9 @@ export class RingTryOnPipeline {
    * @param {HTMLCanvasElement|null} [opts.debugCanvas] - 2D skeleton/measurement layer
    * @param {string} opts.modelUrl
    * @param {boolean} [opts.segmentation=true]
+   * @param {boolean} [opts.smooth=false] - render from renderFrame() on rAF, extrapolating between detections (render-smoothing.js)
    */
-  constructor({ overlayCanvas, debugCanvas = null, modelUrl, segmentation = true }) {
+  constructor({ overlayCanvas, debugCanvas = null, modelUrl, segmentation = true, smooth = false }) {
     this.overlayCanvas = overlayCanvas;
     this.debugCanvas = debugCanvas;
     this.debugCtx = debugCanvas ? debugCanvas.getContext('2d') : null;
@@ -37,6 +39,17 @@ export class RingTryOnPipeline {
     this.scene = new RingScene(overlayCanvas);
     this.lighting = new LightingEstimator();
     this.solver = new RingSolver();
+    this.smoother = smooth ? new PoseSmoother({
+      // Ring centre + the other fingers' occluder capsules, which must move with it.
+      getPoints: (out) => (out.pose && out.pose.valid
+        ? [out.pose.position, ...out.segments.flatMap((s) => [s.a, s.b])]
+        : null),
+      withPoints: (out, pts) => ({
+        ...out,
+        pose: { ...out.pose, position: pts[0] },
+        segments: out.segments.map((s, i) => ({ ...s, a: pts[1 + 2 * i], b: pts[2 + 2 * i] })),
+      }),
+    }) : null;
 
     this.segmenter = segmentation ? new SkinSegmenter() : null;
     this.segmentationStatus = segmentation ? 'loading' : 'disabled';
@@ -73,6 +86,17 @@ export class RingTryOnPipeline {
     this._frame = 0;
     this._lastRoi = null;
     this._lastMeasurement = null;
+    if (this.smoother) this.smoother.reset();
+  }
+
+  /**
+   * Smooth mode only: draws the latest pose, extrapolated to `nowMs`. Call on
+   * every requestAnimationFrame; unchanged frames are skipped by the scene.
+   * @param {number} nowMs - performance.now()
+   */
+  renderFrame(nowMs) {
+    const out = this.smoother && this.smoother.at(nowMs);
+    if (out) this.scene.render(out.pose, out.segments);
   }
 
   get sizing() {
@@ -131,7 +155,8 @@ export class RingTryOnPipeline {
     const videoAspect = sourceWidth > 0 && sourceHeight > 0 ? sourceWidth / sourceHeight : out.crop.containerAspect;
     this.scene.resize(out.crop, videoAspect);
     this.scene.setLighting(this.lighting.update(source));
-    this.scene.render(out.pose, out.segments);
+    if (this.smoother) this.smoother.push(out, timestampMs, performance.now());
+    else this.scene.render(out.pose, out.segments);
     this._drawDebug(handResult, out.crop, mirror, sourceWidth, sourceHeight);
 
     if (this.recording) this._record({ timestampMs, sourceWidth, sourceHeight, displaySize, mirror, handResult, out });
