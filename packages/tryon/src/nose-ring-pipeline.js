@@ -17,6 +17,7 @@ import { FACE_OVAL_CONNECTIONS, headAnglesFromMatrix } from './face-tracking.js'
 import { NoseRingSolver, NOSTRIL_LANDMARKS } from './nose-ring-solver.js';
 import { NoseRingScene } from './nose-ring-scene.js';
 import { LightingEstimator } from './lighting-estimator.js';
+import { PoseSmoother } from './render-smoothing.js';
 
 export class NoseRingTryOnPipeline {
   /**
@@ -32,13 +33,18 @@ export class NoseRingTryOnPipeline {
    * @param {number} [opts.drop] - ring centre below the piercing, in ring diameters
    * @param {number} [opts.cutHidden] - ring height (diameters from centre, negative toward the gap; -1 = nothing) hidden below
    */
-  constructor({ overlayCanvas, debugCanvas = null, modelUrl, diameterMm, side, tiltDeg, rollDeg, offset, drop, cutHidden }) {
+  constructor({ overlayCanvas, debugCanvas = null, modelUrl, diameterMm, side, tiltDeg, rollDeg, offset, drop, cutHidden, smooth = false }) {
     this.debugCanvas = debugCanvas;
     this.debugCtx = debugCanvas ? debugCanvas.getContext('2d') : null;
     this.modelUrl = modelUrl;
     this.scene = new NoseRingScene(overlayCanvas, { cutHidden });
     this.solver = new NoseRingSolver({ diameterMm, side, tiltDeg, rollDeg, offset, drop });
     this.lighting = new LightingEstimator();
+    // smooth: render from renderFrame() on rAF, extrapolating between detections.
+    this.smoother = smooth ? new PoseSmoother({
+      getPoints: (s) => (s.faceDetected ? [s.ring.position] : null),
+      withPoints: (s, [ring]) => ({ ...s, ring: { ...s.ring, position: ring } }),
+    }) : null;
     this.recording = null; // array of frame records while recording
   }
 
@@ -50,6 +56,13 @@ export class NoseRingTryOnPipeline {
   reset() {
     this.solver.reset();
     this.lighting.reset();
+    if (this.smoother) this.smoother.reset();
+  }
+
+  /** Smooth mode only: draws the latest placement, extrapolated to `nowMs` (call on rAF). */
+  renderFrame(nowMs) {
+    const s = this.smoother && this.smoother.at(nowMs);
+    if (s) this.scene.render(s);
   }
 
   startRecording() {
@@ -112,7 +125,8 @@ export class NoseRingTryOnPipeline {
     const videoAspect = f.sourceWidth > 0 && f.sourceHeight > 0 ? f.sourceWidth / f.sourceHeight : s.crop.containerAspect;
     this.scene.resize(s.crop, videoAspect);
     if (f.source) this.scene.setLighting(this.lighting.update(f.source));
-    this.scene.render(s);
+    if (this.smoother) this.smoother.push(s, f.timestampMs, performance.now());
+    else this.scene.render(s);
     this._drawDebug(lm, s, f.mirror);
     if (this.recording) this._record(f, lm, matrix, s);
 

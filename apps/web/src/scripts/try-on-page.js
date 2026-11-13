@@ -2,12 +2,15 @@ import { checkCapability } from '@caen/tryon/capability.js';
 import { startCamera, stopCamera, listVideoInputDevices } from '@caen/tryon/camera.js';
 import { createVisionClient } from '@caen/tryon/vision-client.js';
 import { TrackingLoop } from '@caen/tryon/frame-scheduler.js';
-import { PerfGovernor } from '@caen/tryon/perf-governor.js';
+import { PerfGovernor, QUALITY_TIERS } from '@caen/tryon/perf-governor.js';
 import { setRendererOptions, setOverlayPixelRatio } from '@caen/tryon/three-runtime.js';
 import { RingTryOnPipeline } from '@caen/tryon/ring-tryon-pipeline.js';
 import { FaceTryOnPipeline } from '@caen/tryon/face-tryon-pipeline.js';
 import { NecklaceTryOnPipeline } from '@caen/tryon/necklace-tryon-pipeline.js';
 import { NoseRingTryOnPipeline } from '@caen/tryon/nose-ring-pipeline.js';
+import { registerAssetCache, warmAssetCache, assetCacheStatus } from '@caen/tryon/asset-cache.js';
+import { mediapipeModelUrl } from '@caen/tryon/asset-urls.js';
+import { visionWasmUrls } from '@caen/tryon/mediapipe-vision.js';
 import MODELS from '../data/models.json';
 
 // Product catalogs below move to the database in Phase 3. Model URLs come
@@ -96,8 +99,15 @@ const SHOW_DEBUG_SKELETON = urlParams.get('debug') === '1';
 // The debug recorder reads the WebGL canvas back, which needs the drawing
 // buffer kept; everyone else gets the faster default.
 // Render quality tier (pixel-ratio cap); steps down if tracking can't keep up.
+// ?tier=high|mid|low forces the starting tier (testing the low-tier path on a fast phone).
+const forcedTier = QUALITY_TIERS.findIndex((t) => t.name === urlParams.get('tier'));
 const governor = new PerfGovernor({
-  onChange: (tier) => setOverlayPixelRatio(pipeline && pipeline.scene && pipeline.scene.renderer, tier.maxPixelRatio),
+  ...(forcedTier >= 0 ? { startTier: forcedTier } : {}),
+  onChange: (tier) => {
+    setOverlayPixelRatio(pipeline && pipeline.scene && pipeline.scene.renderer, tier.maxPixelRatio);
+    // Low tier: no skin segmentation; ring sizing uses the hand-size estimate.
+    if (tier.name === 'low' && pipeline && typeof pipeline.disableSegmentation === 'function') pipeline.disableSegmentation();
+  },
 });
 setRendererOptions({ preserveDrawingBuffer: SHOW_DEBUG_SKELETON, maxPixelRatio: governor.tier.maxPixelRatio });
 if (SHOW_DEBUG_SKELETON) document.getElementById('debug-panel').classList.remove('hidden');
@@ -168,9 +178,9 @@ function logDebug(data) {
 }
 
 function goToFallback() {
-  // Placeholder: Task 10 wires this to the real 360°/static product
+  // Placeholder: Task 10 wires this to the real 360Â°/static product
   // viewer instead of an alert.
-  alert('360° product viewer fallback will be wired up in a later step.');
+  alert('360Â° product viewer fallback will be wired up in a later step.');
 }
 
 // Landmarkers per category. Necklaces run pose on every other frame only:
@@ -181,6 +191,11 @@ const VISION_KINDS = category === 'ring' ? ['hand']
 const kindsForFrame = (i) => (category === 'necklace' && i % 2 === 1 ? ['face'] : VISION_KINDS);
 // ?vision=main forces the old main-thread tracking (A/B comparison on a phone).
 const VISION_PREFER = urlParams.get('vision') === 'main' ? 'main' : 'worker';
+// Render on requestAnimationFrame and extrapolate between detections
+// (render-smoothing.js); ?smooth=0 renders once per detection, as before (A/B).
+const SMOOTH = urlParams.get('smooth') !== '0';
+// ?sw=0 unregisters the asset-cache service worker (cold-start comparisons).
+const USE_SW = urlParams.get('sw') !== '0';
 const MODEL_URL = { ring: RING_MODEL_URL, earring: EARRING_ENTRY.url, necklace: NECKLACE_ENTRY.url, nose: NOSE_RING_ENTRY.url }[category];
 
 let visionPromise = null;
@@ -203,7 +218,11 @@ function disposeVision() {
 function createPipeline() {
   const debug = SHOW_DEBUG_SKELETON ? debugCanvas : null;
   if (category === 'ring') {
-    return new RingTryOnPipeline({ overlayCanvas, debugCanvas: debug, modelUrl: RING_MODEL_URL });
+    // The low tier skips skin segmentation (and its 16 MB model) entirely.
+    return new RingTryOnPipeline({
+      overlayCanvas, debugCanvas: debug, modelUrl: RING_MODEL_URL, smooth: SMOOTH,
+      segmentation: governor.tier.name !== 'low',
+    });
   }
   if (category === 'necklace') {
     const cutBackside = urlParams.get('cutBackside') !== '0';
@@ -217,6 +236,7 @@ function createPipeline() {
     return new NecklaceTryOnPipeline({
       overlayCanvas,
       debugCanvas: debug,
+      smooth: SMOOTH,
       modelUrl: NECKLACE_ENTRY.url,
       lengthMm: NECKLACE_ENTRY.lengthMm,
       neckDown,
@@ -240,6 +260,7 @@ function createPipeline() {
     return new NoseRingTryOnPipeline({
       overlayCanvas,
       debugCanvas: debug,
+      smooth: SMOOTH,
       modelUrl: NOSE_RING_ENTRY.url,
       diameterMm: num('noseMm') ?? NOSE_RING_ENTRY.diameterMm,
       side: urlParams.get('side') === 'right' ? 'right' : 'left',
@@ -253,6 +274,7 @@ function createPipeline() {
   return new FaceTryOnPipeline({
     overlayCanvas,
     debugCanvas: debug,
+    smooth: SMOOTH,
     modelUrl: EARRING_ENTRY.url,
     lengthMm: EARRING_ENTRY.lengthMm,
   });
@@ -260,16 +282,36 @@ function createPipeline() {
 
 const r1 = (v, d = 1) => (Number.isFinite(v) ? Number(v.toFixed(d)) : v);
 
+/** renderer.render() calls per second (render on demand skips unchanged frames). */
+let renderRate = { t: 0, rendered: 0, skipped: 0, fps: 0, skippedPerSec: 0 };
+function sampleRenderRate() {
+  const gate = pipeline && pipeline.scene && pipeline.scene.renderGate;
+  if (!gate) return renderRate;
+  const now = performance.now();
+  const dt = (now - renderRate.t) / 1000;
+  if (renderRate.t && dt > 0 && gate.rendered >= renderRate.rendered) {
+    renderRate.fps = (gate.rendered - renderRate.rendered) / dt;
+    renderRate.skippedPerSec = (gate.skipped - renderRate.skipped) / dt;
+  }
+  renderRate = { ...renderRate, t: now, rendered: gate.rendered, skipped: gate.skipped };
+  return renderRate;
+}
+
 /** Tracking/perf numbers shown in the ?debug=1 panel. */
 function perfDebug(vision) {
+  const rr = sampleRenderRate();
   return {
     vision: vision.mode,
     visionFallback: vision.fallbackReason || undefined,
     delegates: vision.delegates,
     trackingFps: r1(trackingLoop ? trackingLoop.resultsPerSecond : 0),
+    renderFps: r1(rr.fps),
+    renderSkippedPerSec: r1(rr.skippedPerSec),
     droppedFrames: trackingLoop ? trackingLoop.droppedFrames : 0,
     workerDetectMs: vision.lastWorkerMs != null ? r1(vision.lastWorkerMs) : undefined,
     qualityTier: governor.tier.name,
+    smooth: SMOOTH,
+    sw: assetCacheStatus(),
   };
 }
 
@@ -283,9 +325,9 @@ function setStatus(status) {
 const isNecklace = category === 'necklace';
 const isNose = category === 'nose';
 const FACE_IDLE = isNecklace ? 'Show your face and neck to the camera' : 'Show your face to the camera';
-const FACE_ACTIVE = isNecklace ? 'Necklace on — turn your head to see it'
-  : isNose ? 'Nose ring on — turn your head to see it'
-    : 'Earrings on — turn your head to see them';
+const FACE_ACTIVE = isNecklace ? 'Necklace on â€” turn your head to see it'
+  : isNose ? 'Nose ring on â€” turn your head to see it'
+    : 'Earrings on â€” turn your head to see them';
 
 function frameInput(timestampMs, frame) {
   const rect = overlayCanvas.getBoundingClientRect();
@@ -303,7 +345,7 @@ function handleRingResult({ results, frame }, timestampMs, vision) {
   const info = pipeline.processFrame({ ...frameInput(timestampMs, frame), handResult: results.hand });
   let status = 'Show your hand to the camera';
   if (info.handDetected) {
-    status = info.sizing && info.sizing.locked ? 'Ring fitted — move freely' : 'Sizing your ring…';
+    status = info.sizing && info.sizing.locked ? 'Ring fitted â€” move freely' : 'Sizing your ringâ€¦';
   }
   setStatus(status);
   updateSizingUi(info);
@@ -392,7 +434,7 @@ async function startTracking() {
   const token = trackingToken;
   const what = category === 'ring' ? 'hand' : isNecklace ? 'face and pose' : 'face';
   modelLoadingIndicator.classList.remove('hidden');
-  modelLoadingIndicator.lastChild.textContent = ` Loading ${what} tracking…`;
+  modelLoadingIndicator.lastChild.textContent = ` Loading ${what} trackingâ€¦`;
 
   // Tracking models and the jewellery scene load in parallel.
   const next = createPipeline();
@@ -403,7 +445,7 @@ async function startTracking() {
     next.dispose();
     if (token !== trackingToken) return;
     modelLoadingIndicator.classList.add('hidden');
-    statusPill.textContent = `${category === 'ring' ? 'Hand' : 'Face'} tracking failed to load — showing camera only`;
+    statusPill.textContent = `${category === 'ring' ? 'Hand' : 'Face'} tracking failed to load â€” showing camera only`;
     logDebug({ category, sku, trackingLoadError: String(err) });
     return;
   }
@@ -434,6 +476,8 @@ async function startTracking() {
     onError: (err) => logDebug({ category, sku, ...perfDebug(vision), trackingError: String((err && err.message) || err) }),
   });
   trackingLoop.start();
+  if (SMOOTH) startRenderLoop(pipeline);
+  warmCacheAfterLoad(vision, pipeline);
 
   if (SHOW_DEBUG_SKELETON) {
     const SessionRecorder = await loadSessionRecorder();
@@ -459,7 +503,7 @@ recordBtn.addEventListener('click', async () => {
   recordBtn.disabled = true;
   try {
     const res = await recorder.record(10000, (ms) => {
-      recordLabel.textContent = `Recording… ${Math.ceil(ms / 1000)}s`;
+      recordLabel.textContent = `Recordingâ€¦ ${Math.ceil(ms / 1000)}s`;
     });
     recordLabel.textContent = res.videoSaved ? 'Saved (JSON + video)' : 'Saved (JSON)';
   } catch (err) {
@@ -472,8 +516,53 @@ recordBtn.addEventListener('click', async () => {
   }, 2500);
 });
 
+let renderLoopHandle = null;
+
+/**
+ * First visit: the asset-cache service worker wasn't in control yet when the
+ * models downloaded, so hand it the URLs this session used (it re-reads them
+ * from the HTTP cache). Later visits fill and use the cache directly.
+ */
+async function warmCacheAfterLoad(vision, p) {
+  if (!USE_SW) return;
+  const urls = [MODEL_URL, ...VISION_KINDS.map(mediapipeModelUrl), ...(vision.wasmUrls || [])];
+  if (p.segmenterReady) {
+    await p.segmenterReady;
+    // The skin segmenter runs on the main thread, with its own wasm variant.
+    if (p.segmenter && p.segmenter.ready) urls.push(mediapipeModelUrl('skin'), ...(await visionWasmUrls().catch(() => [])));
+  }
+  warmAssetCache(urls.filter(Boolean));
+}
+
+/**
+ * Smooth mode: renders on requestAnimationFrame (skipped by the scene when
+ * nothing moved). Below the 'high' tier at most ~30 renders/s: that is
+ * already 2–3× the tracking rate on a budget phone, and rendering every 60 Hz
+ * frame there takes GPU time from tracking.
+ */
+function startRenderLoop(p) {
+  stopRenderLoop();
+  let last = 0;
+  const tick = () => {
+    if (pipeline !== p) return; // pipeline replaced or stopped
+    renderLoopHandle = requestAnimationFrame(tick);
+    const now = performance.now();
+    const minGapMs = governor.tier.name === 'high' ? 0 : 1000 / 30 - 4; // 4 ms slack for rAF jitter
+    if (now - last < minGapMs) return;
+    last = now;
+    p.renderFrame(now);
+  };
+  renderLoopHandle = requestAnimationFrame(tick);
+}
+
+function stopRenderLoop() {
+  if (renderLoopHandle !== null) cancelAnimationFrame(renderLoopHandle);
+  renderLoopHandle = null;
+}
+
 function stopTracking() {
   trackingToken++;
+  stopRenderLoop();
   if (trackingLoop) {
     trackingLoop.stop();
     trackingLoop = null;
@@ -536,6 +625,8 @@ document.getElementById('back-btn').addEventListener('click', () => {
 window.addEventListener('pagehide', releaseAll);
 
 async function boot() {
+  // Cache-first service worker for /mediapipe/* and /models/* (asset-cache-sw.js).
+  registerAssetCache({ enabled: USE_SW });
   showView('checking');
   const capability = await checkCapability();
   logDebug({ category, sku, capability });

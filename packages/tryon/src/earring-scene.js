@@ -12,7 +12,10 @@
  *                                  far earring when the head turns
  */
 
-import { loadThreeRuntime, createOverlayRenderer, syncRendererSize } from './three-runtime.js';
+import {
+  loadThreeRuntime, acquireOverlayRenderer, releaseOverlayRenderer, syncRendererSize,
+  RenderGate, pushObjectState, baseRenderState,
+} from './three-runtime.js';
 import { computeCameraFrame, injectGrain } from './three-scene.js';
 import { loadEarringModel, cloneMirroredEarring } from './earring-model.js';
 
@@ -33,21 +36,21 @@ export class EarringScene {
     this._grainUniforms = { uGrain: { value: 0.015 }, uGrainTime: { value: 0 } };
     this._baseExposure = 1.0;
     this.modelLoaded = false;
+    this.renderGate = new RenderGate();
   }
 
   async init() {
     await loadThree();
-    this.renderer = createOverlayRenderer(THREE, this.canvas);
+    const { renderer, envTexture } = acquireOverlayRenderer({ THREE, RoomEnvironment }, this.canvas);
+    this.renderer = renderer;
     this.renderer.setClearColor(0x000000, 0);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = this._baseExposure;
 
     this.scene = new THREE.Scene();
-    const pmrem = new THREE.PMREMGenerator(this.renderer);
-    this._envTexture = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    this._envTexture = envTexture; // shared per canvas; not disposed with the scene
     this.scene.environment = this._envTexture;
-    pmrem.dispose();
     this.keyLight = new THREE.DirectionalLight(0xffffff, 0.8);
     this.keyLight.position.set(0.3, 1, 0.8);
     this.scene.add(this.keyLight);
@@ -150,8 +153,8 @@ export class EarringScene {
 
   /** @param {Object} s - output of EarringSolver.solve() */
   render(s) {
-    this._grainUniforms.uGrainTime.value = (performance.now() / 1000) % 1000;
     const show = !!(s && s.faceDetected && this.modelLoaded);
+    const state = [];
     for (const side of ['right', 'left']) {
       const a = this.anchors[side];
       const e = show ? s.earrings[side] : null;
@@ -161,6 +164,8 @@ export class EarringScene {
         this._placeOriented(a, e.position, e.axes, e.length);
         for (const m of this._materials[side]) m.opacity = vis;
       }
+      pushObjectState(state, a);
+      state.push(a.visible ? vis : 0);
     }
     this.head.visible = show;
     this.neck.visible = show;
@@ -169,6 +174,11 @@ export class EarringScene {
       // Cylinder geometry is radius 1, height 2 along Y -> radii[1] = half length.
       this._placeOriented(this.neck, s.neck.center, s.neck.axes, s.neck.radii);
     }
+    pushObjectState(state, this.head);
+    pushObjectState(state, this.neck);
+    const full = baseRenderState(this.renderer, this.camera, this.scene, this.keyLight, this.fillLight, this._grainUniforms).concat(state);
+    if (!this.renderGate.shouldRender(full)) return;
+    this._grainUniforms.uGrainTime.value = (performance.now() / 1000) % 1000;
     this.renderer.render(this.scene, this.camera);
   }
 
@@ -186,7 +196,6 @@ export class EarringScene {
       this.neck.geometry.dispose();
       this.head.material.dispose();
     }
-    if (this._envTexture) this._envTexture.dispose();
-    if (this.renderer) this.renderer.dispose();
+    releaseOverlayRenderer(this.renderer); // renderer + env map are shared per canvas
   }
 }

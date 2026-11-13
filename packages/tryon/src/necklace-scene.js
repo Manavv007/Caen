@@ -12,7 +12,10 @@
  *   chestOccluder      depth-only box: hides the pendant behind the chest
  */
 
-import { loadThreeRuntime, createOverlayRenderer, syncRendererSize } from './three-runtime.js';
+import {
+  loadThreeRuntime, acquireOverlayRenderer, releaseOverlayRenderer, syncRendererSize,
+  RenderGate, pushObjectState, baseRenderState,
+} from './three-runtime.js';
 import { computeCameraFrame, injectGrain } from './three-scene.js';
 import { loadNecklaceModel } from './necklace-model.js';
 
@@ -34,23 +37,22 @@ export class NecklaceScene {
     this._grainUniforms = { uGrain: { value: 0.015 }, uGrainTime: { value: 0 } };
     this._baseExposure = 1.0;
     this.modelLoaded = false;
+    this.renderGate = new RenderGate();
   }
 
   async init() {
     await loadThree();
 
-    this.renderer = createOverlayRenderer(THREE, this.canvas);
+    const { renderer, envTexture } = acquireOverlayRenderer({ THREE, RoomEnvironment }, this.canvas);
+    this.renderer = renderer;
     this.renderer.setClearColor(0x000000, 0);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = this._baseExposure;
 
     this.scene = new THREE.Scene();
-
-    const pmrem = new THREE.PMREMGenerator(this.renderer);
-    this._envTexture = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    this._envTexture = envTexture; // shared per canvas; not disposed with the scene
     this.scene.environment = this._envTexture;
-    pmrem.dispose();
 
     // Key light from above-front + soft fill.
     this.keyLight = new THREE.DirectionalLight(0xffffff, 0.8);
@@ -161,7 +163,6 @@ export class NecklaceScene {
 
   /** @param {Object} s - output of NecklaceSolver.solve() */
   render(s) {
-    this._grainUniforms.uGrainTime.value = (performance.now() / 1000) % 1000;
     const show = !!(s && s.tracked && s.necklace && this.modelLoaded);
     const vis = show ? (s.necklace.visibility === undefined ? 1 : s.necklace.visibility) : 0;
 
@@ -180,6 +181,13 @@ export class NecklaceScene {
       this._placeOriented(this.chestOccluder, s.chestOccluder.center, s.chestOccluder.axes, s.chestOccluder.radii);
     }
 
+    const state = baseRenderState(this.renderer, this.camera, this.scene, this.keyLight, this.fillLight, this._grainUniforms);
+    pushObjectState(state, this.necklaceAnchor);
+    state.push(this.necklaceAnchor.visible ? vis : 0);
+    pushObjectState(state, this.neckOccluder);
+    pushObjectState(state, this.chestOccluder);
+    if (!this.renderGate.shouldRender(state)) return;
+    this._grainUniforms.uGrainTime.value = (performance.now() / 1000) % 1000;
     this.renderer.render(this.scene, this.camera);
   }
 
@@ -200,7 +208,6 @@ export class NecklaceScene {
       this.chestOccluder.geometry.dispose();
       this.chestOccluder.material.dispose();
     }
-    if (this._envTexture) this._envTexture.dispose();
-    if (this.renderer) this.renderer.dispose();
+    releaseOverlayRenderer(this.renderer); // renderer + env map are shared per canvas
   }
 }

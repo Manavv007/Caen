@@ -28,7 +28,10 @@
  * as a dark halo around the band rather than as a shadow on the skin.)
  */
 
-import { loadThreeRuntime, createOverlayRenderer, syncRendererSize } from './three-runtime.js';
+import {
+  loadThreeRuntime, acquireOverlayRenderer, releaseOverlayRenderer, syncRendererSize,
+  RenderGate, pushObjectState, baseRenderState,
+} from './three-runtime.js';
 
 let THREE = null;
 let GLTFLoader = null;
@@ -144,23 +147,22 @@ export class RingScene {
     this._axes = null;
     this._grainUniforms = { uGrain: { value: 0.015 }, uGrainTime: { value: 0 } };
     this._baseExposure = 1.0;
+    this.renderGate = new RenderGate();
   }
 
   async init() {
     await loadThree();
 
-    this.renderer = createOverlayRenderer(THREE, this.canvas);
+    const { renderer, envTexture } = acquireOverlayRenderer({ THREE, RoomEnvironment }, this.canvas);
+    this.renderer = renderer;
     this.renderer.setClearColor(0x000000, 0);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = this._baseExposure;
 
     this.scene = new THREE.Scene();
-
-    const pmrem = new THREE.PMREMGenerator(this.renderer);
-    this._envTexture = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    this._envTexture = envTexture; // shared per canvas; not disposed with the scene
     this.scene.environment = this._envTexture;
-    pmrem.dispose();
 
     // Key light from above-front (typical ceiling/window light) + soft fill.
     // Colours/intensities are overwritten by setLighting() from the camera image.
@@ -289,13 +291,11 @@ export class RingScene {
    *   (+ = closer to the camera)
    */
   render(pose, handSegments = []) {
-    this._grainUniforms.uGrainTime.value = (performance.now() / 1000) % 1000;
-
     if (!pose || !pose.valid || !this.ringModel) {
       this.anchor.visible = false;
       this._handCylinders.count = 0;
       this._handSpheres.count = 0;
-      this.renderer.render(this.scene, this.camera);
+      this._present([]);
       return;
     }
 
@@ -323,6 +323,23 @@ export class RingScene {
 
     this._updateHandOccluders(handSegments, fw);
 
+    this._present(handSegments);
+  }
+
+  /** Renders unless the image would be the same as the last rendered one. */
+  _present(handSegments) {
+    const state = baseRenderState(this.renderer, this.camera, this.scene, this.keyLight, this.fillLight, this._grainUniforms);
+    pushObjectState(state, this.anchor);
+    if (this.anchor.visible) {
+      pushObjectState(state, this.sizer);
+      pushObjectState(state, this.occluder);
+      state.push(this._handCylinders.count, this._handSpheres.count);
+      for (const seg of handSegments.slice(0, MAX_HAND_OCCLUDER_SEGMENTS)) {
+        state.push(seg.a.x, seg.a.y, seg.a.z || 0, seg.b.x, seg.b.y, seg.b.z || 0, seg.radius);
+      }
+    }
+    if (!this.renderGate.shouldRender(state)) return;
+    this._grainUniforms.uGrainTime.value = (performance.now() / 1000) % 1000;
     this.renderer.render(this.scene, this.camera);
   }
 
@@ -379,8 +396,7 @@ export class RingScene {
       this._handCylinders.dispose();
       this._handSpheres.dispose();
     }
-    if (this._envTexture) this._envTexture.dispose();
-    if (this.renderer) this.renderer.dispose();
+    releaseOverlayRenderer(this.renderer); // renderer + env map are shared per canvas
   }
 }
 

@@ -15,6 +15,7 @@
 import { loadHandLandmarker, detectHandsForVideoFrame, getHandLandmarkerDelegate, disposeHandLandmarker } from './hand-tracking.js';
 import { loadFaceLandmarker, detectFaceForVideoFrame, getFaceLandmarkerDelegate, disposeFaceLandmarker } from './face-tracking.js';
 import { loadPoseLandmarker, detectPoseForVideoFrame, getPoseLandmarkerDelegate, disposePoseLandmarker } from './pose-tracking.js';
+import { visionWasmUrls } from './mediapipe-vision.js';
 
 const TASKS = {
   hand: { load: loadHandLandmarker, detect: detectHandsForVideoFrame, delegate: getHandLandmarkerDelegate, dispose: disposeHandLandmarker },
@@ -33,7 +34,7 @@ self.onmessage = async ({ data }) => {
         await TASKS[kind].load();
         delegates[kind] = TASKS[kind].delegate();
       }
-      self.postMessage({ type: 'ready', id, delegates });
+      self.postMessage({ type: 'ready', id, delegates, wasmUrls: await visionWasmUrls().catch(() => []) });
     } catch (err) {
       self.postMessage({ type: 'error', id, message: errorMessage(err) });
     }

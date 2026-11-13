@@ -41,6 +41,12 @@ export function loadVisionFileset() {
   return filesetPromise;
 }
 
+/** Full URLs of the wasm glue + binary this context loaded (for the asset cache). */
+export async function visionWasmUrls() {
+  const fileset = await loadVisionFileset();
+  return [fileset.wasmLoaderPath, fileset.wasmBinaryPath].filter(Boolean);
+}
+
 /**
  * In module mode MediaPipe import()s its wasm glue, reads the
  * `self.ModuleFactory` global it sets, then clears that global. A second
