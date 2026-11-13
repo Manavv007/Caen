@@ -1,0 +1,11 @@
+# Copy to .dev.vars for `npx wrangler pages dev apps/web/dist` (never commit .dev.vars).
+# In production set these in Cloudflare Pages -> Settings -> Variables and Secrets.
+RAZORPAY_KEY_ID=rzp_test_xxxxxxxx
+RAZORPAY_KEY_SECRET=
+RAZORPAY_WEBHOOK_SECRET=
+SUPABASE_URL=https://xxxxxxxx.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=
+# Optional: order confirmation emails
+RESEND_API_KEY=
+ORDER_EMAIL_FROM=CAEN JEWELS <orders@yourdomain.in>
+ORDER_NOTIFY_EMAIL=

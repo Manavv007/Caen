@@ -1,11 +1,11 @@
 /**
  * Store catalogue — PLACEHOLDER DATA taken from the Stitch design mockups
- * (names, prices, copy and photos). Phase 3 moves this into the database
- * (Supabase); pages read it only through src/lib/catalog.js, so only that
- * module changes then.
+ * (names, prices, copy and photos). Single source of truth for both the
+ * storefront (apps/web/src/lib/catalog.js) and the checkout API, which
+ * prices orders from it. Edit here, then deploy.
  *
  * image: {src, alt} for a remote photo, or {local, alt} for a file in
- * src/assets/products/<local>.webp.
+ * apps/web/src/assets/products/<local>.webp.
  * tryOn: the /try-on category whose 3D model matches this product (only set
  * where a matching model exists), with sku = the try-on catalogue key.
  */

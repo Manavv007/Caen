@@ -4,7 +4,7 @@ import Icon from './Icon.astro';
 import { productUrl } from '../lib/catalog.js';
 import { formatInr } from '../lib/format.js';
 
-interface Props { product: import('../data/catalog.js').Product; eager?: boolean }
+interface Props { product: import('@caen/commerce/catalog.js').Product; eager?: boolean }
 const { product: p, eager = false } = Astro.props;
 ---
 <a href={productUrl(p)} class="group flex flex-col overflow-hidden rounded-lg border border-line bg-white transition-shadow hover:shadow-lg">

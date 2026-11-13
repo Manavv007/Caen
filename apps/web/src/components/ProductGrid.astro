@@ -1,6 +1,6 @@
 ---
 import ProductCard from './ProductCard.astro';
-interface Props { products: import('../data/catalog.js').Product[] }
+interface Props { products: import('@caen/commerce/catalog.js').Product[] }
 const { products } = Astro.props;
 ---
 <div class="grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-6">

@@ -1,0 +1,12 @@
+{
+  "name": "@caen/commerce",
+  "private": true,
+  "type": "module",
+  "exports": { "./*": "./src/*" },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "vitest": "5.1.0"
+  }
+}

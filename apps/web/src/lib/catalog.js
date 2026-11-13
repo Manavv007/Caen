@@ -2,11 +2,11 @@
  * The only way pages read the catalogue. Today it serves src/data/catalog.js;
  * Phase 3 swaps the data source for the database without touching pages.
  */
-import { CATEGORIES, PRODUCTS, EDITORIAL } from '../data/catalog.js';
+import { CATEGORIES, PRODUCTS, EDITORIAL } from '@caen/commerce/catalog.js';
 
 const localImages = import.meta.glob('../assets/products/*.webp', { eager: true, import: 'default' });
 
-/** @param {import('../data/catalog.js').ImageRef} ref */
+/** @param {import('@caen/commerce/catalog.js').ImageRef} ref */
 export function resolveImage(ref) {
   if (ref.local) {
     const asset = localImages[`../assets/products/${ref.local}.webp`];
