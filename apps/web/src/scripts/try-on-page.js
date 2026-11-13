@@ -260,13 +260,31 @@ function createPipeline() {
 
 const r1 = (v, d = 1) => (Number.isFinite(v) ? Number(v.toFixed(d)) : v);
 
+/** renderer.render() calls per second (render on demand skips unchanged frames). */
+let renderRate = { t: 0, rendered: 0, skipped: 0, fps: 0, skippedPerSec: 0 };
+function sampleRenderRate() {
+  const gate = pipeline && pipeline.scene && pipeline.scene.renderGate;
+  if (!gate) return renderRate;
+  const now = performance.now();
+  const dt = (now - renderRate.t) / 1000;
+  if (renderRate.t && dt > 0 && gate.rendered >= renderRate.rendered) {
+    renderRate.fps = (gate.rendered - renderRate.rendered) / dt;
+    renderRate.skippedPerSec = (gate.skipped - renderRate.skipped) / dt;
+  }
+  renderRate = { ...renderRate, t: now, rendered: gate.rendered, skipped: gate.skipped };
+  return renderRate;
+}
+
 /** Tracking/perf numbers shown in the ?debug=1 panel. */
 function perfDebug(vision) {
+  const rr = sampleRenderRate();
   return {
     vision: vision.mode,
     visionFallback: vision.fallbackReason || undefined,
     delegates: vision.delegates,
     trackingFps: r1(trackingLoop ? trackingLoop.resultsPerSecond : 0),
+    renderFps: r1(rr.fps),
+    renderSkippedPerSec: r1(rr.skippedPerSec),
     droppedFrames: trackingLoop ? trackingLoop.droppedFrames : 0,
     workerDetectMs: vision.lastWorkerMs != null ? r1(vision.lastWorkerMs) : undefined,
     qualityTier: governor.tier.name,

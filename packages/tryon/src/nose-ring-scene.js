@@ -10,7 +10,10 @@
  *          uniform scale = ring diameter (model diameter is 1)
  */
 
-import { loadThreeRuntime, createOverlayRenderer, syncRendererSize } from './three-runtime.js';
+import {
+  loadThreeRuntime, acquireOverlayRenderer, releaseOverlayRenderer, syncRendererSize,
+  RenderGate, pushObjectState, baseRenderState,
+} from './three-runtime.js';
 import { computeCameraFrame, injectGrain } from './three-scene.js';
 import { loadNoseRingModel } from './nose-ring-model.js';
 
@@ -75,6 +78,7 @@ export class NoseRingScene {
     this._materials = [];
     this.modelLoaded = false;
     this._cutOpts = opts;
+    this.renderGate = new RenderGate();
   }
 
   async init() {
@@ -83,17 +87,16 @@ export class NoseRingScene {
     const hidden = Number.isFinite(this._cutOpts.cutHidden) ? this._cutOpts.cutHidden : DEFAULT_CUT_HIDDEN;
     const shown = Number.isFinite(this._cutOpts.cutShown) ? this._cutOpts.cutShown : hidden + CUT_SOFTNESS;
     this._cutUniforms.uCut.value = new THREE.Vector2(hidden, shown);
-    this.renderer = createOverlayRenderer(THREE, this.canvas);
+    const { renderer, envTexture } = acquireOverlayRenderer({ THREE, RoomEnvironment }, this.canvas);
+    this.renderer = renderer;
     this.renderer.setClearColor(0x000000, 0);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = this._baseExposure;
 
     this.scene = new THREE.Scene();
-    const pmrem = new THREE.PMREMGenerator(this.renderer);
-    this._envTexture = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    this._envTexture = envTexture; // shared per canvas; not disposed with the scene
     this.scene.environment = this._envTexture;
-    pmrem.dispose();
     this.keyLight = new THREE.DirectionalLight(0xffffff, 0.8);
     this.keyLight.position.set(0.3, 1, 0.8);
     this.scene.add(this.keyLight);
@@ -180,7 +183,6 @@ export class NoseRingScene {
 
   /** @param {Object} s - output of NoseRingSolver.solve() */
   render(s) {
-    this._grainUniforms.uGrainTime.value = (performance.now() / 1000) % 1000;
     const show = !!(s && s.faceDetected && this.modelLoaded);
     const vis = show ? (s.ring.visibility === undefined ? 1 : s.ring.visibility) : 0;
     this.anchor.visible = vis > 0.01;
@@ -191,6 +193,11 @@ export class NoseRingScene {
       this._cutUniforms.uRingInv.value.copy(this.anchor.matrixWorld).invert();
       for (const m of this._materials) m.opacity = vis;
     }
+    const state = baseRenderState(this.renderer, this.camera, this.scene, this.keyLight, this.fillLight, this._grainUniforms);
+    pushObjectState(state, this.anchor);
+    state.push(this.anchor.visible ? vis : 0);
+    if (!this.renderGate.shouldRender(state)) return;
+    this._grainUniforms.uGrainTime.value = (performance.now() / 1000) % 1000;
     this.renderer.render(this.scene, this.camera);
   }
 
@@ -203,7 +210,6 @@ export class NoseRingScene {
         }
       });
     }
-    if (this._envTexture) this._envTexture.dispose();
-    if (this.renderer) this.renderer.dispose();
+    releaseOverlayRenderer(this.renderer); // renderer + env map are shared per canvas
   }
 }
