@@ -10,7 +10,7 @@ See [PLAN.md](PLAN.md) for the production plan and its progress.
 | `apps/web` | Astro site (deploys to Cloudflare Pages): storefront pages in `src/pages`, catalogue in `src/data/catalog.js` (placeholder data until the database), try-on at `src/pages/try-on.astro`. |
 | `packages/tryon` | Try-on engine: MediaPipe tracking, solvers (pure, testable), three.js scenes. |
 | `packages/commerce` | Catalogue (`src/catalog.js`, single source for site + checkout), pricing, checkout/payment handlers. |
-| `functions/api` | Cloudflare Pages Functions: `/api/checkout`, `/api/checkout/confirm`, `/api/razorpay/webhook`. |
+| `apps/web/functions/api` | Cloudflare Pages Functions: `/api/checkout`, `/api/checkout/confirm`, `/api/razorpay/webhook`. |
 | `supabase/migrations` | Orders database schema. |
 | `assets-src/models` | Source 3D models (glTF + licences). Not shipped directly. |
 | `scripts/build-models.mjs` | Compresses source models to small `.glb` files in `apps/web/public/models` (committed). |
@@ -52,8 +52,9 @@ npm run models    # re-compress models after changing assets-src/models
 
 Connect the GitHub repo in the Cloudflare dashboard → Workers & Pages → Create → Pages → Connect to Git, with:
 
+- Root directory: `apps/web` (Cloudflare picks up the API from `apps/web/functions`)
 - Build command: `npm run build`
-- Build output directory: `apps/web/dist`
+- Build output directory: `dist`
 - Environment variable: `NODE_VERSION=22`
 
 Caching and security headers come from `apps/web/public/_headers`; old prototype URLs redirect via `apps/web/public/_redirects`.
@@ -62,10 +63,10 @@ Caching and security headers come from `apps/web/public/_headers`; old prototype
 
 Until these are set, checkout offers "Order on WhatsApp" instead of paying online.
 
-1. **Supabase** (free tier): create a project (region: Mumbai). In the SQL editor, run `supabase/migrations/20261113000000_orders.sql`. Copy the project URL and the `service_role` key (Project Settings → API).
+1. **Supabase** (free tier): create a project (region: Mumbai). In the SQL editor, run the files in `supabase/migrations/` in order. Copy the project URL and the `service_role` key (Project Settings → API).
 2. **Razorpay**: in test mode, create API keys (Settings → API Keys). Add a webhook (Settings → Webhooks) for `https://<your-site>/api/razorpay/webhook` with events `payment.captured` and `order.paid`, and a secret you choose.
-3. **Cloudflare Pages** → your project → Settings → Variables and Secrets: add `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (as secrets), then redeploy.
+3. **Cloudflare Pages** → your project → Settings → Variables and Secrets: add `RAZORPAY_KEY_ID`, `SUPABASE_URL` (plain text) and `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`, `SUPABASE_SERVICE_ROLE_KEY` (type **Secret**, so they're encrypted), then redeploy. Check names have no trailing spaces.
 4. Optional emails: a free [Resend](https://resend.com) account with your domain verified; add `RESEND_API_KEY`, `ORDER_EMAIL_FROM`, `ORDER_NOTIFY_EMAIL`.
 5. Test with Razorpay's test cards/UPI, check the order shows `paid` in Supabase (Table editor → orders), then switch to live keys after KYC.
 
-To run the site with the API locally: copy `.dev.vars.example` to `.dev.vars`, fill it in, `npm run build`, then `npx wrangler pages dev apps/web/dist`.
+To run the site with the API locally: copy `.dev.vars.example` to `apps/web/.dev.vars`, fill it in, `npm run build`, then from `apps/web`: `npx wrangler pages dev dist`.

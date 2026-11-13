@@ -1,4 +1,4 @@
-# Copy to .dev.vars for `npx wrangler pages dev apps/web/dist` (never commit .dev.vars).
+# Copy to apps/web/.dev.vars, then from apps/web: `npx wrangler pages dev dist` (never commit .dev.vars).
 # In production set these in Cloudflare Pages -> Settings -> Variables and Secrets.
 RAZORPAY_KEY_ID=rzp_test_xxxxxxxx
 RAZORPAY_KEY_SECRET=
