@@ -8,7 +8,7 @@
  * side), and the estimated piercing point (green).
  *
  * Same structure as face-tryon-pipeline.js so the page can share the
- * FaceTrackingSession loop and the SessionRecorder.
+ * TrackingLoop (frame-scheduler.js) and the SessionRecorder.
  */
 
 import { createVisibleMapper } from './view-mapping.js';

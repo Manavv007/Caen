@@ -12,6 +12,9 @@ import { mediapipeWasmUrl } from './asset-urls.js';
 
 export { TASKS_VISION_VERSION } from './asset-urls.js';
 
+/** True inside a (module) Web Worker, where MediaPipe must load its wasm glue as an ES module. */
+const IN_WORKER = typeof WorkerGlobalScope !== 'undefined' && typeof document === 'undefined';
+
 let modulePromise = null;
 let filesetPromise = null;
 
@@ -29,13 +32,26 @@ export function loadVisionModule() {
 export function loadVisionFileset() {
   if (!filesetPromise) {
     filesetPromise = loadVisionModule()
-      .then(({ FilesetResolver }) => FilesetResolver.forVisionTasks(mediapipeWasmUrl()))
+      .then(({ FilesetResolver }) => FilesetResolver.forVisionTasks(mediapipeWasmUrl(), IN_WORKER))
       .catch((err) => {
         filesetPromise = null;
         throw err;
       });
   }
   return filesetPromise;
+}
+
+/**
+ * In module mode MediaPipe import()s its wasm glue, reads the
+ * `self.ModuleFactory` global it sets, then clears that global. A second
+ * task (or a GPU->CPU retry) re-imports the same URL, which the module cache
+ * serves without re-running it, so the global stays unset ("ModuleFactory not
+ * set."). The glue's default export is that factory: put it back first.
+ */
+async function restoreModuleFactory(fileset) {
+  if (self.ModuleFactory) return;
+  const glue = await import(/* @vite-ignore */ fileset.wasmLoaderPath);
+  self.ModuleFactory = glue.default;
 }
 
 /**
@@ -51,6 +67,7 @@ export async function createTaskWithFallback(TaskClass, options) {
   let gpuError = null;
   for (const delegate of ['GPU', 'CPU']) {
     try {
+      if (IN_WORKER) await restoreModuleFactory(fileset);
       const task = await TaskClass.createFromOptions(fileset, {
         ...options,
         baseOptions: { ...options.baseOptions, delegate },

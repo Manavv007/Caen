@@ -105,35 +105,3 @@ export function headAnglesFromMatrix(matrix) {
   const roll = Math.atan2(m[1], m[5]) * deg;
   return { yaw, pitch, roll };
 }
-
-/** Detect-on-new-frame loop (same pattern as HandTrackingSession). */
-export class FaceTrackingSession {
-  constructor(videoEl, onResult) {
-    this.videoEl = videoEl;
-    this.onResult = onResult;
-    this.lastVideoTime = -1;
-    this._running = false;
-    this._rafId = null;
-  }
-
-  start() {
-    this._running = true;
-    const loop = () => {
-      if (!this._running) return;
-      if (this.videoEl.readyState >= 2 && this.videoEl.currentTime !== this.lastVideoTime) {
-        this.lastVideoTime = this.videoEl.currentTime;
-        this.onResult(detectFaceForVideoFrame(this.videoEl, performance.now()));
-      }
-      this._rafId = requestAnimationFrame(loop);
-    };
-    this._rafId = requestAnimationFrame(loop);
-  }
-
-  stop() {
-    this._running = false;
-    if (this._rafId !== null) {
-      cancelAnimationFrame(this._rafId);
-      this._rafId = null;
-    }
-  }
-}

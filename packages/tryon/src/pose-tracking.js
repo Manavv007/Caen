@@ -114,35 +114,3 @@ export function computeTorsoFrame(leftShoulder, rightShoulder) {
   const forward = { x: 0, y: 0, z: 1 };       // side × up
   return { side, up, forward, width };
 }
-
-/** Detect-on-new-frame loop (same pattern as FaceTrackingSession). */
-export class PoseTrackingSession {
-  constructor(videoEl, onResult) {
-    this.videoEl = videoEl;
-    this.onResult = onResult;
-    this.lastVideoTime = -1;
-    this._running = false;
-    this._rafId = null;
-  }
-
-  start() {
-    this._running = true;
-    const loop = () => {
-      if (!this._running) return;
-      if (this.videoEl.readyState >= 2 && this.videoEl.currentTime !== this.lastVideoTime) {
-        this.lastVideoTime = this.videoEl.currentTime;
-        this.onResult(detectPoseForVideoFrame(this.videoEl, performance.now()));
-      }
-      this._rafId = requestAnimationFrame(loop);
-    };
-    this._rafId = requestAnimationFrame(loop);
-  }
-
-  stop() {
-    this._running = false;
-    if (this._rafId !== null) {
-      cancelAnimationFrame(this._rafId);
-      this._rafId = null;
-    }
-  }
-}

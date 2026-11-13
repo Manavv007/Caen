@@ -8,7 +8,7 @@
  * necklace anchor position (blue).
  *
  * Same structure as face-tryon-pipeline.js so the two can share
- * the FaceTrackingSession loop and SessionRecorder.
+ * the TrackingLoop (frame-scheduler.js) and SessionRecorder.
  */
 
 import { createVisibleMapper, createViewMapper } from './view-mapping.js';

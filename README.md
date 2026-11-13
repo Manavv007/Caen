@@ -26,7 +26,10 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:4321/try-on?category=ring (also `earring`, `necklace`, `nose`; add `&debug=1` for the landmark overlay and session recorder).
+Open http://localhost:4321/try-on?category=ring (also `earring`, `necklace`, `nose`).
+
+- `&debug=1`: landmark overlay, session recorder, and a "Debug details" panel with tracking fps, dropped frames, worker vs main-thread mode and quality tier.
+- `&vision=main`: run tracking on the main thread instead of the Web Worker (to compare smoothness).
 
 To test on a phone on the same Wi-Fi, the camera needs HTTPS:
 
