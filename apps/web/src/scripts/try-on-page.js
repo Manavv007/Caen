@@ -2,7 +2,7 @@ import { checkCapability } from '@caen/tryon/capability.js';
 import { startCamera, stopCamera, listVideoInputDevices } from '@caen/tryon/camera.js';
 import { createVisionClient } from '@caen/tryon/vision-client.js';
 import { TrackingLoop } from '@caen/tryon/frame-scheduler.js';
-import { PerfGovernor } from '@caen/tryon/perf-governor.js';
+import { PerfGovernor, QUALITY_TIERS } from '@caen/tryon/perf-governor.js';
 import { setRendererOptions, setOverlayPixelRatio } from '@caen/tryon/three-runtime.js';
 import { RingTryOnPipeline } from '@caen/tryon/ring-tryon-pipeline.js';
 import { FaceTryOnPipeline } from '@caen/tryon/face-tryon-pipeline.js';
@@ -96,8 +96,15 @@ const SHOW_DEBUG_SKELETON = urlParams.get('debug') === '1';
 // The debug recorder reads the WebGL canvas back, which needs the drawing
 // buffer kept; everyone else gets the faster default.
 // Render quality tier (pixel-ratio cap); steps down if tracking can't keep up.
+// ?tier=high|mid|low forces the starting tier (testing the low-tier path on a fast phone).
+const forcedTier = QUALITY_TIERS.findIndex((t) => t.name === urlParams.get('tier'));
 const governor = new PerfGovernor({
-  onChange: (tier) => setOverlayPixelRatio(pipeline && pipeline.scene && pipeline.scene.renderer, tier.maxPixelRatio),
+  ...(forcedTier >= 0 ? { startTier: forcedTier } : {}),
+  onChange: (tier) => {
+    setOverlayPixelRatio(pipeline && pipeline.scene && pipeline.scene.renderer, tier.maxPixelRatio);
+    // Low tier: no skin segmentation; ring sizing uses the hand-size estimate.
+    if (tier.name === 'low' && pipeline && typeof pipeline.disableSegmentation === 'function') pipeline.disableSegmentation();
+  },
 });
 setRendererOptions({ preserveDrawingBuffer: SHOW_DEBUG_SKELETON, maxPixelRatio: governor.tier.maxPixelRatio });
 if (SHOW_DEBUG_SKELETON) document.getElementById('debug-panel').classList.remove('hidden');
@@ -206,7 +213,11 @@ function disposeVision() {
 function createPipeline() {
   const debug = SHOW_DEBUG_SKELETON ? debugCanvas : null;
   if (category === 'ring') {
-    return new RingTryOnPipeline({ overlayCanvas, debugCanvas: debug, modelUrl: RING_MODEL_URL, smooth: SMOOTH });
+    // The low tier skips skin segmentation (and its 16 MB model) entirely.
+    return new RingTryOnPipeline({
+      overlayCanvas, debugCanvas: debug, modelUrl: RING_MODEL_URL, smooth: SMOOTH,
+      segmentation: governor.tier.name !== 'low',
+    });
   }
   if (category === 'necklace') {
     const cutBackside = urlParams.get('cutBackside') !== '0';

@@ -54,6 +54,7 @@ export class RingTryOnPipeline {
     this.segmenter = segmentation ? new SkinSegmenter() : null;
     this.segmentationStatus = segmentation ? 'loading' : 'disabled';
     this.segmentationError = null;
+    this._segmentationAllowed = !!segmentation;
 
     this._frame = 0;
     this._last = null;
@@ -67,16 +68,33 @@ export class RingTryOnPipeline {
     if (this.segmenter) {
       // Started first so its ~16 MB download overlaps the ring scene setup.
       this.segmenterReady = this.segmenter.load().then(
-        () => { this.segmentationStatus = `ready (${this.segmenter.delegate})`; },
+        () => {
+          if (!this._segmentationAllowed) this.segmenter.dispose(); // tier dropped while loading
+          else this.segmentationStatus = `ready (${this.segmenter.delegate})`;
+        },
         (err) => {
           // Non-fatal: sizing falls back to the hand-size estimate.
-          this.segmentationStatus = 'unavailable';
+          if (this._segmentationAllowed) this.segmentationStatus = 'unavailable';
           this.segmentationError = String(err && err.message || err);
         }
       );
     }
     await this.scene.init();
     await this.scene.loadRingModel(this.modelUrl);
+  }
+
+  /**
+   * Turns skin segmentation off for the rest of the session (the 'low'
+   * quality tier, perf-governor.js). Sizing then locks to the existing
+   * hand-size estimate (RingSizer, lockSource 'estimated'); measurements
+   * already taken still count. The model is released to free memory.
+   * Quality tiers never step back up, so there is no way back on.
+   */
+  disableSegmentation(reason = 'low tier') {
+    if (!this._segmentationAllowed) return;
+    this._segmentationAllowed = false;
+    this.segmentationStatus = `skipped (${reason})`;
+    if (this.segmenter && this.segmenter.ready) this.segmenter.dispose();
   }
 
   /** Full reset including the size lock (Resize button). */
@@ -128,7 +146,7 @@ export class RingTryOnPipeline {
   processFrame({ source, sourceWidth, sourceHeight, displaySize, handResult, mirror, timestampMs, forceSegmentation = false }) {
     const due = forceSegmentation || this._frame % this.solver.measureEveryNFrames === 0;
     this._frame++;
-    const canSegment = due && this.segmenter && this.segmenter.ready;
+    const canSegment = due && this._segmentationAllowed && this.segmenter && this.segmenter.ready;
 
     const measure = canSegment
       ? (req) => {
@@ -148,7 +166,7 @@ export class RingTryOnPipeline {
 
     const out = this.solver.solve({
       timeMs: timestampMs, sourceWidth, sourceHeight, displaySize, mirror, handResult, measure,
-      measurementPending: this.segmentationStatus === 'loading',
+      measurementPending: this._segmentationAllowed && this.segmentationStatus === 'loading',
     });
     this._last = out;
 
