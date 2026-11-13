@@ -12,7 +12,7 @@
  *   chestOccluder      depth-only box: hides the pendant behind the chest
  */
 
-import { loadThreeRuntime, createOverlayRenderer } from './three-runtime.js';
+import { loadThreeRuntime, createOverlayRenderer, syncRendererSize } from './three-runtime.js';
 import { computeCameraFrame, injectGrain } from './three-scene.js';
 import { loadNecklaceModel } from './necklace-model.js';
 
@@ -115,13 +115,7 @@ export class NecklaceScene {
   }
 
   resize(crop, videoAspect) {
-    const rect = this.canvas.getBoundingClientRect();
-    const dpr = this.renderer.getPixelRatio();
-    const w = Math.max(1, Math.round(rect.width * dpr));
-    const h = Math.max(1, Math.round(rect.height * dpr));
-    if (this.canvas.width !== w || this.canvas.height !== h) {
-      this.renderer.setSize(w, h, false);
-    }
+    syncRendererSize(this.renderer, this.canvas);
     const { fovDeg, distance } = computeCameraFrame(crop.containerAspect, videoAspect, crop.cropHeight);
     const cam = this.camera;
     if (cam.aspect !== crop.containerAspect || cam.fov !== fovDeg || cam.position.z !== distance) {

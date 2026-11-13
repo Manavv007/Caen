@@ -94,7 +94,7 @@ export function getHandLandmarkerDelegate() {
  * Runs hand detection against the current frame of a playing <video>
  * element. Must be called with a monotonically increasing timestamp
  * (e.g. performance.now()) and only when the video has advanced to a
- * new frame — see the detection loop pattern in HandTrackingSession below.
+ * new frame — see TrackingLoop in frame-scheduler.js.
  *
  * @param {HTMLVideoElement} videoEl
  * @param {number} timestampMs
@@ -119,46 +119,4 @@ export function disposeHandLandmarker() {
   }
   handLandmarkerDelegate = null;
   loadingPromise = null;
-}
-
-/**
- * A small stateful helper that runs the detect-on-new-frame loop pattern
- * MediaPipe recommends for video: only re-run detection when the video's
- * currentTime has actually advanced, avoiding duplicate work if the
- * render loop runs faster than the video decodes new frames.
- */
-export class HandTrackingSession {
-  /**
-   * @param {HTMLVideoElement} videoEl
-   * @param {(result: any) => void} onResult - called with each new detection result
-   */
-  constructor(videoEl, onResult) {
-    this.videoEl = videoEl;
-    this.onResult = onResult;
-    this.lastVideoTime = -1;
-    this._running = false;
-    this._rafId = null;
-  }
-
-  start() {
-    this._running = true;
-    const loop = () => {
-      if (!this._running) return;
-      if (this.videoEl.readyState >= 2 && this.videoEl.currentTime !== this.lastVideoTime) {
-        this.lastVideoTime = this.videoEl.currentTime;
-        const result = detectHandsForVideoFrame(this.videoEl, performance.now());
-        this.onResult(result);
-      }
-      this._rafId = requestAnimationFrame(loop);
-    };
-    this._rafId = requestAnimationFrame(loop);
-  }
-
-  stop() {
-    this._running = false;
-    if (this._rafId !== null) {
-      cancelAnimationFrame(this._rafId);
-      this._rafId = null;
-    }
-  }
 }

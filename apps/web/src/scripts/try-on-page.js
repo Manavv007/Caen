@@ -1,28 +1,13 @@
 import { checkCapability } from '@caen/tryon/capability.js';
 import { startCamera, stopCamera, listVideoInputDevices } from '@caen/tryon/camera.js';
-import {
-  loadHandLandmarker,
-  disposeHandLandmarker,
-  HandTrackingSession,
-  getHandLandmarkerDelegate,
-} from '@caen/tryon/hand-tracking.js';
+import { createVisionClient } from '@caen/tryon/vision-client.js';
+import { TrackingLoop } from '@caen/tryon/frame-scheduler.js';
+import { PerfGovernor } from '@caen/tryon/perf-governor.js';
+import { setRendererOptions, setOverlayPixelRatio } from '@caen/tryon/three-runtime.js';
 import { RingTryOnPipeline } from '@caen/tryon/ring-tryon-pipeline.js';
-import {
-  loadFaceLandmarker,
-  disposeFaceLandmarker,
-  FaceTrackingSession,
-  getFaceLandmarkerDelegate,
-} from '@caen/tryon/face-tracking.js';
-import {
-  loadPoseLandmarker,
-  disposePoseLandmarker,
-  PoseTrackingSession,
-  getPoseLandmarkerDelegate,
-} from '@caen/tryon/pose-tracking.js';
 import { FaceTryOnPipeline } from '@caen/tryon/face-tryon-pipeline.js';
 import { NecklaceTryOnPipeline } from '@caen/tryon/necklace-tryon-pipeline.js';
 import { NoseRingTryOnPipeline } from '@caen/tryon/nose-ring-pipeline.js';
-import { setRendererOptions } from '@caen/tryon/three-runtime.js';
 import MODELS from '../data/models.json';
 
 // Product catalogs below move to the database in Phase 3. Model URLs come
@@ -110,7 +95,11 @@ if (CREDIT_ENTRY && CREDIT_ENTRY.credit) {
 const SHOW_DEBUG_SKELETON = urlParams.get('debug') === '1';
 // The debug recorder reads the WebGL canvas back, which needs the drawing
 // buffer kept; everyone else gets the faster default.
-setRendererOptions({ preserveDrawingBuffer: SHOW_DEBUG_SKELETON });
+// Render quality tier (pixel-ratio cap); steps down if tracking can't keep up.
+const governor = new PerfGovernor({
+  onChange: (tier) => setOverlayPixelRatio(pipeline && pipeline.scene && pipeline.scene.renderer, tier.maxPixelRatio),
+});
+setRendererOptions({ preserveDrawingBuffer: SHOW_DEBUG_SKELETON, maxPixelRatio: governor.tier.maxPixelRatio });
 if (SHOW_DEBUG_SKELETON) document.getElementById('debug-panel').classList.remove('hidden');
 /** Debug-only module, fetched only with ?debug=1. */
 const loadSessionRecorder = () => import('@caen/tryon/session-recorder.js').then((m) => m.SessionRecorder);
@@ -141,7 +130,8 @@ const recordLabel = document.getElementById('record-label');
 
 let currentStream = null;
 let currentFacingMode = 'user';
-let trackingSession = null;
+let trackingLoop = null;
+let trackingToken = 0; // bumps on every stop, so a start that finishes late can tell it was cancelled
 let lastStatus = '';
 let pipeline = null;
 let recorder = null;
@@ -183,300 +173,277 @@ function goToFallback() {
   alert('360° product viewer fallback will be wired up in a later step.');
 }
 
-// Face tracking for earrings and necklaces (necklaces also use pose tracking).
-async function startFaceTracking() {
-  modelLoadingIndicator.classList.remove('hidden');
-  modelLoadingIndicator.lastChild.textContent = ' Loading face tracking…';
-  try {
-    await loadFaceLandmarker();
-    
-    // Necklaces also load pose tracking for body-anchored placement.
-    if (category === 'necklace') {
-      modelLoadingIndicator.lastChild.textContent = ' Loading pose tracking…';
-      await loadPoseLandmarker();
-    }
-    
-    if (category === 'necklace') {
-      const cutBackside = urlParams.get('cutBackside') !== '0';
-      const cutZParam = urlParams.get('cutZ');
-      const cutZ = cutZParam !== null ? parseFloat(cutZParam) : -0.02;
-      const neckDownParam = urlParams.get('neckDown');
-      const neckDown = neckDownParam !== null ? parseFloat(neckDownParam) : 0.80;
-      // Sideways nudge in face widths (+ = right), e.g. ?neckX=-0.03
-      const neckXParam = urlParams.get('neckX');
-      const neckX = neckXParam !== null ? parseFloat(neckXParam) : 0;
-      pipeline = new NecklaceTryOnPipeline({
-        overlayCanvas,
-        debugCanvas: SHOW_DEBUG_SKELETON ? debugCanvas : null,
-        modelUrl: NECKLACE_ENTRY.url,
-        lengthMm: NECKLACE_ENTRY.lengthMm,
-        neckDown,
-        neckX,
-        cutBackside,
-        cutZ,
-      });
-    } else if (category === 'nose') {
-      // Tuning from the URL while the placement is being refined:
-      //   ?side=right|left  ?noseTilt=deg  ?noseRoll=deg (gap turned toward the nose centre; 180 = gap down)
-      //   ?noseCut=-0.34  ring height hidden below (diameters from the centre, toward the gap; -1 = hide nothing)
-      //   ?noseX= ?noseY= ?noseZ=  piercing offset in face widths (X out, Y down, Z forward)
-      //   ?noseDrop=  ring centre below the piercing, in ring diameters
-      //   ?noseMm=  ring outer diameter in mm
-      const num = (k) => { const v = urlParams.get(k); return v !== null && v !== '' && Number.isFinite(parseFloat(v)) ? parseFloat(v) : undefined; };
-      const offset = {};
-      if (num('noseX') !== undefined) offset.out = num('noseX');
-      if (num('noseY') !== undefined) offset.down = num('noseY');
-      if (num('noseZ') !== undefined) offset.forward = num('noseZ');
-      pipeline = new NoseRingTryOnPipeline({
-        overlayCanvas,
-        debugCanvas: SHOW_DEBUG_SKELETON ? debugCanvas : null,
-        modelUrl: NOSE_RING_ENTRY.url,
-        diameterMm: num('noseMm') ?? NOSE_RING_ENTRY.diameterMm,
-        side: urlParams.get('side') === 'right' ? 'right' : 'left',
-        tiltDeg: num('noseTilt'),
-        rollDeg: num('noseRoll'),
-        offset,
-        drop: num('noseDrop'),
-        cutHidden: num('noseCut'),
-      });
-    } else {
-      pipeline = new FaceTryOnPipeline({
-        overlayCanvas,
-        debugCanvas: SHOW_DEBUG_SKELETON ? debugCanvas : null,
-        modelUrl: EARRING_ENTRY.url,
-        lengthMm: EARRING_ENTRY.lengthMm,
-      });
-    }
-    await pipeline.init();
-  } catch (err) {
-    modelLoadingIndicator.classList.add('hidden');
-    statusPill.textContent = 'Face tracking failed to load — showing camera only';
-    logDebug({ category, sku, faceTrackingLoadError: String(err) });
-    return;
+// Landmarkers per category. Necklaces run pose on every other frame only:
+// the torso moves slowly and the face drives the fine placement.
+const VISION_KINDS = category === 'ring' ? ['hand']
+  : category === 'necklace' ? ['face', 'pose']
+    : FACE_CATEGORIES.includes(category) ? ['face'] : [];
+const kindsForFrame = (i) => (category === 'necklace' && i % 2 === 1 ? ['face'] : VISION_KINDS);
+// ?vision=main forces the old main-thread tracking (A/B comparison on a phone).
+const VISION_PREFER = urlParams.get('vision') === 'main' ? 'main' : 'worker';
+const MODEL_URL = { ring: RING_MODEL_URL, earring: EARRING_ENTRY.url, necklace: NECKLACE_ENTRY.url, nose: NOSE_RING_ENTRY.url }[category];
+
+let visionPromise = null;
+/** Loads the landmarkers once per page (kept across camera switches). */
+function getVision() {
+  if (!visionPromise) {
+    visionPromise = createVisionClient(VISION_KINDS, { prefer: VISION_PREFER }).catch((err) => {
+      visionPromise = null; // allow "Try again"
+      throw err;
+    });
   }
-  modelLoadingIndicator.classList.add('hidden');
+  return visionPromise;
+}
 
-  const isNecklace = category === 'necklace';
-  const isNose = category === 'nose';
-  const idleMsg = isNecklace ? 'Show your face and neck to the camera' : 'Show your face to the camera';
-  const activeMsg = isNecklace ? 'Necklace on — turn your head to see it'
-    : isNose ? 'Nose ring on — turn your head to see it'
-      : 'Earrings on — turn your head to see them';
-  statusPill.textContent = idleMsg;
+function disposeVision() {
+  if (visionPromise) visionPromise.then((v) => v.dispose(), () => {});
+  visionPromise = null;
+}
 
-  // Dual tracking for necklaces: run face + pose in parallel.
-  if (isNecklace) {
-    let lastFaceResult = null;
-    let lastPoseResult = null;
-    let lastVideoTime = -1;
-    
-    const faceSession = new FaceTrackingSession(videoEl, (result) => {
-      lastFaceResult = result;
-    });
-    const poseSession = new PoseTrackingSession(videoEl, (result) => {
-      lastPoseResult = result;
-    });
-    
-    faceSession.start();
-    poseSession.start();
-    
-    const loop = () => {
-      if (!trackingSession) return;
-      if (videoEl.readyState >= 2 && videoEl.currentTime !== lastVideoTime) {
-        lastVideoTime = videoEl.currentTime;
-        const rect = overlayCanvas.getBoundingClientRect();
-        const info = pipeline.processFrame({
-          source: videoEl,
-          sourceWidth: videoEl.videoWidth,
-          sourceHeight: videoEl.videoHeight,
-          displaySize: { width: rect.width, height: rect.height },
-          faceResult: lastFaceResult,
-          poseResult: lastPoseResult,
-          mirror: currentFacingMode === 'user',
-          timestampMs: performance.now(),
-        });
-        const status = info.faceDetected ? activeMsg : idleMsg;
-        if (status !== lastStatus) {
-          lastStatus = status;
-          statusPill.textContent = status;
-        }
-        window.__faceInfo = info;
-        if (SHOW_DEBUG_SKELETON) window.__faceResult = lastFaceResult;
-        if (SHOW_DEBUG_SKELETON && performance.now() - lastDebugLog > 500) {
-          lastDebugLog = performance.now();
-          const r = (v, d = 1) => (Number.isFinite(v) ? Number(v.toFixed(d)) : v);
-          logDebug({
-            category, sku,
-            faceDelegate: getFaceLandmarkerDelegate(),
-            poseDelegate: getPoseLandmarkerDelegate(),
-            faceDetected: info.faceDetected,
-            poseDetected: info.poseDetected,
-            trackingMode: info.trackingMode,
-            landmarks: info.landmarkCount,
-            poseLandmarks: info.poseLandmarkCount,
-            yawDeg: r(info.yawDeg), pitchDeg: r(info.pitchDeg), rollDeg: r(info.rollDeg),
-            faceWidthPx: r(info.faceWidthPx),
-            necklaceScale: r(info.necklaceScale, 4),
-            necklaceVisibility: r(info.necklaceVisibility, 2),
-          });
-        }
-      }
-      requestAnimationFrame(loop);
-    };
-    requestAnimationFrame(loop);
-    
-    trackingSession = { stop: () => { faceSession.stop(); poseSession.stop(); trackingSession = null; } };
-  } else {
-    // Earrings and nose rings: face-only tracking.
-    trackingSession = new FaceTrackingSession(videoEl, (result) => {
-      const rect = overlayCanvas.getBoundingClientRect();
-      const info = pipeline.processFrame({
-        source: videoEl,
-        sourceWidth: videoEl.videoWidth,
-        sourceHeight: videoEl.videoHeight,
-        displaySize: { width: rect.width, height: rect.height },
-        faceResult: result,
-        mirror: currentFacingMode === 'user',
-        timestampMs: performance.now(),
-      });
-      const status = info.faceDetected ? activeMsg : idleMsg;
-      if (status !== lastStatus) {
-        lastStatus = status;
-        statusPill.textContent = status;
-      }
-      window.__faceInfo = info;
-      if (SHOW_DEBUG_SKELETON) window.__faceResult = result;
-      if (SHOW_DEBUG_SKELETON && performance.now() - lastDebugLog > 500) {
-        lastDebugLog = performance.now();
-        const r = (v, d = 1) => (Number.isFinite(v) ? Number(v.toFixed(d)) : v);
-        if (category === 'nose') {
-          logDebug({
-            category, sku,
-            faceDelegate: getFaceLandmarkerDelegate(),
-            faceDetected: info.faceDetected,
-            side: info.side,
-            yawDeg: r(info.yawDeg), pitchDeg: r(info.pitchDeg), rollDeg: r(info.rollDeg),
-            faceWidthPx: r(info.faceWidthPx),
-            ringDiameterPx: r(info.ringDiameterPx),
-            ringVisibility: r(info.ringVisibility, 2),
-          });
-          return;
-        }
-        logDebug({
-          category, sku,
-          faceDelegate: getFaceLandmarkerDelegate(),
-          faceDetected: info.faceDetected,
-          landmarks: info.landmarkCount,
-          yawDeg: r(info.yawDeg), pitchDeg: r(info.pitchDeg), rollDeg: r(info.rollDeg),
-          faceWidthPx: r(info.faceWidthPx),
-          earringLengthPx: r(info.earringLengthPx),
-          earringLengthMm: EARRING_ENTRY.lengthMm,
-        });
-      }
-    });
-    trackingSession.start();
+function createPipeline() {
+  const debug = SHOW_DEBUG_SKELETON ? debugCanvas : null;
+  if (category === 'ring') {
+    return new RingTryOnPipeline({ overlayCanvas, debugCanvas: debug, modelUrl: RING_MODEL_URL });
   }
-
-  if (SHOW_DEBUG_SKELETON) {
-    const SessionRecorder = await loadSessionRecorder();
-    recorder = new SessionRecorder({
-      videoEl,
+  if (category === 'necklace') {
+    const cutBackside = urlParams.get('cutBackside') !== '0';
+    const cutZParam = urlParams.get('cutZ');
+    const cutZ = cutZParam !== null ? parseFloat(cutZParam) : -0.02;
+    const neckDownParam = urlParams.get('neckDown');
+    const neckDown = neckDownParam !== null ? parseFloat(neckDownParam) : 0.80;
+    // Sideways nudge in face widths (+ = right), e.g. ?neckX=-0.03
+    const neckXParam = urlParams.get('neckX');
+    const neckX = neckXParam !== null ? parseFloat(neckXParam) : 0;
+    return new NecklaceTryOnPipeline({
       overlayCanvas,
-      isMirrored: () => currentFacingMode === 'user',
-      pipeline,
-      filePrefix: isNecklace ? 'necklacetryon' : isNose ? 'noseringtryon' : 'earringtryon',
+      debugCanvas: debug,
+      modelUrl: NECKLACE_ENTRY.url,
+      lengthMm: NECKLACE_ENTRY.lengthMm,
+      neckDown,
+      neckX,
+      cutBackside,
+      cutZ,
     });
-    recordBtn.classList.remove('hidden');
+  }
+  if (category === 'nose') {
+    // Tuning from the URL while the placement is being refined:
+    //   ?side=right|left  ?noseTilt=deg  ?noseRoll=deg (gap turned toward the nose centre; 180 = gap down)
+    //   ?noseCut=-0.34  ring height hidden below (diameters from the centre, toward the gap; -1 = hide nothing)
+    //   ?noseX= ?noseY= ?noseZ=  piercing offset in face widths (X out, Y down, Z forward)
+    //   ?noseDrop=  ring centre below the piercing, in ring diameters
+    //   ?noseMm=  ring outer diameter in mm
+    const num = (k) => { const v = urlParams.get(k); return v !== null && v !== '' && Number.isFinite(parseFloat(v)) ? parseFloat(v) : undefined; };
+    const offset = {};
+    if (num('noseX') !== undefined) offset.out = num('noseX');
+    if (num('noseY') !== undefined) offset.down = num('noseY');
+    if (num('noseZ') !== undefined) offset.forward = num('noseZ');
+    return new NoseRingTryOnPipeline({
+      overlayCanvas,
+      debugCanvas: debug,
+      modelUrl: NOSE_RING_ENTRY.url,
+      diameterMm: num('noseMm') ?? NOSE_RING_ENTRY.diameterMm,
+      side: urlParams.get('side') === 'right' ? 'right' : 'left',
+      tiltDeg: num('noseTilt'),
+      rollDeg: num('noseRoll'),
+      offset,
+      drop: num('noseDrop'),
+      cutHidden: num('noseCut'),
+    });
+  }
+  return new FaceTryOnPipeline({
+    overlayCanvas,
+    debugCanvas: debug,
+    modelUrl: EARRING_ENTRY.url,
+    lengthMm: EARRING_ENTRY.lengthMm,
+  });
+}
+
+const r1 = (v, d = 1) => (Number.isFinite(v) ? Number(v.toFixed(d)) : v);
+
+/** Tracking/perf numbers shown in the ?debug=1 panel. */
+function perfDebug(vision) {
+  return {
+    vision: vision.mode,
+    visionFallback: vision.fallbackReason || undefined,
+    delegates: vision.delegates,
+    trackingFps: r1(trackingLoop ? trackingLoop.resultsPerSecond : 0),
+    droppedFrames: trackingLoop ? trackingLoop.droppedFrames : 0,
+    workerDetectMs: vision.lastWorkerMs != null ? r1(vision.lastWorkerMs) : undefined,
+    qualityTier: governor.tier.name,
+  };
+}
+
+function setStatus(status) {
+  if (status !== lastStatus) {
+    lastStatus = status;
+    statusPill.textContent = status;
   }
 }
 
-// Rings use hand tracking; earrings and necklaces use face tracking.
-async function startTrackingForCategory() {
-  if (FACE_CATEGORIES.includes(category)) {
-    await startFaceTracking();
-    return;
+const isNecklace = category === 'necklace';
+const isNose = category === 'nose';
+const FACE_IDLE = isNecklace ? 'Show your face and neck to the camera' : 'Show your face to the camera';
+const FACE_ACTIVE = isNecklace ? 'Necklace on — turn your head to see it'
+  : isNose ? 'Nose ring on — turn your head to see it'
+    : 'Earrings on — turn your head to see them';
+
+function frameInput(timestampMs, frame) {
+  const rect = overlayCanvas.getBoundingClientRect();
+  return {
+    source: frame || videoEl,
+    sourceWidth: frame ? frame.width : videoEl.videoWidth,
+    sourceHeight: frame ? frame.height : videoEl.videoHeight,
+    displaySize: { width: rect.width, height: rect.height },
+    mirror: currentFacingMode === 'user',
+    timestampMs,
+  };
+}
+
+function handleRingResult({ results, frame }, timestampMs, vision) {
+  const info = pipeline.processFrame({ ...frameInput(timestampMs, frame), handResult: results.hand });
+  let status = 'Show your hand to the camera';
+  if (info.handDetected) {
+    status = info.sizing && info.sizing.locked ? 'Ring fitted — move freely' : 'Sizing your ring…';
   }
-  if (category !== 'ring') {
+  setStatus(status);
+  updateSizingUi(info);
+
+  if (SHOW_DEBUG_SKELETON && performance.now() - lastDebugLog > 500) {
+    lastDebugLog = performance.now();
+    const r = (v, d = 2) => r1(v, d);
+    logDebug({
+      category, sku,
+      ...perfDebug(vision),
+      skinSegmentation: pipeline.segmentationStatus,
+      skinSegmentationError: pipeline.segmentationError,
+      sizing: info.sizing && {
+        state: info.sizing.state,
+        progress: r(info.sizing.progress),
+        lockSource: info.sizing.lockSource,
+        scaleMode: info.sizing.scaleMode,
+        lastRejectReason: info.sizing.lastRejectReason,
+      },
+      hand3dTrusted: info.worldTrusted,
+      hand3dKnuckleSpanMm: r(info.knuckleSpanMm, 0),
+      hand: info.hand, backFacing: info.backFacing,
+      fingerWidthPx: r(info.fingerWidthPx, 1),
+      knuckleWidthPx: r(info.knuckleWidthPx, 1),
+      measuredWidthPx: r(info.measuredWidthPx, 1),
+      tiltDeg: r(info.tiltDeg, 1),
+      handFitResidualMm: r(info.residualMm, 1),
+    });
+  }
+}
+
+let lastPoseResult = null;
+
+function handleFaceResult({ results, frame }, timestampMs, vision) {
+  if (results.pose) lastPoseResult = results.pose;
+  const info = pipeline.processFrame({
+    ...frameInput(timestampMs, frame),
+    faceResult: results.face,
+    ...(isNecklace ? { poseResult: lastPoseResult } : {}),
+  });
+  setStatus(info.faceDetected ? FACE_ACTIVE : FACE_IDLE);
+  window.__faceInfo = info;
+  if (SHOW_DEBUG_SKELETON) window.__faceResult = results.face;
+
+  if (SHOW_DEBUG_SKELETON && performance.now() - lastDebugLog > 500) {
+    lastDebugLog = performance.now();
+    const r = r1;
+    const common = { category, sku, ...perfDebug(vision), faceDetected: info.faceDetected };
+    const angles = { yawDeg: r(info.yawDeg), pitchDeg: r(info.pitchDeg), rollDeg: r(info.rollDeg), faceWidthPx: r(info.faceWidthPx) };
+    if (isNecklace) {
+      logDebug({
+        ...common,
+        poseDetected: info.poseDetected,
+        trackingMode: info.trackingMode,
+        landmarks: info.landmarkCount,
+        poseLandmarks: info.poseLandmarkCount,
+        ...angles,
+        necklaceScale: r(info.necklaceScale, 4),
+        necklaceVisibility: r(info.necklaceVisibility, 2),
+      });
+    } else if (isNose) {
+      logDebug({
+        ...common,
+        side: info.side,
+        ...angles,
+        ringDiameterPx: r(info.ringDiameterPx),
+        ringVisibility: r(info.ringVisibility, 2),
+      });
+    } else {
+      logDebug({
+        ...common,
+        landmarks: info.landmarkCount,
+        ...angles,
+        earringLengthPx: r(info.earringLengthPx),
+        earringLengthMm: EARRING_ENTRY.lengthMm,
+      });
+    }
+  }
+}
+
+async function startTracking() {
+  if (!VISION_KINDS.length) {
     statusPill.textContent = `Live camera connected (${category} tracking not yet implemented)`;
     return;
   }
-
+  const token = trackingToken;
+  const what = category === 'ring' ? 'hand' : isNecklace ? 'face and pose' : 'face';
   modelLoadingIndicator.classList.remove('hidden');
+  modelLoadingIndicator.lastChild.textContent = ` Loading ${what} tracking…`;
+
+  // Tracking models and the jewellery scene load in parallel.
+  const next = createPipeline();
+  let vision;
   try {
-    await loadHandLandmarker();
-    pipeline = new RingTryOnPipeline({
-      overlayCanvas,
-      debugCanvas: SHOW_DEBUG_SKELETON ? debugCanvas : null,
-      modelUrl: RING_MODEL_URL,
-    });
-    await pipeline.init();
+    [vision] = await Promise.all([getVision(), next.init()]);
   } catch (err) {
+    next.dispose();
+    if (token !== trackingToken) return;
     modelLoadingIndicator.classList.add('hidden');
-    statusPill.textContent = 'Hand tracking failed to load — showing camera only';
-    logDebug({ category, sku, handTrackingLoadError: String(err) });
+    statusPill.textContent = `${category === 'ring' ? 'Hand' : 'Face'} tracking failed to load — showing camera only`;
+    logDebug({ category, sku, trackingLoadError: String(err) });
     return;
   }
+  if (token !== trackingToken) { // stopped (camera switch / back) while loading
+    next.dispose();
+    return;
+  }
+  pipeline = next;
+  if (category === 'ring') pipeline.reset();
   modelLoadingIndicator.classList.add('hidden');
-  statusPill.textContent = 'Show your hand to the camera';
-  pipeline.reset();
+  setStatus(category === 'ring' ? 'Show your hand to the camera' : FACE_IDLE);
+  lastPoseResult = null;
 
-  trackingSession = new HandTrackingSession(videoEl, (result) => {
-    const rect = overlayCanvas.getBoundingClientRect();
-    const info = pipeline.processFrame({
-      source: videoEl,
-      sourceWidth: videoEl.videoWidth,
-      sourceHeight: videoEl.videoHeight,
-      displaySize: { width: rect.width, height: rect.height },
-      handResult: result,
-      mirror: currentFacingMode === 'user',
-      timestampMs: performance.now(),
-    });
-
-    let status = 'Show your hand to the camera';
-    if (info.handDetected) {
-      status = info.sizing && info.sizing.locked ? 'Ring fitted — move freely' : 'Sizing your ring…';
-    }
-    if (status !== lastStatus) {
-      lastStatus = status;
-      statusPill.textContent = status;
-    }
-    updateSizingUi(info);
-
-    if (SHOW_DEBUG_SKELETON && performance.now() - lastDebugLog > 500) {
-      lastDebugLog = performance.now();
-      const r = (v, d = 2) => (Number.isFinite(v) ? Number(v.toFixed(d)) : v);
-      logDebug({
-        category, sku,
-        handDelegate: getHandLandmarkerDelegate(),
-        skinSegmentation: pipeline.segmentationStatus,
-        skinSegmentationError: pipeline.segmentationError,
-        sizing: info.sizing && {
-          state: info.sizing.state,
-          progress: r(info.sizing.progress),
-          lockSource: info.sizing.lockSource,
-          scaleMode: info.sizing.scaleMode,
-          lastRejectReason: info.sizing.lastRejectReason,
-        },
-        hand3dTrusted: info.worldTrusted,
-        hand3dKnuckleSpanMm: r(info.knuckleSpanMm, 0),
-        hand: info.hand, backFacing: info.backFacing,
-        fingerWidthPx: r(info.fingerWidthPx, 1),
-        knuckleWidthPx: r(info.knuckleWidthPx, 1),
-        measuredWidthPx: r(info.measuredWidthPx, 1),
-        tiltDeg: r(info.tiltDeg, 1),
-        handFitResidualMm: r(info.residualMm, 1),
-      });
-    }
+  const handle = category === 'ring' ? handleRingResult : handleFaceResult;
+  // Ring sizing measures the skin around the landmarks, so it needs the exact
+  // frame they came from; face categories only sample lighting from the video.
+  const keepFrame = category === 'ring';
+  trackingLoop = new TrackingLoop(videoEl, {
+    detect: (video, timestampMs, i) => vision.detect(video, timestampMs, kindsForFrame(i), { keepFrame }),
+    onResult: (detection, timestampMs) => {
+      try {
+        handle(detection, timestampMs, vision);
+      } finally {
+        if (detection.frame) detection.frame.close();
+      }
+      governor.update(performance.now(), trackingLoop.resultsPerSecond);
+    },
+    onError: (err) => logDebug({ category, sku, ...perfDebug(vision), trackingError: String((err && err.message) || err) }),
   });
-  trackingSession.start();
+  trackingLoop.start();
 
   if (SHOW_DEBUG_SKELETON) {
     const SessionRecorder = await loadSessionRecorder();
+    if (token !== trackingToken) return;
     recorder = new SessionRecorder({
       videoEl,
       overlayCanvas,
       isMirrored: () => currentFacingMode === 'user',
       pipeline,
+      ...(category === 'ring' ? {} : { filePrefix: isNecklace ? 'necklacetryon' : isNose ? 'noseringtryon' : 'earringtryon' }),
     });
     recordBtn.classList.remove('hidden');
   }
@@ -506,9 +473,10 @@ recordBtn.addEventListener('click', async () => {
 });
 
 function stopTracking() {
-  if (trackingSession) {
-    trackingSession.stop();
-    trackingSession = null;
+  trackingToken++;
+  if (trackingLoop) {
+    trackingLoop.stop();
+    trackingLoop = null;
   }
   if (pipeline) {
     pipeline.dispose();
@@ -539,7 +507,7 @@ async function initCamera(facingMode = 'user') {
   const devices = await listVideoInputDevices();
   switchCameraBtn.classList.toggle('hidden', devices.length < 2);
 
-  await startTrackingForCategory();
+  await startTracking();
 }
 
 switchCameraBtn.addEventListener('click', async () => {
@@ -552,24 +520,20 @@ document.getElementById('retry-camera-btn').addEventListener('click', () => init
 document.getElementById('fallback-btn-error').addEventListener('click', goToFallback);
 document.getElementById('fallback-btn-unsupported').addEventListener('click', goToFallback);
 
-document.getElementById('back-btn').addEventListener('click', () => {
+function releaseAll() {
   stopTracking();
-  disposeHandLandmarker();
-  disposeFaceLandmarker();
-  disposePoseLandmarker();
+  disposeVision();
   stopCamera(videoEl, currentStream);
+}
+
+document.getElementById('back-btn').addEventListener('click', () => {
+  releaseAll();
   history.back();
 });
 
 // Release camera + tracking resources on any unload path (tab close,
 // swipe-back, etc.), not just the explicit Back button.
-window.addEventListener('pagehide', () => {
-  stopTracking();
-  disposeHandLandmarker();
-  disposeFaceLandmarker();
-  disposePoseLandmarker();
-  stopCamera(videoEl, currentStream);
-});
+window.addEventListener('pagehide', releaseAll);
 
 async function boot() {
   showView('checking');
@@ -581,6 +545,11 @@ async function boot() {
     showView('unsupported');
     return;
   }
+
+  // Start downloading tracking models and the jewellery model while the
+  // camera permission prompt is up, instead of after it.
+  if (VISION_KINDS.length) getVision().catch(() => {}); // errors surface in startTracking()
+  if (MODEL_URL) fetch(MODEL_URL).catch(() => {});
 
   await initCamera('user');
 }

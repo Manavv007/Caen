@@ -16,7 +16,16 @@ Decisions (confirmed): **Supabase + Cloudflare Pages Functions** backend · **As
 - **Models:** ring 3.9 MB → 219 KB, earrings 3.0 MB → 590 KB, necklace 2.0 MB → 307 KB, nose ring 1.2 MB → 134 KB (Meshopt + WebP, content-hashed, immutable cache). Renders compared against the originals pixel-wise. Fixed a necklace normals bug that compressed geometry exposed.
 - **Tests/CI:** solver replay snapshot tests on the recorded sessions; GitHub Actions runs tests, build and model size budgets.
 
-**Not done yet from Phase 1:** worker + single scheduler (2), extrapolation (3), cheaper segmentation (4), shared PMREM / render-on-demand (rest of 5), quality tiers incl. camera resolution (6), prefetch + service worker (7), telemetry (10). three.js is bundled whole (~174 KB gzip); tree-shaking needs named imports in the scenes.
+**Done — Phase 1 step 2 (2026-11-13):**
+- **Sizing bug fixed (likely a big part of the lag):** every scene passed device pixels to `renderer.setSize()`, which applies the pixel ratio again. The overlay rendered at 2.25× per side (≈5× the pixels) at the 1.5 cap and its WebGL buffer was reallocated on every frame. Now `syncRendererSize()` in `three-runtime.js`; verified 0 reallocations.
+- **Tracking in a Web Worker** (`vision-worker.js`, `vision-client.js`), same tracker modules and options; automatic fallback to the main thread (`?vision=main` forces it for A/B). Fixed MediaPipe's module-mode "ModuleFactory not set" when a worker loads two models.
+- **One scheduler** (`frame-scheduler.js`): detection once per camera frame via requestVideoFrameCallback, one in flight, frames dropped not queued. Necklace runs pose on every other frame.
+- Ring skin measurement uses the exact frame the landmarks came from (ImageBitmap kept alongside the one sent to the worker).
+- **Quality tiers** (`perf-governor.js`): pixel-ratio cap from device hints, steps down after 2 s under 20 fps.
+- Tracking models + jewellery model start downloading while the camera permission prompt is open.
+- `?debug=1` shows vision mode, delegates, tracking fps, dropped frames, worker ms, tier.
+
+**Still to do from Phase 1:** extrapolation between detections (3), cheaper segmentation (4), shared PMREM / render-on-demand (rest of 5), service worker cache (7), telemetry (10), three.js tree-shaking (~174 KB gzip now).
 
 ## Why try-on is laggy today (from the code)
 1. **Everything runs on the main thread, in several independent rAF loops.** `HandTrackingSession` / `FaceTrackingSession` / `PoseTrackingSession` (`hand-tracking.js:131`, `face-tracking.js`, `pose-tracking.js`) each call the blocking `detectForVideo` from their own `requestAnimationFrame`. The necklace runs face + pose + a third render loop (`try-on.html:428-470`), so two models plus WebGL compete for one thread every frame.

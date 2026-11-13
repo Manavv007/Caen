@@ -50,6 +50,11 @@ export function loadThreeRuntime() {
   return runtimePromise;
 }
 
+/** Pixel ratio for the current device under the configured cap. */
+export function overlayPixelRatio() {
+  return Math.min((typeof window !== 'undefined' && window.devicePixelRatio) || 1, rendererOptions.maxPixelRatio);
+}
+
 /**
  * @param {typeof import('three')} THREE
  * @param {HTMLCanvasElement} canvas
@@ -65,6 +70,38 @@ export function createOverlayRenderer(THREE, canvas) {
   });
   // Capped: higher densities render the jewellery noticeably sharper than
   // the (usually soft, upscaled) webcam image and cost fill-rate.
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, rendererOptions.maxPixelRatio));
+  renderer.setPixelRatio(overlayPixelRatio());
   return renderer;
+}
+
+/**
+ * Matches the drawing buffer to the canvas's on-screen size at the
+ * renderer's pixel ratio, touching it only when it actually changed
+ * (assigning canvas.width reallocates the WebGL drawing buffer).
+ *
+ * Note: renderer.setSize() takes CSS pixels and applies the pixel ratio
+ * itself. (The scenes used to pass device pixels, which squared the ratio
+ * — 2.25x per side at a 1.5 cap — and reallocated the buffer every frame.)
+ *
+ * @param {import('three').WebGLRenderer} renderer
+ * @param {HTMLCanvasElement} canvas
+ */
+export function syncRendererSize(renderer, canvas) {
+  const rect = canvas.getBoundingClientRect();
+  const w = Math.max(1, Math.round(rect.width));
+  const h = Math.max(1, Math.round(rect.height));
+  const dpr = renderer.getPixelRatio();
+  if (canvas.width !== Math.floor(w * dpr) || canvas.height !== Math.floor(h * dpr)) {
+    renderer.setSize(w, h, false);
+  }
+}
+
+/**
+ * Applies a new pixel-ratio cap to a live renderer (quality tiers).
+ * @param {import('three').WebGLRenderer} renderer
+ * @param {number} maxPixelRatio
+ */
+export function setOverlayPixelRatio(renderer, maxPixelRatio) {
+  rendererOptions.maxPixelRatio = maxPixelRatio;
+  if (renderer) renderer.setPixelRatio(overlayPixelRatio());
 }
