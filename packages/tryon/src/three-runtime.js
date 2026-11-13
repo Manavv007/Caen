@@ -25,23 +25,19 @@ export function setRendererOptions(opts) {
 }
 
 /**
- * @returns {Promise<{THREE: typeof import('three'), GLTFLoader: Function, RoomEnvironment: Function}>}
+ * @returns {Promise<{THREE: typeof import('./three-lib.js'), GLTFLoader: Function, RoomEnvironment: Function}>}
+ *   THREE: the named subset in three-lib.js (tree-shaken), not all of three.js
  */
 export function loadThreeRuntime() {
   if (!runtimePromise) {
-    runtimePromise = Promise.all([
-      import('three'),
-      import('three/addons/loaders/GLTFLoader.js'),
-      import('three/addons/environments/RoomEnvironment.js'),
-      import('three/addons/libs/meshopt_decoder.module.js'),
-    ]).then(([THREE, gltf, env, meshopt]) => {
-      class GLTFLoader extends gltf.GLTFLoader {
+    runtimePromise = import('./three-lib.js').then((THREE) => {
+      class GLTFLoader extends THREE.GLTFLoader {
         constructor(manager) {
           super(manager);
-          this.setMeshoptDecoder(meshopt.MeshoptDecoder);
+          this.setMeshoptDecoder(THREE.MeshoptDecoder);
         }
       }
-      return { THREE, GLTFLoader, RoomEnvironment: env.RoomEnvironment };
+      return { THREE, GLTFLoader, RoomEnvironment: THREE.RoomEnvironment };
     }).catch((err) => {
       runtimePromise = null;
       throw err;
