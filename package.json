@@ -2,13 +2,18 @@
   "name": "caen",
   "private": true,
   "type": "module",
-  "workspaces": ["apps/*", "packages/*"],
-  "engines": { "node": ">=22" },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "npm run dev -w @caen/web",
     "build": "npm run build -w @caen/web",
     "preview": "npm run preview -w @caen/web",
-    "test": "npm test -w @caen/tryon",
+    "test": "npm test -w @caen/tryon -w @caen/commerce",
     "models": "node scripts/build-models.mjs",
     "vendor": "node scripts/fetch-mediapipe.mjs"
   },

@@ -1,0 +1,14 @@
+---
+import { getCategories, categoryUrl } from '../lib/catalog.js';
+interface Props { active?: string }
+const { active } = Astro.props;
+const link = 'whitespace-nowrap rounded-full border px-4 py-2 text-[12px] font-medium uppercase tracking-[0.12em] transition-colors';
+---
+<nav aria-label="Categories" class="-mx-4 overflow-x-auto px-4">
+  <ul class="flex gap-2">
+    <li><a href="/collections" class:list={[link, !active ? 'border-ink bg-ink text-white' : 'border-line hover:border-ink']}>All</a></li>
+    {getCategories().map((c) => (
+      <li><a href={categoryUrl(c)} class:list={[link, active === c.slug ? 'border-ink bg-ink text-white' : 'border-line hover:border-ink']}>{c.name}</a></li>
+    ))}
+  </ul>
+</nav>

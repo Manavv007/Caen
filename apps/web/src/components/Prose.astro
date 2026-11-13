@@ -1,0 +1,11 @@
+---
+interface Props { title: string; updated: string }
+const { title, updated } = Astro.props;
+---
+<section class="container-page max-w-3xl py-12 lg:py-16">
+  <h1 class="font-garamond text-[40px]">{title}</h1>
+  <p class="mt-1 text-[12px] text-subtle">Last updated {updated} · draft, to be reviewed before launch</p>
+  <div class="mt-8 space-y-4 text-[15px] leading-relaxed text-muted [&_h2]:mt-8 [&_h2]:font-garamond [&_h2]:text-[24px] [&_h2]:text-ink [&_ul]:list-disc [&_ul]:space-y-1 [&_ul]:pl-5">
+    <slot />
+  </div>
+</section>

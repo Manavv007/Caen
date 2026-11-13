@@ -1,0 +1,19 @@
+---
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import { SITE } from '../../data/site.js';
+---
+<Base title="Order confirmed" noindex>
+  <section class="container-page max-w-xl py-20 text-center">
+    <Icon name="check_circle" class="mx-auto h-14 w-14 text-gold" />
+    <h1 class="mt-4 font-garamond text-[40px]">Thank you</h1>
+    <p class="mt-3 text-[15px] text-muted">Your payment is confirmed. Order <strong id="order-number" class="text-ink"></strong></p>
+    <p class="mt-2 text-[14px] text-muted">A confirmation email is on its way. Pieces are dispatched within 48 hours by insured courier.</p>
+    <p class="mt-6 text-[13px] text-subtle">Questions? <a class="underline" href={`mailto:${SITE.email}`}>{SITE.email}</a></p>
+    <a href="/collections" class="btn-outline mt-10">Continue shopping</a>
+  </section>
+</Base>
+<script>
+  const n = new URLSearchParams(location.search).get('order');
+  document.getElementById('order-number').textContent = n ? `#${n}` : '';
+</script>

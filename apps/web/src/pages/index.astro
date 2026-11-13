@@ -1,0 +1,178 @@
+---
+import Base from '../layouts/Base.astro';
+import ProductCard from '../components/ProductCard.astro';
+import ProductImage from '../components/ProductImage.astro';
+import Icon from '../components/Icon.astro';
+import { getCategories, getProducts, getProduct, getEditorial, categoryUrl, productUrl } from '../lib/catalog.js';
+import { SITE } from '../data/site.js';
+
+const ed = getEditorial();
+const categories = getCategories();
+const edit = ['celeste-solitaire-ring', 'aurelia-diamond-band', 'mira-diamond-pendant', 'elan-gold-hoops'].map(getProduct);
+const tryOn = getProducts().filter((p) => p.tryOn);
+const earStack = getProducts({ category: 'earrings' }).filter((p) => ['classic-huggie-hoop', 'pave-curved-crawler', 'minimalist-bold-cuff', 'micro-solitaire-stud'].includes(p.slug));
+const occasions = [
+  { name: 'Engagement', blurb: 'Solitaires and timeless bands', image: ed.engagement, href: categoryUrl('rings') },
+  { name: 'Wedding', blurb: 'Bridal sets and heirloom pieces', image: ed.wedding, href: categoryUrl('necklaces') },
+  { name: "Valentine's", blurb: 'Intimate gifts', image: ed.valentines, href: categoryUrl('earrings') },
+  { name: 'Anniversary', blurb: 'Eternity bands and tennis bracelets', image: ed.anniversary, href: categoryUrl('bracelets') },
+];
+const promises = [
+  { icon: 'verified', title: 'Certified diamonds', text: 'IGI & GIA documentation with every piece.' },
+  { icon: 'local_shipping', title: 'Insured shipping', text: `Free above ₹${SITE.freeShippingAboveInr.toLocaleString('en-IN')}, fully insured, delivered to your door.` },
+  { icon: 'autorenew', title: `${SITE.returnDays}-day returns`, text: 'Transparent, no-fuss returns and exchanges.' },
+  { icon: 'photo_camera', title: 'Try on, live', text: 'See rings, earrings and necklaces on you with your camera.' },
+];
+const faqs = [
+  { q: 'How long does delivery take?', a: 'Ready-to-ship pieces are dispatched within 48 business hours by insured courier. Made-to-order pieces take 7–10 working days.' },
+  { q: 'Are your diamonds certified?', a: 'Yes. Solitaires come with IGI or GIA certification, and all gold is BIS hallmarked.' },
+  { q: 'What is your return policy?', a: `Unworn pieces can be returned within ${SITE.returnDays} days of delivery. See Shipping & returns for details.` },
+  { q: 'How does the virtual try-on work?', a: 'Tap “Try on” on a product page and allow camera access. Everything runs on your device — your camera feed is never uploaded or stored.' },
+  { q: 'Can I speak to someone before buying?', a: `Of course — message us on WhatsApp or email ${SITE.email}.` },
+];
+---
+<Base>
+  <!-- Hero -->
+  <section class="bg-gradient-to-b from-cream to-white">
+    <div class="container-page grid items-center gap-10 py-12 lg:grid-cols-2 lg:py-20">
+      <div>
+        <p class="eyebrow">Fine jewellery · Est. India</p>
+        <h1 class="mt-4 font-garamond text-[44px] leading-[1.05] sm:text-[56px] lg:text-[64px]">
+          Jewellery, <em class="text-gold">made personal.</em>
+        </h1>
+        <p class="mt-5 max-w-md text-[15px] leading-relaxed text-muted">
+          Timeless pieces in hallmarked gold and certified diamonds — and you can try them on, live, before you buy.
+        </p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href="/collections" class="btn-primary">Shop the collection <Icon name="arrow_forward" class="h-4 w-4" /></a>
+          <a href={productUrl(tryOn[0])} class="btn-outline"><Icon name="photo_camera" class="h-4 w-4" /> Try on live</a>
+        </div>
+        <ul class="mt-10 flex flex-wrap gap-x-6 gap-y-2 text-[11px] uppercase tracking-[0.14em] text-muted">
+          <li>◆ 14K &amp; 18K solid gold</li><li>◆ IGI &amp; GIA certified</li><li>◆ Conflict-free sourcing</li>
+        </ul>
+      </div>
+      <div class="relative aspect-[4/5] overflow-hidden rounded-lg bg-sand lg:aspect-[5/6]">
+        <ProductImage image={ed.hero} eager sizes="(min-width: 1024px) 50vw, 100vw" width={1000} class="h-full w-full object-cover" />
+      </div>
+    </div>
+  </section>
+
+  <!-- Categories -->
+  <section class="container-page py-16 lg:py-24">
+    <div class="flex flex-wrap items-end justify-between gap-4">
+      <div><p class="eyebrow">The collections</p><h2 class="mt-2 font-garamond text-[34px] lg:text-[40px]">Shop by category</h2></div>
+      <a href="/collections" class="text-[12px] font-semibold uppercase tracking-[0.16em] underline-offset-4 hover:underline">View all</a>
+    </div>
+    <div class="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+      {categories.map((c) => (
+        <a href={categoryUrl(c)} class="group">
+          <div class="aspect-[4/5] overflow-hidden rounded-lg bg-cream">
+            <ProductImage image={c.image} class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+          </div>
+          <h3 class="mt-3 font-garamond text-[22px]">{c.name}</h3>
+          <p class="text-[12px] text-subtle">{c.blurb}</p>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- The Caen Edit -->
+  <section class="bg-cream py-16 lg:py-24">
+    <div class="container-page">
+      <div class="text-center"><p class="eyebrow">Curated vitrine</p><h2 class="mt-2 font-garamond text-[34px] lg:text-[40px]">The Caen Edit</h2>
+        <p class="mx-auto mt-3 max-w-lg text-[14px] text-muted">A considered collection of pieces designed to move effortlessly from everyday moments to the ones worth remembering.</p></div>
+      <div class="mt-10 grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-6">
+        {edit.map((p) => <ProductCard product={p} />)}
+      </div>
+    </div>
+  </section>
+
+  <!-- Try-on -->
+  <section class="container-page py-16 lg:py-24">
+    <div class="grid items-center gap-10 rounded-2xl bg-ink p-8 text-white lg:grid-cols-2 lg:p-14">
+      <div>
+        <p class="eyebrow">Virtual try-on</p>
+        <h2 class="mt-3 font-garamond text-[34px] leading-tight lg:text-[44px]">See it on you before you buy.</h2>
+        <p class="mt-4 max-w-md text-[14px] leading-relaxed text-white/70">
+          Open any piece marked <span class="text-gold">Try on</span>, allow your camera, and the jewellery follows your hand or face in real time.
+          It runs entirely on your phone — nothing is uploaded or recorded.
+        </p>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        {tryOn.map((p) => (
+          <a href={productUrl(p)} class="group flex items-center gap-3 rounded-lg bg-white/5 p-3 transition-colors hover:bg-white/10">
+            <div class="h-16 w-16 shrink-0 overflow-hidden rounded bg-cream"><ProductImage image={p.image} class="h-full w-full object-cover" sizes="64px" width={160} /></div>
+            <span class="font-garamond text-[17px] leading-tight">{p.name}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Editorial split -->
+  <section class="container-page grid gap-4 pb-16 sm:grid-cols-2 lg:pb-24">
+    {[{ image: ed.stack, title: 'Stacked gold & diamond rings', href: categoryUrl('rings') }, { image: ed.pendants, title: 'Pendants & layered chains', href: categoryUrl('necklaces') }].map((b) => (
+      <a href={b.href} class="group relative aspect-[4/3] overflow-hidden rounded-lg bg-sand">
+        <ProductImage image={b.image} sizes="(min-width: 640px) 50vw, 100vw" width={900} class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+        <div class="absolute bottom-0 p-6 text-white"><h3 class="font-garamond text-[26px]">{b.title}</h3><span class="mt-1 inline-block text-[11px] font-semibold uppercase tracking-[0.18em] underline underline-offset-4">Shop now</span></div>
+      </a>
+    ))}
+  </section>
+
+  <!-- Ear stack -->
+  <section class="bg-cream py-16 lg:py-24">
+    <div class="container-page grid gap-10 lg:grid-cols-[5fr_7fr]">
+      <div class="relative aspect-[4/5] overflow-hidden rounded-lg bg-sand">
+        <ProductImage image={ed.earStack} sizes="(min-width: 1024px) 40vw, 100vw" width={900} class="h-full w-full object-cover" />
+      </div>
+      <div class="flex flex-col justify-center">
+        <p class="eyebrow">Editorial capsule</p>
+        <h2 class="mt-2 font-garamond text-[34px] lg:text-[40px]">The art of the ear stack</h2>
+        <p class="mt-3 max-w-lg text-[14px] text-muted">Huggies, crawlers and cuffs in 14K and 18K solid gold, made to be layered.</p>
+        <div class="mt-8 grid grid-cols-2 gap-4">{earStack.map((p) => <ProductCard product={p} />)}</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Occasions -->
+  <section class="container-page py-16 lg:py-24">
+    <div class="text-center"><p class="eyebrow">Celebrations</p><h2 class="mt-2 font-garamond text-[34px] lg:text-[40px]">Shop by occasion</h2></div>
+    <div class="mt-10 grid grid-cols-2 gap-4 lg:grid-cols-4">
+      {occasions.map((o) => (
+        <a href={o.href} class="group relative aspect-[3/4] overflow-hidden rounded-lg bg-sand">
+          <ProductImage image={o.image} class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+          <div class="absolute inset-0 bg-gradient-to-t from-black/65 via-black/5 to-transparent"></div>
+          <div class="absolute bottom-0 p-4 text-white"><h3 class="font-garamond text-[24px]">{o.name}</h3><p class="text-[12px] text-white/80">{o.blurb}</p></div>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <!-- Promises -->
+  <section class="border-y border-line bg-white">
+    <ul class="container-page grid gap-8 py-12 sm:grid-cols-2 lg:grid-cols-4">
+      {promises.map((p) => (
+        <li class="flex gap-4">
+          <Icon name={p.icon} class="h-7 w-7 shrink-0 text-gold" />
+          <div><h3 class="font-garamond text-[20px]">{p.title}</h3><p class="mt-1 text-[13px] leading-relaxed text-muted">{p.text}</p></div>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <!-- FAQ -->
+  <section class="container-page max-w-3xl py-16 lg:py-24">
+    <div class="text-center"><p class="eyebrow">Client care</p><h2 class="mt-2 font-garamond text-[34px] lg:text-[40px]">Questions, answered</h2></div>
+    <div class="mt-10 divide-y divide-line border-y border-line">
+      {faqs.map((f) => (
+        <details class="group py-5">
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-4 text-[15px] font-medium [&::-webkit-details-marker]:hidden">
+            {f.q}<Icon name="add" class="h-5 w-5 shrink-0 text-gold transition-transform group-open:rotate-45" />
+          </summary>
+          <p class="mt-3 text-[14px] leading-relaxed text-muted">{f.a}</p>
+        </details>
+      ))}
+    </div>
+  </section>
+</Base>

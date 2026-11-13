@@ -7,8 +7,11 @@ See [PLAN.md](PLAN.md) for the production plan and its progress.
 
 | Path | What |
 |---|---|
-| `apps/web` | Astro site (deploys to Cloudflare Pages). `src/pages/try-on.astro` is the try-on page; `public/*.html` are the legacy Stitch pages until the storefront is rebuilt. |
+| `apps/web` | Astro site (deploys to Cloudflare Pages): storefront pages in `src/pages`, catalogue in `src/data/catalog.js` (placeholder data until the database), try-on at `src/pages/try-on.astro`. |
 | `packages/tryon` | Try-on engine: MediaPipe tracking, solvers (pure, testable), three.js scenes. |
+| `packages/commerce` | Catalogue (`src/catalog.js`, single source for site + checkout), pricing, checkout/payment handlers. |
+| `functions/api` | Cloudflare Pages Functions: `/api/checkout`, `/api/checkout/confirm`, `/api/razorpay/webhook`. |
+| `supabase/migrations` | Orders database schema. |
 | `assets-src/models` | Source 3D models (glTF + licences). Not shipped directly. |
 | `scripts/build-models.mjs` | Compresses source models to small `.glb` files in `apps/web/public/models` (committed). |
 | `scripts/fetch-mediapipe.mjs` | Self-hosts the MediaPipe wasm + pinned models into `apps/web/public/mediapipe` (gitignored, runs before dev/build). |
@@ -26,7 +29,7 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:4321/try-on?category=ring (also `earring`, `necklace`, `nose`).
+Open http://localhost:4321 for the store, or http://localhost:4321/try-on?category=ring (also `earring`, `necklace`, `nose`).
 
 - `&debug=1`: landmark overlay, session recorder, and a "Debug details" panel with tracking fps, dropped frames, worker vs main-thread mode and quality tier.
 - `&vision=main`: run tracking on the main thread instead of the Web Worker (to compare smoothness).
@@ -53,4 +56,16 @@ Connect the GitHub repo in the Cloudflare dashboard → Workers & Pages → Crea
 - Build output directory: `apps/web/dist`
 - Environment variable: `NODE_VERSION=22`
 
-Caching and security headers come from `apps/web/public/_headers`.
+Caching and security headers come from `apps/web/public/_headers`; old prototype URLs redirect via `apps/web/public/_redirects`.
+
+## Turn on online payments
+
+Until these are set, checkout offers "Order on WhatsApp" instead of paying online.
+
+1. **Supabase** (free tier): create a project (region: Mumbai). In the SQL editor, run `supabase/migrations/20261113000000_orders.sql`. Copy the project URL and the `service_role` key (Project Settings → API).
+2. **Razorpay**: in test mode, create API keys (Settings → API Keys). Add a webhook (Settings → Webhooks) for `https://<your-site>/api/razorpay/webhook` with events `payment.captured` and `order.paid`, and a secret you choose.
+3. **Cloudflare Pages** → your project → Settings → Variables and Secrets: add `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (as secrets), then redeploy.
+4. Optional emails: a free [Resend](https://resend.com) account with your domain verified; add `RESEND_API_KEY`, `ORDER_EMAIL_FROM`, `ORDER_NOTIFY_EMAIL`.
+5. Test with Razorpay's test cards/UPI, check the order shows `paid` in Supabase (Table editor → orders), then switch to live keys after KYC.
+
+To run the site with the API locally: copy `.dev.vars.example` to `.dev.vars`, fill it in, `npm run build`, then `npx wrangler pages dev apps/web/dist`.

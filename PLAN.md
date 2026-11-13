@@ -27,6 +27,14 @@ Decisions (confirmed): **Supabase + Cloudflare Pages Functions** backend · **As
 
 **Still to do from Phase 1:** extrapolation between detections (3), cheaper segmentation (4), shared PMREM / render-on-demand (rest of 5), service worker cache (7), telemetry (10), three.js tree-shaking (~174 KB gzip now).
 
+**Done — Phase 2 + 3 (storefront & checkout, 2026-11-13):**
+- Astro storefront replacing the prototype pages: home, collections, product pages (options, try-on button where a 3D model matches, Product JSON-LD), bag, checkout, order confirmation, draft privacy and shipping pages. Under 2.2 KB gzipped JS per page.
+- Catalogue in `packages/commerce/src/catalog.js` (placeholder data from the mockups), used by both the site and the checkout API. Decision: keep it in the repo until the catalogue grows; moving it to Supabase later only changes `apps/web/src/lib/catalog.js` and `order.js`.
+- Checkout API (Cloudflare Pages Functions + Supabase + Razorpay): server-side pricing, signature-verified confirm, idempotent webhook with amount check, optional Resend emails. Without keys it returns 503 and the site offers WhatsApp ordering.
+- Not carried over from the mockups: invented customer reviews, ratings and press mentions.
+
+**Still open:** real product data and photos (mockup photos are hotlinked from Google), storefront CSP (Razorpay domains), Turnstile on checkout, sitemap/merchant feed, shipping integration, GST invoices, live gold-rate pricing.
+
 ## Why try-on is laggy today (from the code)
 1. **Everything runs on the main thread, in several independent rAF loops.** `HandTrackingSession` / `FaceTrackingSession` / `PoseTrackingSession` (`hand-tracking.js:131`, `face-tracking.js`, `pose-tracking.js`) each call the blocking `detectForVideo` from their own `requestAnimationFrame`. The necklace runs face + pose + a third render loop (`try-on.html:428-470`), so two models plus WebGL compete for one thread every frame.
 2. **Skin segmentation is heavy.** `selfie_multiclass_256x256` **float32** (~16 MB) runs every **2 frames** until the size locks (`ring-solver.js:125`). `getAsFloat32Array()` forces a GPU→CPU readback stall every time.

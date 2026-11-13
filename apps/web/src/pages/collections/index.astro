@@ -1,0 +1,16 @@
+---
+import Base from '../../layouts/Base.astro';
+import ProductGrid from '../../components/ProductGrid.astro';
+import CategoryNav from '../../components/CategoryNav.astro';
+import { getProducts } from '../../lib/catalog.js';
+const products = getProducts();
+---
+<Base title="All jewellery" description="Rings, earrings, necklaces, bracelets and nose rings in hallmarked gold and certified diamonds.">
+  <section class="container-page py-10 lg:py-14">
+    <p class="eyebrow">The collections</p>
+    <h1 class="mt-2 font-garamond text-[40px] lg:text-[48px]">All jewellery</h1>
+    <p class="mt-1 text-[13px] text-subtle">{products.length} pieces</p>
+    <div class="mt-6"><CategoryNav /></div>
+    <div class="mt-8"><ProductGrid products={products} /></div>
+  </section>
+</Base>

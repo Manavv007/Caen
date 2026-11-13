@@ -1,0 +1,27 @@
+---
+import ProductImage from './ProductImage.astro';
+import Icon from './Icon.astro';
+import { productUrl } from '../lib/catalog.js';
+import { formatInr } from '../lib/format.js';
+
+interface Props { product: import('@caen/commerce/catalog.js').Product; eager?: boolean }
+const { product: p, eager = false } = Astro.props;
+---
+<a href={productUrl(p)} class="group flex flex-col overflow-hidden rounded-lg border border-line bg-white transition-shadow hover:shadow-lg">
+  <div class="relative aspect-square overflow-hidden bg-cream">
+    <ProductImage image={p.image} eager={eager} class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+    {p.tryOn && (
+      <span class="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-ink shadow-sm">
+        <Icon name="photo_camera" class="h-3.5 w-3.5 text-gold" /> Try on
+      </span>
+    )}
+  </div>
+  <div class="flex flex-1 flex-col p-4">
+    <span class="eyebrow mb-1 text-[10px]">{p.label}</span>
+    <h3 class="font-garamond text-[20px] leading-snug">{p.name}</h3>
+    <div class="mt-auto flex items-baseline justify-between border-t border-line pt-3">
+      <span class="text-[15px] font-semibold">{formatInr(p.priceInr)}</span>
+      <span class="text-[12px] text-subtle">{p.detail}</span>
+    </div>
+  </div>
+</a>

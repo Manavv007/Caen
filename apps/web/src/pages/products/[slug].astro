@@ -1,0 +1,135 @@
+---
+import Base from '../../layouts/Base.astro';
+import ProductImage from '../../components/ProductImage.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import Icon from '../../components/Icon.astro';
+import { getProducts, getCategory, getRelated, resolveImage, categoryUrl, tryOnUrl } from '../../lib/catalog.js';
+import { formatInr } from '../../lib/format.js';
+import { SITE } from '../../data/site.js';
+
+export function getStaticPaths() {
+  return getProducts().map((product) => ({ params: { slug: product.slug }, props: { product } }));
+}
+const { product: p } = Astro.props;
+const category = getCategory(p.category);
+const related = getRelated(p);
+
+// Options. Prices don't vary by option yet (Phase 3: variants in the database).
+const metals = p.category === 'nose-rings' ? [] : ['18K Yellow Gold', '18K Rose Gold', '18K White Gold'];
+const ringSizes = p.category === 'rings'
+  ? [['4', 14.9], ['4.5', 15.3], ['5', 15.7], ['5.5', 16.1], ['6', 16.5], ['6.5', 16.9], ['7', 17.3], ['7.5', 17.7], ['8', 18.1], ['9', 18.9]]
+  : [];
+
+const img = resolveImage(p.image);
+const imageUrl = img.asset ? new URL(img.asset.src, Astro.site).href : img.src;
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Product',
+  name: p.name,
+  sku: p.sku,
+  description: p.description,
+  image: [imageUrl],
+  brand: { '@type': 'Brand', name: SITE.name },
+  category: category && category.name,
+  offers: {
+    '@type': 'Offer',
+    priceCurrency: 'INR',
+    price: p.priceInr,
+    availability: 'https://schema.org/InStock',
+    url: new URL(Astro.url.pathname, Astro.site).href,
+  },
+};
+const optionClass = 'cursor-pointer rounded border border-line px-3 py-2.5 text-center text-[13px] transition-colors hover:border-ink has-[:checked]:border-ink has-[:checked]:bg-ink has-[:checked]:text-white has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-gold';
+---
+<Base title={p.name} description={p.description} image={imageUrl} jsonLd={jsonLd}>
+  <section class="container-page py-8 lg:py-12">
+    <nav class="text-[12px] text-subtle" aria-label="Breadcrumb">
+      <a href="/" class="hover:text-ink">Home</a> / <a href={categoryUrl(p.category)} class="hover:text-ink">{category && category.name}</a> / <span class="text-ink">{p.name}</span>
+    </nav>
+
+    <div class="mt-6 grid gap-8 lg:grid-cols-2 lg:gap-14">
+      <div class="relative aspect-square overflow-hidden rounded-lg bg-cream lg:sticky lg:top-28 lg:self-start">
+        <ProductImage image={p.image} eager sizes="(min-width: 1024px) 50vw, 100vw" width={1000} class="h-full w-full object-cover" />
+      </div>
+
+      <div>
+        <p class="eyebrow">{p.label}</p>
+        <h1 class="mt-2 font-garamond text-[36px] leading-tight lg:text-[44px]">{p.name}</h1>
+        <p class="mt-4 text-[26px] font-semibold">{formatInr(p.priceInr)}</p>
+        <p class="text-[12px] text-subtle">Inclusive of all taxes · free insured shipping above {formatInr(SITE.freeShippingAboveInr)}</p>
+        <p class="mt-5 text-[15px] leading-relaxed text-muted">{p.description}</p>
+
+        {p.tryOn && (
+          <a href={tryOnUrl(p)} class="btn-gold mt-6 w-full">
+            <Icon name="photo_camera" class="h-5 w-5 text-gold" /> Try it on — live camera
+          </a>
+        )}
+
+        <form id="add-form" class="mt-8 space-y-6" data-sku={p.sku}>
+          {metals.length > 0 && (
+            <fieldset>
+              <legend class="mb-3 text-[12px] font-semibold uppercase tracking-[0.14em]">Metal</legend>
+              <div class="grid grid-cols-3 gap-2">
+                {metals.map((m, i) => (
+                  <label class={optionClass}><input type="radio" name="metal" value={m} checked={i === 0} class="sr-only" />{m.replace('18K ', '')}</label>
+                ))}
+              </div>
+            </fieldset>
+          )}
+          {ringSizes.length > 0 && (
+            <fieldset>
+              <legend class="mb-3 text-[12px] font-semibold uppercase tracking-[0.14em]">Ring size <span class="font-normal normal-case tracking-normal text-subtle">(US · inner diameter)</span></legend>
+              <div class="grid grid-cols-5 gap-2">
+                {ringSizes.map(([s, mm]) => (
+                  <label class={optionClass}><input type="radio" name="size" value={`US ${s}`} required class="sr-only" />{s}<span class="block text-[10px] opacity-70">{mm} mm</span></label>
+                ))}
+              </div>
+            </fieldset>
+          )}
+          <div class="flex gap-3">
+            <label class="sr-only" for="qty">Quantity</label>
+            <select id="qty" name="qty" class="w-20 rounded border border-line px-3 text-[14px]">
+              {[1, 2, 3, 4, 5].map((n) => <option value={n}>{n}</option>)}
+            </select>
+            <button type="submit" class="btn-primary flex-1"><Icon name="shopping_bag" class="h-5 w-5" /> Add to bag</button>
+          </div>
+          <p id="add-status" class="hidden rounded bg-cream px-4 py-3 text-[13px]" role="status" aria-live="polite">
+            Added to your bag. <a href="/cart" class="font-semibold underline underline-offset-2">View bag</a>
+          </p>
+        </form>
+
+        <dl class="mt-10 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-line bg-line text-[13px]">
+          <div class="bg-white p-4"><dt class="text-subtle">Detail</dt><dd class="mt-1 font-medium">{p.detail}</dd></div>
+          <div class="bg-white p-4"><dt class="text-subtle">SKU</dt><dd class="mt-1 font-medium">{p.sku}</dd></div>
+          <div class="bg-white p-4"><dt class="text-subtle">Hallmark</dt><dd class="mt-1 font-medium">{p.category === 'nose-rings' ? '925 sterling silver' : 'BIS hallmarked gold'}</dd></div>
+          <div class="bg-white p-4"><dt class="text-subtle">Returns</dt><dd class="mt-1 font-medium">{SITE.returnDays}-day returns</dd></div>
+        </dl>
+
+        <ul class="mt-6 space-y-3 text-[13px] text-muted">
+          <li class="flex gap-3"><Icon name="local_shipping" class="h-5 w-5 shrink-0 text-gold" /> Dispatched within 48 hours by insured courier.</li>
+          <li class="flex gap-3"><Icon name="verified" class="h-5 w-5 shrink-0 text-gold" /> Certificate of authenticity included.</li>
+          <li class="flex gap-3"><Icon name="chat" class="h-5 w-5 shrink-0 text-gold" /> Questions? <a href={`https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(`Hi, I have a question about ${p.name} (${p.sku}).`)}`} class="underline underline-offset-2" target="_blank" rel="noopener">Ask us on WhatsApp</a></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="container-page py-12">
+    <h2 class="font-garamond text-[30px]">Complete the look</h2>
+    <div class="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-6">{related.map((r) => <ProductCard product={r} />)}</div>
+  </section>
+</Base>
+
+<script>
+  import { addToCart } from '../../scripts/cart.js';
+  const form = document.getElementById('add-form');
+  const status = document.getElementById('add-status');
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const data = new FormData(form);
+    const options = {};
+    for (const k of ['metal', 'size']) if (data.get(k)) options[k] = String(data.get(k));
+    addToCart({ sku: form.dataset.sku, options, qty: Number(data.get('qty')) || 1 });
+    status.classList.remove('hidden');
+  });
+</script>

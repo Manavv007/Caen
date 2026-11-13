@@ -1,0 +1,36 @@
+---
+import { SITE } from '../data/site.js';
+import { getCategories, categoryUrl } from '../lib/catalog.js';
+const year = new Date().getFullYear();
+---
+<footer class="mt-20 bg-ink text-white/80">
+  <div class="container-page grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-4">
+    <div>
+      <p class="font-garamond text-[24px] tracking-[0.24em] text-white">CAEN JEWELS</p>
+      <p class="mt-3 max-w-xs text-[13px] leading-relaxed text-white/60">Fine jewellery in hallmarked gold and certified diamonds, hand-finished in small batches.</p>
+    </div>
+    <div>
+      <p class="eyebrow">Collections</p>
+      <ul class="mt-4 space-y-2 text-[13px]">
+        {getCategories().map((c) => <li><a class="hover:text-white" href={categoryUrl(c)}>{c.name}</a></li>)}
+      </ul>
+    </div>
+    <div>
+      <p class="eyebrow">Client care</p>
+      <ul class="mt-4 space-y-2 text-[13px]">
+        <li><a class="hover:text-white" href="/shipping-returns">Shipping &amp; returns</a></li>
+        <li><a class="hover:text-white" href="/privacy">Privacy</a></li>
+        <li><a class="hover:text-white" href="/try-on?category=ring&amp;sku=CELESTE-SOLITAIRE-RING">Virtual try-on</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="eyebrow">Contact</p>
+      <ul class="mt-4 space-y-2 text-[13px]">
+        <li><a class="hover:text-white" href={`mailto:${SITE.email}`}>{SITE.email}</a></li>
+        <li><a class="hover:text-white" href={`tel:${SITE.phone.replace(/\s/g, '')}`}>{SITE.phone}</a></li>
+        <li><a class="hover:text-white" href={`https://wa.me/${SITE.whatsapp}`} rel="noopener" target="_blank">WhatsApp us</a></li>
+      </ul>
+    </div>
+  </div>
+  <p class="border-t border-white/10 py-6 text-center text-[11px] tracking-wider text-white/40">© {year} {SITE.name}</p>
+</footer>

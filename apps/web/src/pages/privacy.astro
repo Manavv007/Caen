@@ -1,0 +1,20 @@
+---
+import Base from '../layouts/Base.astro';
+import Prose from '../components/Prose.astro';
+import { SITE } from '../data/site.js';
+---
+<Base title="Privacy notice">
+  <Prose title="Privacy notice" updated="November 2026">
+    <h2>Virtual try-on and your camera</h2>
+    <p>The try-on runs entirely on your device. Your camera feed is processed in your browser to place the jewellery and is never uploaded, recorded or stored by us. Camera access is requested only when you open the try-on, and stops when you leave it.</p>
+    <h2>What we collect when you order</h2>
+    <ul>
+      <li>Your name, email, mobile number and delivery address, to fulfil and deliver your order and contact you about it.</li>
+      <li>Order details (items, amounts, payment status). Card, UPI and bank details are handled by our payment partner Razorpay and never reach us.</li>
+    </ul>
+    <h2>How long we keep it</h2>
+    <p>Order records are kept as long as tax and accounting law requires; other personal data is deleted when no longer needed for the order.</p>
+    <h2>Your rights</h2>
+    <p>You can ask to access, correct or delete your personal data, or withdraw consent, by writing to <a class="underline" href={`mailto:${SITE.email}`}>{SITE.email}</a>.</p>
+  </Prose>
+</Base>
