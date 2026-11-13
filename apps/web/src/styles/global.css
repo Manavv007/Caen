@@ -1,0 +1,15 @@
+/* Scan only our sources (not the legacy pages in public/). */
+@import "tailwindcss" source("../");
+
+@import "@fontsource/eb-garamond/latin-400.css";
+@import "@fontsource/eb-garamond/latin-500.css";
+@import "@fontsource/eb-garamond/latin-400-italic.css";
+@import "@fontsource/plus-jakarta-sans/latin-300.css";
+@import "@fontsource/plus-jakarta-sans/latin-400.css";
+@import "@fontsource/plus-jakarta-sans/latin-500.css";
+@import "@fontsource/plus-jakarta-sans/latin-600.css";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-garamond: "EB Garamond", ui-serif, Georgia, serif;
+}

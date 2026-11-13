@@ -1,0 +1,165 @@
+---
+/**
+ * Live AR try-on (rings, earrings, necklaces, nose rings).
+ * /try-on?category=ring|earring|necklace|nose&sku=...   (?debug=1 for tools)
+ *
+ * Everything runs on-device: camera frames never leave the browser.
+ */
+import Icon from '../components/Icon.astro';
+import '../styles/global.css';
+---
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="robots" content="noindex">
+  <title>Try On — CAEN JEWELS</title>
+  <style is:global>
+    body {
+      background-color: #0F0E0D;
+      color: #E5E0D8;
+      margin: 0;
+      overflow: hidden;
+    }
+    /* Front camera should feel like a mirror; back camera should not be flipped. */
+    #camera-video[data-facing-mode="user"] {
+      transform: scaleX(-1);
+    }
+
+    /* Webcam images are soft; a pin-sharp render reads as a sticker.
+       A sub-pixel blur on the ring layer matches the camera's softness. */
+    #overlay-canvas {
+      filter: blur(0.35px);
+    }
+  </style>
+</head>
+<body class="min-h-screen h-screen flex flex-col">
+
+  <!-- Header (always on top of camera feed) -->
+  <header class="relative z-20 flex items-center justify-between px-5 py-4 border-b border-white/10 bg-[#0F0E0D]/80 backdrop-blur-sm">
+    <button id="back-btn" class="flex items-center gap-1.5 text-[13px] text-[#D1CCC4] hover:text-[#C5A059] transition-colors">
+      <Icon name="arrow_back" class="w-[20px] h-[20px] shrink-0" />
+      Back
+    </button>
+    <h1 class="font-garamond text-[18px] text-[#F3DEB2] tracking-wide">Virtual Try-On</h1>
+    <span id="category-badge" class="text-[10px] uppercase tracking-wider text-[#C5A059] w-16 text-right"></span>
+  </header>
+
+  <!-- ============ VIEW: capability checking ============ -->
+  <main id="view-checking" class="flex-1 flex flex-col items-center justify-center px-6 py-10 text-center gap-6">
+    <div class="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
+      <Icon name="hourglass_top" class="w-[32px] h-[32px] shrink-0 text-[#C5A059] animate-pulse" />
+    </div>
+    <div class="max-w-md">
+      <h2 class="font-garamond text-[24px] text-[#F3DEB2] mb-2">Checking your device…</h2>
+      <p class="text-[13px] text-[#B8B2A8] leading-relaxed">
+        We're making sure your browser can run the live camera try-on experience.
+      </p>
+    </div>
+  </main>
+
+  <!-- ============ VIEW: capability unsupported ============ -->
+  <main id="view-unsupported" class="hidden flex-1 flex flex-col items-center justify-center px-6 py-10 text-center gap-6">
+    <div class="w-16 h-16 rounded-full border border-amber-500/40 bg-amber-500/10 flex items-center justify-center">
+      <Icon name="videocam_off" class="w-[32px] h-[32px] shrink-0 text-amber-400" />
+    </div>
+    <div class="max-w-md">
+      <h2 class="font-garamond text-[24px] text-[#F3DEB2] mb-2">Try-On Not Available</h2>
+      <p id="unsupported-message" class="text-[13px] text-[#B8B2A8] leading-relaxed"></p>
+    </div>
+    <button id="fallback-btn-unsupported" class="mt-2 py-3 px-6 bg-[#C5A059] hover:bg-[#b08c42] text-[#1A1A1A] rounded font-medium text-[12px] uppercase tracking-[0.2em] transition-colors">
+      View 360° Product Instead
+    </button>
+  </main>
+
+  <!-- ============ VIEW: awaiting camera permission / starting ============ -->
+  <main id="view-starting-camera" class="hidden flex-1 flex flex-col items-center justify-center px-6 py-10 text-center gap-6">
+    <div class="w-16 h-16 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
+      <Icon name="videocam" class="w-[32px] h-[32px] shrink-0 text-[#C5A059] animate-pulse" />
+    </div>
+    <div class="max-w-md">
+      <h2 class="font-garamond text-[24px] text-[#F3DEB2] mb-2">Starting Camera…</h2>
+      <p class="text-[13px] text-[#B8B2A8] leading-relaxed">
+        Please allow camera access when your browser asks — CAEN JEWELS never stores or uploads your camera feed.
+      </p>
+    </div>
+  </main>
+
+  <!-- ============ VIEW: camera error ============ -->
+  <main id="view-camera-error" class="hidden flex-1 flex flex-col items-center justify-center px-6 py-10 text-center gap-6">
+    <div class="w-16 h-16 rounded-full border border-red-500/40 bg-red-500/10 flex items-center justify-center">
+      <Icon name="error" class="w-[32px] h-[32px] shrink-0 text-red-400" />
+    </div>
+    <div class="max-w-md">
+      <h2 class="font-garamond text-[24px] text-[#F3DEB2] mb-2">Camera Unavailable</h2>
+      <p id="camera-error-message" class="text-[13px] text-[#B8B2A8] leading-relaxed"></p>
+    </div>
+    <div class="flex flex-col gap-2 items-center">
+      <button id="retry-camera-btn" class="py-3 px-6 bg-[#C5A059] hover:bg-[#b08c42] text-[#1A1A1A] rounded font-medium text-[12px] uppercase tracking-[0.2em] transition-colors">
+        Try Again
+      </button>
+      <button id="fallback-btn-error" class="text-[12px] text-[#D1CCC4] hover:text-[#C5A059] underline underline-offset-2 transition-colors">
+        View 360° Product Instead
+      </button>
+    </div>
+  </main>
+
+  <!-- ============ VIEW: live camera feed ============ -->
+  <main id="view-live" class="hidden flex-1 relative overflow-hidden bg-black">
+    <video id="camera-video" class="absolute inset-0 w-full h-full object-cover" autoplay playsinline muted></video>
+
+    <!-- Overlay canvas reserved for landmark/jewelry rendering in later tasks -->
+    <canvas id="overlay-canvas" class="absolute inset-0 w-full h-full pointer-events-none"></canvas>
+
+    <!-- 2D landmark skeleton for debugging alignment (enable with ?debug=1) -->
+    <canvas id="debug-canvas" class="hidden absolute inset-0 w-full h-full pointer-events-none"></canvas>
+
+    <!-- Sizing prompt: shown for the first ~2 s while the ring size is measured and locked -->
+    <div id="sizing-panel" class="hidden absolute top-4 left-1/2 -translate-x-1/2 z-20 w-[min(92%,360px)] px-4 py-3 rounded-xl bg-black/60 border border-white/20 backdrop-blur-sm text-center" role="status" aria-live="polite">
+      <p id="sizing-title" class="text-[12px] uppercase tracking-wider text-[#F3DEB2]">Sizing your ring</p>
+      <p id="sizing-hint" class="text-[11px] text-[#D1CCC4] mt-1">Hold your hand flat and still, fingers slightly apart</p>
+      <div class="mt-2 h-1 rounded-full bg-white/15 overflow-hidden">
+        <div id="sizing-bar" class="h-full bg-[#C5A059] transition-[width] duration-150" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- Bottom controls -->
+    <div class="absolute bottom-0 left-0 right-0 z-20 flex items-center justify-center gap-3 p-6 bg-gradient-to-t from-black/70 to-transparent">
+      <button id="switch-camera-btn" aria-label="Switch camera" class="hidden w-12 h-12 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/20 transition-colors">
+        <Icon name="cameraswitch" class="w-[22px] h-[22px] shrink-0" />
+      </button>
+      <span id="status-pill" class="px-4 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm text-[11px] uppercase tracking-wider text-[#F3DEB2]">
+        Live camera connected
+      </span>
+      <button id="resize-btn" class="hidden px-4 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm text-[11px] uppercase tracking-wider text-white hover:bg-white/20 transition-colors flex items-center gap-1.5">
+        <Icon name="straighten" class="w-[16px] h-[16px] shrink-0" />
+        Resize
+      </button>
+      <!-- Debug only (?debug=1): records 10 s of tracking data + video for offline analysis -->
+      <button id="record-btn" class="hidden px-4 py-2 rounded-full bg-red-600/80 border border-red-300/40 text-[11px] uppercase tracking-wider text-white hover:bg-red-600 transition-colors flex items-center gap-1.5">
+        <Icon name="fiber_manual_record" class="w-[16px] h-[16px] shrink-0" />
+        <span id="record-label">Record 10s</span>
+      </button>
+    </div>
+
+    <!-- Tracking model loading indicator (shown while MediaPipe model downloads/initializes) -->
+    <div id="model-loading-indicator" class="hidden absolute top-4 left-1/2 -translate-x-1/2 z-20 px-4 py-2 rounded-full bg-black/60 border border-white/20 backdrop-blur-sm text-[11px] uppercase tracking-wider text-[#C5A059] flex items-center gap-2">
+      <Icon name="progress_activity" class="w-[16px] h-[16px] shrink-0 animate-spin" />
+      Loading hand tracking…
+    </div>
+
+    <!-- 3D model credit (CC-BY models must credit the author) -->
+    <p id="model-credit" class="hidden absolute bottom-1 left-0 right-0 z-20 text-center text-[9px] text-white/50 pointer-events-auto"></p>
+  </main>
+
+  <!-- Debug details panel: shown only with ?debug=1 -->
+  <details id="debug-panel" class="hidden relative z-20 text-left bg-white/5 border-t border-white/10 p-3 mx-0">
+    <summary class="text-[11px] uppercase tracking-wider text-[#C5A059] cursor-pointer px-2">Debug details</summary>
+    <pre id="debug-output" class="text-[11px] text-[#B8B2A8] mt-2 px-2 whitespace-pre-wrap break-words max-h-32 overflow-auto">—</pre>
+  </details>
+  <script>
+    import '../scripts/try-on-page.js';
+  </script>
+</body>
+</html>

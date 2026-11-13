@@ -1,0 +1,22 @@
+{
+  "name": "caen",
+  "private": true,
+  "type": "module",
+  "workspaces": ["apps/*", "packages/*"],
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "dev": "npm run dev -w @caen/web",
+    "build": "npm run build -w @caen/web",
+    "preview": "npm run preview -w @caen/web",
+    "test": "npm test -w @caen/tryon",
+    "models": "node scripts/build-models.mjs",
+    "vendor": "node scripts/fetch-mediapipe.mjs"
+  },
+  "devDependencies": {
+    "@gltf-transform/core": "4.5.1",
+    "@gltf-transform/extensions": "4.5.1",
+    "@gltf-transform/functions": "4.5.1",
+    "meshoptimizer": "1.3.0",
+    "sharp": "0.35.5"
+  }
+}
