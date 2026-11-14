@@ -14,7 +14,7 @@
  *   facing / tilt / speed ──────┘
  *   locked width × hand-distance change (rigid on-screen lengths, median +
  *     One Euro smoothing, clamp) ─► on-screen finger width
- *   screen direction + clamped world tilt ─► ring axis
+ *   screen direction (+ clamped world tilt, opt-in) ─► ring axis
  *   palm/back ─► which way the ring's top faces
  */
 
@@ -84,8 +84,19 @@ function median(a) {
 }
 
 export class RingSolver {
-  /** @param {Object} [opts] - { sizer: RingSizer options } */
+  /**
+   * @param {Object} [opts]
+   * @param {Object} [opts.sizer] - RingSizer options
+   * @param {'flat'|'world'} [opts.tiltMode='flat'] - ring axis tilt toward/away
+   *   from the camera. 'flat': none, the axis follows the finger's on-screen
+   *   direction exactly. 'world': from MediaPipe's 3D hand, clamped to
+   *   ±MAX_FINGER_TILT_DEG. In real sessions that estimate leaned ~15° one
+   *   way with ±30° swings while the hand was held flat to the camera, which
+   *   showed as a ring tilted to one side that shifted as the hand moved, so
+   *   'world' is kept only for comparison (?ringTilt=world).
+   */
   constructor(opts = {}) {
+    this.tiltMode = opts.tiltMode === 'world' ? 'world' : 'flat';
     this.sizer = new RingSizer(opts.sizer);
     this.poseHold = new RingPoseHold();
     this.facing = new HandFacingTracker();
@@ -271,10 +282,11 @@ export class RingSolver {
       positionOffset = { x: (f.mirror ? -px : px) * k, y: -py * k, z: 0 };
     }
 
-    // --- Orientation: precise screen direction + clamped world tilt. ---
+    // --- Orientation: precise screen direction (+ clamped world tilt in
+    // 'world' mode; the tilt still feeds sizing either way). ---
     const fingerAxis = fingerAxisFromScreenAndTilt(
       { x: wp.ringPip.x - wp.ringMcp.x, y: wp.ringPip.y - wp.ringMcp.y },
-      tiltSin
+      this.tiltMode === 'world' ? tiltSin : 0
     );
     let dorsal = null;
     if (facing) {

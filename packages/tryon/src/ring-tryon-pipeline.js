@@ -30,7 +30,7 @@ export class RingTryOnPipeline {
    * @param {boolean} [opts.segmentation=true]
    * @param {boolean} [opts.smooth=false] - render from renderFrame() on rAF, extrapolating between detections (render-smoothing.js)
    */
-  constructor({ overlayCanvas, debugCanvas = null, modelUrl, segmentation = true, smooth = false }) {
+  constructor({ overlayCanvas, debugCanvas = null, modelUrl, segmentation = true, smooth = false, tiltMode = 'flat' }) {
     this.overlayCanvas = overlayCanvas;
     this.debugCanvas = debugCanvas;
     this.debugCtx = debugCanvas ? debugCanvas.getContext('2d') : null;
@@ -38,7 +38,7 @@ export class RingTryOnPipeline {
 
     this.scene = new RingScene(overlayCanvas);
     this.lighting = new LightingEstimator();
-    this.solver = new RingSolver();
+    this.solver = new RingSolver({ tiltMode });
     this.smoother = smooth ? new PoseSmoother({
       // Ring centre + the other fingers' occluder capsules, which must move with it.
       getPoints: (out) => (out.pose && out.pose.valid
