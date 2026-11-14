@@ -178,9 +178,9 @@ function logDebug(data) {
 }
 
 function goToFallback() {
-  // Placeholder: Task 10 wires this to the real 360Â°/static product
+  // Placeholder: Task 10 wires this to the real 360°/static product
   // viewer instead of an alert.
-  alert('360Â° product viewer fallback will be wired up in a later step.');
+  alert('360° product viewer fallback will be wired up in a later step.');
 }
 
 // Landmarkers per category. Necklaces run pose on every other frame only:
@@ -325,9 +325,9 @@ function setStatus(status) {
 const isNecklace = category === 'necklace';
 const isNose = category === 'nose';
 const FACE_IDLE = isNecklace ? 'Show your face and neck to the camera' : 'Show your face to the camera';
-const FACE_ACTIVE = isNecklace ? 'Necklace on â€” turn your head to see it'
-  : isNose ? 'Nose ring on â€” turn your head to see it'
-    : 'Earrings on â€” turn your head to see them';
+const FACE_ACTIVE = isNecklace ? 'Necklace on — turn your head to see it'
+  : isNose ? 'Nose ring on — turn your head to see it'
+    : 'Earrings on — turn your head to see them';
 
 function frameInput(timestampMs, frame) {
   const rect = overlayCanvas.getBoundingClientRect();
@@ -345,7 +345,7 @@ function handleRingResult({ results, frame }, timestampMs, vision) {
   const info = pipeline.processFrame({ ...frameInput(timestampMs, frame), handResult: results.hand });
   let status = 'Show your hand to the camera';
   if (info.handDetected) {
-    status = info.sizing && info.sizing.locked ? 'Ring fitted â€” move freely' : 'Sizing your ringâ€¦';
+    status = info.sizing && info.sizing.locked ? 'Ring fitted — move freely' : 'Sizing your ring…';
   }
   setStatus(status);
   updateSizingUi(info);
@@ -434,7 +434,7 @@ async function startTracking() {
   const token = trackingToken;
   const what = category === 'ring' ? 'hand' : isNecklace ? 'face and pose' : 'face';
   modelLoadingIndicator.classList.remove('hidden');
-  modelLoadingIndicator.lastChild.textContent = ` Loading ${what} trackingâ€¦`;
+  modelLoadingIndicator.lastChild.textContent = ` Loading ${what} tracking…`;
 
   // Tracking models and the jewellery scene load in parallel.
   const next = createPipeline();
@@ -445,7 +445,7 @@ async function startTracking() {
     next.dispose();
     if (token !== trackingToken) return;
     modelLoadingIndicator.classList.add('hidden');
-    statusPill.textContent = `${category === 'ring' ? 'Hand' : 'Face'} tracking failed to load â€” showing camera only`;
+    statusPill.textContent = `${category === 'ring' ? 'Hand' : 'Face'} tracking failed to load — showing camera only`;
     logDebug({ category, sku, trackingLoadError: String(err) });
     return;
   }
@@ -503,7 +503,7 @@ recordBtn.addEventListener('click', async () => {
   recordBtn.disabled = true;
   try {
     const res = await recorder.record(10000, (ms) => {
-      recordLabel.textContent = `Recordingâ€¦ ${Math.ceil(ms / 1000)}s`;
+      recordLabel.textContent = `Recording… ${Math.ceil(ms / 1000)}s`;
     });
     recordLabel.textContent = res.videoSaved ? 'Saved (JSON + video)' : 'Saved (JSON)';
   } catch (err) {
