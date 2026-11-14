@@ -12,8 +12,8 @@
  *   skin-mask width (optional) ─┐
  *                               ├─► RingSizer: sizing phase -> locked metric width
  *   facing / tilt / speed ──────┘
- *   locked width × hand-distance change (rigid on-screen lengths, dead band,
- *     clamp, rate limit) ─► on-screen finger width
+ *   locked width × hand-distance change (rigid on-screen lengths, median +
+ *     One Euro smoothing, clamp) ─► on-screen finger width
  *   screen direction + clamped world tilt ─► ring axis
  *   palm/back ─► which way the ring's top faces
  */
@@ -61,15 +61,19 @@ const TILT_FILTER = { minCutoff: 0.5, beta: 0.3, dCutoff: 1.0 };
 /** Rigid hand lengths (landmark pairs) used as the distance cue after lock:
  *  the palm triangle plus the four proximal finger bones. */
 const SIZE_LENGTHS = [[0, 5], [0, 17], [5, 17], [5, 6], [9, 10], [13, 14], [17, 18]];
-/** Distance changes smaller than this are treated as posture wobble and
- *  ignored. 12% covers the wobble measured in two real sessions (fist,
- *  hand hanging down, fingers together) with the hand at a steady distance. */
-const SIZE_DEADBAND = 0.12;
-/** After the dead band, the ring may shrink/grow at most this much vs the lock. */
-const SIZE_MIN_SCALE = 0.85;
-const SIZE_MAX_SCALE = 1.2;
-/** Fastest allowed size change, as a fraction of the locked size per second. */
-const SIZE_MAX_RATE_PER_S = 0.1;
+/** Smoothing of the post-lock size (One Euro filter on log-scale): slow,
+ *  small changes (posture wobble at a steady distance) are smoothed heavily,
+ *  a hand moving toward/away from the camera is followed quickly, and the
+ *  size always settles at the true value. (Previously a 12% dead band that
+ *  also subtracted 12% from every real change, plus a 0.85–1.2× clamp, so
+ *  the ring barely followed distance.) */
+const SIZE_FILTER = { minCutoff: 0.2, beta: 1.0, dCutoff: 1.0 };
+/** Glitch guard: the ring stays within this range of its size at lock
+ *  (≈ hand 3× farther … 3× closer than when the size was locked). */
+const SIZE_MIN_SCALE = 1 / 3;
+const SIZE_MAX_SCALE = 3;
+/** Backstop rate limit, in log-scale per second (e^3 ≈ 20× per second). */
+const SIZE_MAX_LOG_RATE_PER_S = 3;
 /** Frames in the median window that rejects one-frame tracking glitches. */
 const SIZE_SPIKE_WINDOW = 5;
 
@@ -243,7 +247,9 @@ export class RingSolver {
     });
     const lockedPx = this.sizer.widthPx(null, screenScale);
     if (!lockedPx) this._sizeRef = null;
-    const fingerWidthPx = lockedPx ? this._sizeAfterLock(lm, f.sourceWidth, f.sourceHeight, lockedPx, t) : null;
+    // Raw landmarks: the median in _sizeAfterLock then rejects one-frame
+    // glitches outright (smoothed ones would smear a glitch over several frames).
+    const fingerWidthPx = lockedPx ? this._sizeAfterLock(raw, f.sourceWidth, f.sourceHeight, lockedPx, t) : null;
     // Before locking show the knuckle estimate (the ring is hidden then anyway).
     const fingerWidth = fingerWidthPx ? fingerWidthPx * worldPerPx : knuckleWidthWorld;
 
@@ -330,15 +336,16 @@ export class RingSolver {
    * Distance cue: several rigid on-screen hand lengths in different
    * directions, each relative to its value at lock (see comments in the
    * body for how they are combined). Then:
-   *  - a dead band ignores the ±SIZE_DEADBAND wobble that posture changes
-   *    cause, so in normal use the ring size simply stays put;
-   *  - the result is clamped and rate-limited so no tracking glitch can
-   *    resize the ring quickly or by much.
+   *  - a median over the last frames rejects one-frame tracking glitches;
+   *  - a One Euro filter (log-scale) smooths posture wobble but follows
+   *    real distance changes quickly and settles at the true size;
+   *  - the result is clamped to a wide range and rate-limited.
    */
   _sizeAfterLock(lm, sw, sh, lockedPx, t) {
     const lens = SIZE_LENGTHS.map(([i, j]) => Math.hypot((lm[i].x - lm[j].x) * sw, (lm[i].y - lm[j].y) * sh));
     if (!this._sizeRef) {
-      this._sizeRef = { widthPx: lockedPx, lens, scale: 1, t, recent: [] };
+      this._sizeRef = { widthPx: lockedPx, lens, scale: 1, t, recent: [], filter: new OneEuroFilter(SIZE_FILTER) };
+      this._sizeRef.filter.filter(0, t); // log(1): start at the locked size
       return lockedPx;
     }
     const ref = this._sizeRef;
@@ -354,12 +361,12 @@ export class RingSolver {
     if (ref.recent.length > SIZE_SPIKE_WINDOW) ref.recent.shift();
     // Median over the last few frames rejects one-frame tracking glitches.
     const r = median(ref.recent);
-    const dev = r - 1;
-    let target = 1 + Math.sign(dev) * Math.max(0, Math.abs(dev) - SIZE_DEADBAND);
-    target = Math.min(Math.max(target, SIZE_MIN_SCALE), SIZE_MAX_SCALE);
+    const target = Math.min(Math.max(r, SIZE_MIN_SCALE), SIZE_MAX_SCALE);
+    const smoothed = ref.filter.filter(Math.log(target), t);
     const dt = Math.min(Math.max(t - ref.t, 0), 0.25);
-    const maxStep = SIZE_MAX_RATE_PER_S * dt;
-    ref.scale += Math.min(Math.max(target - ref.scale, -maxStep), maxStep);
+    const maxStep = SIZE_MAX_LOG_RATE_PER_S * dt;
+    const step = Math.min(Math.max(smoothed - Math.log(ref.scale), -maxStep), maxStep);
+    ref.scale *= Math.exp(step);
     ref.t = t;
     return ref.widthPx * ref.scale;
   }
