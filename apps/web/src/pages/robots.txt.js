@@ -5,6 +5,7 @@ export function GET({ site }) {
     'Disallow: /cart',
     'Disallow: /checkout',
     'Disallow: /order/',
+    'Disallow: /account',
     'Disallow: /api/',
     '',
     `Sitemap: ${new URL('/sitemap.xml', site).href}`,

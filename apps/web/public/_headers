@@ -5,11 +5,12 @@
 # single site-wide policy.) Allowed outside this origin:
 #   Razorpay checkout: checkout.js, its popup frame, its logging endpoint
 #   Cloudflare Turnstile (checkout bot check): script + frame
+#   motsxvcewmflyldqspsa.supabase.co: customer sign-in, account data (RLS)
 #   lh3.googleusercontent.com: placeholder product photos (remove when real
 #     photos are self-hosted)
 # 'wasm-unsafe-eval' lets MediaPipe compile its wasm (try-on).
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://checkout.razorpay.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://lh3.googleusercontent.com; font-src 'self'; connect-src 'self' data: blob: https://api.razorpay.com https://lumberjack.razorpay.com; frame-src https://api.razorpay.com https://checkout.razorpay.com https://challenges.cloudflare.com; media-src 'self' blob:; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'wasm-unsafe-eval' https://checkout.razorpay.com https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://lh3.googleusercontent.com; font-src 'self'; connect-src 'self' data: blob: https://motsxvcewmflyldqspsa.supabase.co https://api.razorpay.com https://lumberjack.razorpay.com; frame-src https://api.razorpay.com https://checkout.razorpay.com https://challenges.cloudflare.com; media-src 'self' blob:; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
   X-Frame-Options: DENY
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin

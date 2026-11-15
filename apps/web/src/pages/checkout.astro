@@ -19,6 +19,7 @@ const label = 'block text-[12px] font-medium uppercase tracking-[0.1em] text-mut
 
     <div id="checkout-body" class="mt-8 hidden gap-10 lg:grid lg:grid-cols-[1fr_380px]">
       <form id="checkout-form" class="space-y-8" novalidate>
+        <div id="acct-banner" class="hidden rounded-lg bg-cream px-4 py-3 text-[13px]"></div>
         <fieldset class="space-y-4">
           <legend class="font-garamond text-[24px]">Contact</legend>
           <div><label class={label} for="name">Full name</label><input class={field} id="name" name="name" autocomplete="name" required maxlength="100" /></div>
@@ -42,6 +43,10 @@ const label = 'block text-[12px] font-medium uppercase tracking-[0.1em] text-mut
             <div><label class={label} for="pincode">PIN code</label><input class={field} id="pincode" name="pincode" inputmode="numeric" autocomplete="postal-code" required pattern="[1-9][0-9]{5}" maxlength="6" /></div>
           </div>
         </fieldset>
+        <label id="save-address-row" class="hidden gap-3 text-[13px] text-muted">
+          <input type="checkbox" name="saveAddress" checked class="mt-0.5 h-4 w-4 accent-ink" />
+          <span>Save these details to my account for next time</span>
+        </label>
         <label class="flex gap-3 text-[13px] text-muted">
           <input type="checkbox" name="consent" required class="mt-0.5 h-4 w-4 accent-ink" />
           <span>I agree to the <a href="/shipping-returns" class="underline" target="_blank">shipping &amp; returns</a> terms and to my details being used to fulfil this order, as described in the <a href="/privacy" class="underline" target="_blank">privacy notice</a>.</span>
@@ -73,12 +78,41 @@ const label = 'block text-[12px] font-medium uppercase tracking-[0.1em] text-mut
   import { startPayment, PAYMENTS_UNAVAILABLE } from '../scripts/checkout.js';
   import { reportError } from '../scripts/error-report.js';
   import { initTurnstile, getTurnstileToken, resetTurnstile } from '../scripts/turnstile.js';
+  import { authEnabled, getSession, rest, loginUrl } from '../scripts/auth.js';
 
   const catalog = readCatalog();
   const site = JSON.parse(document.getElementById('site-config').textContent);
   const $ = (id) => document.getElementById(id);
   const form = $('checkout-form');
   initTurnstile($('turnstile-box'), site.turnstileSiteKey).catch((err) => reportError('checkout', err));
+
+  // Accounts: prefill from the saved profile; link the order to the account.
+  let session = null;
+  (async () => {
+    if (!authEnabled()) return;
+    const banner = $('acct-banner');
+    session = await getSession();
+    banner.classList.remove('hidden');
+    if (!session) {
+      banner.innerHTML = `Have an account? <a class="font-semibold underline underline-offset-2" href="${esc(loginUrl('/checkout'))}">Sign in</a> for faster checkout, or continue as a guest.`;
+      return;
+    }
+    banner.innerHTML = `Signed in as <strong>${esc(session.user.email)}</strong>. This order will appear in <a class="underline underline-offset-2" href="/account">your account</a>.`;
+    $('save-address-row').classList.replace('hidden', 'flex');
+    const fill = (name, value) => { const el = form.elements[name]; if (el && value && !el.value) el.value = value; };
+    fill('email', session.user.email);
+    try {
+      const [p] = await rest('profiles?select=*');
+      if (p) {
+        fill('name', p.full_name); fill('phone', p.phone); fill('address1', p.address1); fill('address2', p.address2);
+        fill('city', p.city); fill('state', p.state); fill('pincode', p.pincode);
+      } else {
+        fill('name', session.user.name);
+      }
+    } catch {
+      // prefill is a convenience only
+    }
+  })();
   const errorEl = $('checkout-error');
 
   onCartChange((items) => {
@@ -135,7 +169,12 @@ const label = 'block text-[12px] font-medium uppercase tracking-[0.1em] text-mut
     try {
       const turnstileToken = await getTurnstileToken();
       const expectedTotalInr = priceCart(readCart(), catalog).total;
-      const result = await startPayment({ items: readCart(), customer, turnstileToken, expectedTotalInr });
+      const fresh = session ? await getSession() : null; // refreshed token if it was about to expire
+      const result = await startPayment({
+        items: readCart(), customer, turnstileToken, expectedTotalInr,
+        accessToken: fresh ? fresh.access_token : null,
+        saveAddress: !!(fresh && form.elements.saveAddress && form.elements.saveAddress.checked),
+      });
       clearCart();
       location.href = `/order/success?order=${encodeURIComponent(result.orderNumber)}`;
     } catch (err) {

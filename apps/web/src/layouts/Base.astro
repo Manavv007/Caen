@@ -15,6 +15,10 @@ interface Props {
 const { title, description = SITE.description, image, noindex = false, jsonLd } = Astro.props;
 const fullTitle = title ? `${title} — ${SITE.name}` : `${SITE.name} — ${SITE.tagline}`;
 const canonical = new URL(publicPath(Astro.url.pathname), Astro.site).href;
+// Public sign-in settings (Supabase URL + anon key are public by design).
+const authConfig = process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY
+  ? { url: process.env.SUPABASE_URL.replace(/\/$/, ''), anonKey: process.env.SUPABASE_ANON_KEY }
+  : null;
 ---
 <!DOCTYPE html>
 <html lang="en-IN">
@@ -32,6 +36,7 @@ const canonical = new URL(publicPath(Astro.url.pathname), Astro.site).href;
   {image && <meta property="og:image" content={image} />}
   <meta name="theme-color" content="#faf7f2" />
   {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+  {authConfig && <script type="application/json" id="auth-config" set:html={JSON.stringify(authConfig)} />}
 </head>
 <body class="flex min-h-screen flex-col bg-white font-sans text-ink antialiased">
   <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:bg-white focus:px-3 focus:py-2">Skip to content</a>

@@ -17,8 +17,11 @@ export class FakeBackend {
   constructor() {
     this.tables = {
       orders: [], order_items: [], payment_events: [], client_errors: [],
-      products: productRows(), site_settings: [settingsRow()],
+      products: productRows(), site_settings: [settingsRow()], profiles: [],
     };
+    /** access token -> user, for /auth/v1/user */
+    this.users = { 'token-a': { id: 'user-a', email: 'Buyer@Example.com' } };
+    this.deletedUsers = [];
     this.razorpayOrders = [];
     this.emails = [];
     this.nextId = 1;
@@ -58,6 +61,16 @@ export class FakeBackend {
       this.emails.push(body);
       return ok({ id: `email_${this.nextId++}` });
     }
+    if (u.hostname === 'db.test' && u.pathname === '/auth/v1/user') {
+      const token = (init.headers.authorization || '').replace('Bearer ', '');
+      const user = this.users[token];
+      return user ? ok(user) : ok({ message: 'invalid token' }, 401);
+    }
+    if (u.hostname === 'db.test' && u.pathname.startsWith('/auth/v1/admin/users/') && method === 'DELETE') {
+      if (init.headers.authorization !== 'Bearer service-key') return ok({ message: 'unauthorized' }, 401);
+      this.deletedUsers.push(decodeURIComponent(u.pathname.split('/').pop()));
+      return ok({});
+    }
     if (u.hostname === 'db.test' && u.pathname.startsWith('/rest/v1/')) {
       if (init.headers.authorization !== 'Bearer service-key') return ok({ message: 'unauthorized' }, 401);
       const table = this.tables[u.pathname.slice('/rest/v1/'.length)];
@@ -66,8 +79,15 @@ export class FakeBackend {
       if (method === 'GET') return ok(table.filter((r) => this._match(r, filters)));
       if (method === 'POST') {
         const ignoreDup = (init.headers.prefer || '').includes('ignore-duplicates');
+        const merge = (init.headers.prefer || '').includes('merge-duplicates');
+        const conflictKey = u.searchParams.get('on_conflict');
         const inserted = [];
         for (const row of body) {
+          if (merge && conflictKey) {
+            const existing = table.find((r) => r[conflictKey] === row[conflictKey]);
+            if (existing) { Object.assign(existing, row); inserted.push(existing); continue; }
+            table.push({ ...row }); inserted.push(row); continue;
+          }
           if (row.id !== undefined && table.some((r) => r.id === row.id)) {
             if (ignoreDup) continue;
             return ok({ message: 'duplicate key' }, 409);

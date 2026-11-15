@@ -92,6 +92,11 @@ const optionClass = 'cursor-pointer rounded border border-line px-3 py-2.5 text-
             </select>
             <button type="submit" class="btn-primary flex-1"><Icon name="shopping_bag" class="h-5 w-5" /> Add to bag</button>
           </div>
+          <button type="button" id="wish-btn" data-sku={p.sku} aria-pressed="false" class="flex w-full items-center justify-center gap-2 rounded border border-line px-4 py-3 text-[12px] font-semibold uppercase tracking-[0.16em] transition-colors hover:border-ink">
+            <Icon name="favorite" class="h-5 w-5" data-wish-off />
+            <Icon name="favorite-fill" class="hidden h-5 w-5 text-gold" data-wish-on />
+            <span data-wish-label>Save to wishlist</span>
+          </button>
           <p id="add-status" class="hidden rounded bg-cream px-4 py-3 text-[13px]" role="status" aria-live="polite">
             Added to your bag. <a href="/cart" class="font-semibold underline underline-offset-2">View bag</a>
           </p>
@@ -121,6 +126,8 @@ const optionClass = 'cursor-pointer rounded border border-line px-3 py-2.5 text-
 
 <script>
   import { addToCart } from '../../scripts/cart.js';
+  import { initWishlistButton } from '../../scripts/wishlist-button.js';
+  initWishlistButton(document.getElementById('wish-btn'));
   const form = document.getElementById('add-form');
   const status = document.getElementById('add-status');
   form.addEventListener('submit', (e) => {

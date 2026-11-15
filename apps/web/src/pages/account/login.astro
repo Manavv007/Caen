@@ -1,0 +1,175 @@
+---
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import ProductImage from '../../components/ProductImage.astro';
+import { getEditorial } from '../../lib/catalog.js';
+const ed = getEditorial();
+const field = 'mt-1.5 w-full rounded-lg border border-line-strong bg-white px-4 py-3.5 text-[15px] transition-colors focus:border-ink focus:outline-none';
+---
+<Base title="Sign in" noindex>
+  <section class="container-page py-8 lg:py-14">
+    <div class="mx-auto grid max-w-5xl overflow-hidden rounded-2xl border border-line bg-white shadow-sm lg:grid-cols-2">
+      <div class="relative hidden min-h-[560px] bg-sand lg:block">
+        <ProductImage image={ed.hero} sizes="40vw" width={900} class="absolute inset-0 h-full w-full object-cover" />
+        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
+        <div class="absolute bottom-0 p-10 text-white">
+          <p class="eyebrow">Your CAEN account</p>
+          <p class="mt-3 font-garamond text-[32px] leading-tight">Every piece, every order, in one place.</p>
+          <ul class="mt-6 space-y-2 text-[14px] text-white/85">
+            <li class="flex items-center gap-2"><Icon name="receipt_long" class="h-5 w-5 text-gold" /> Track your orders</li>
+            <li class="flex items-center gap-2"><Icon name="favorite" class="h-5 w-5 text-gold" /> Save pieces to your wishlist</li>
+            <li class="flex items-center gap-2"><Icon name="local_shipping" class="h-5 w-5 text-gold" /> Faster checkout with a saved address</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="flex flex-col justify-center px-6 py-10 sm:px-12">
+        <p class="eyebrow">Welcome</p>
+        <h1 class="mt-2 font-garamond text-[36px] leading-tight">Sign in or create an account</h1>
+        <p class="mt-2 text-[14px] text-muted">No password needed. We'll email you a 6-digit code.</p>
+
+        <div id="login-disabled" class="mt-8 hidden rounded-lg bg-cream p-4 text-[14px] text-muted">
+          Accounts are being set up. You can still shop and check out as a guest.
+        </div>
+
+        <div id="login-ui" class="mt-8">
+          <button id="google-btn" type="button" class="hidden w-full items-center justify-center gap-3 rounded-lg border border-line-strong bg-white px-4 py-3.5 text-[14px] font-medium transition-colors hover:border-ink">
+            <svg viewBox="0 0 48 48" class="h-5 w-5" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+            Continue with Google
+          </button>
+          <div id="or-divider" class="my-6 hidden items-center gap-4 text-[11px] uppercase tracking-[0.2em] text-subtle">
+            <span class="h-px flex-1 bg-line"></span>or<span class="h-px flex-1 bg-line"></span>
+          </div>
+
+          <form id="email-step" novalidate>
+            <label class="block text-[12px] font-medium uppercase tracking-[0.1em] text-muted" for="email">Email address</label>
+            <input id="email" name="email" type="email" autocomplete="email" inputmode="email" required maxlength="200" placeholder="you@example.com" class={field} />
+            <button type="submit" class="btn-primary mt-4 w-full"><Icon name="mail" class="h-4 w-4" /> <span data-label>Email me a code</span></button>
+          </form>
+
+          <form id="code-step" class="hidden" novalidate>
+            <p class="text-[14px] text-muted">We sent a 6-digit code to <strong id="sent-to" class="text-ink"></strong>. <button type="button" id="change-email" class="text-ink underline underline-offset-2">Change</button></p>
+            <label class="mt-5 block text-[12px] font-medium uppercase tracking-[0.1em] text-muted" for="code">6-digit code</label>
+            <input id="code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required placeholder="••••••"
+              class={`${field} text-center font-medium tracking-[0.6em] text-[26px] placeholder:text-line-strong`} />
+            <button type="submit" class="btn-primary mt-4 w-full"><Icon name="lock" class="h-4 w-4" /> <span data-label>Sign in</span></button>
+            <p class="mt-4 text-center text-[13px] text-subtle">Didn't get it? Check spam, or <button type="button" id="resend" class="text-ink underline underline-offset-2 disabled:text-subtle disabled:no-underline" disabled>resend code</button></p>
+          </form>
+
+          <p id="login-error" class="mt-4 hidden rounded-lg bg-red-50 px-4 py-3 text-[13px] text-red-800" role="alert"></p>
+        </div>
+
+        <p class="mt-8 text-[12px] leading-relaxed text-subtle">
+          By continuing you agree to our <a href="/privacy" class="underline">privacy notice</a>. You can also <a href="/collections" class="underline">keep shopping as a guest</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<script>
+  import { authEnabled, providers, sendCode, verifyCode, signInWithGoogle, currentUser, safeNext } from '../../scripts/auth.js';
+
+  const $ = (id) => document.getElementById(id);
+  const next = safeNext(new URLSearchParams(location.search).get('next') || '/account');
+  const errorEl = $('login-error');
+  const emailForm = $('email-step');
+  const codeForm = $('code-step');
+  let email = '';
+  let timer = null;
+
+  const showError = (msg) => { errorEl.textContent = msg; errorEl.classList.toggle('hidden', !msg); };
+  const busy = (form, on, label) => {
+    const btn = form.querySelector('button[type=submit]');
+    btn.disabled = on;
+    btn.querySelector('[data-label]').textContent = label;
+  };
+
+  if (!authEnabled()) {
+    $('login-ui').classList.add('hidden');
+    $('login-disabled').classList.remove('hidden');
+  } else if (currentUser()) {
+    location.replace(next);
+  } else {
+    providers().then(({ google }) => {
+      if (!google) return;
+      $('google-btn').classList.replace('hidden', 'flex');
+      $('or-divider').classList.replace('hidden', 'flex');
+    });
+  }
+
+  $('google-btn').addEventListener('click', () => signInWithGoogle(next).catch((e) => showError(e.message)));
+
+  function startResendTimer() {
+    const btn = $('resend');
+    let left = 30;
+    btn.disabled = true;
+    clearInterval(timer);
+    const tick = () => {
+      btn.textContent = left > 0 ? `resend code (${left}s)` : 'resend code';
+      if (left-- <= 0) { btn.disabled = false; clearInterval(timer); }
+    };
+    tick();
+    timer = setInterval(tick, 1000);
+  }
+
+  emailForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    showError('');
+    const value = $('email').value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) { showError('Please enter a valid email address.'); $('email').focus(); return; }
+    busy(emailForm, true, 'Sending…');
+    try {
+      await sendCode(value);
+      email = value;
+      $('sent-to').textContent = email;
+      emailForm.classList.add('hidden');
+      codeForm.classList.remove('hidden');
+      $('code').value = '';
+      $('code').focus();
+      startResendTimer();
+    } catch (err) {
+      showError(err.message);
+    } finally {
+      busy(emailForm, false, 'Email me a code');
+    }
+  });
+
+  // Submit as soon as 6 digits are typed or pasted.
+  $('code').addEventListener('input', (e) => {
+    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
+    if (e.target.value.length === 6) codeForm.requestSubmit();
+  });
+
+  codeForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    showError('');
+    const code = $('code').value;
+    if (!/^\d{6}$/.test(code)) { showError('Enter the 6-digit code from the email.'); return; }
+    busy(codeForm, true, 'Signing in…');
+    try {
+      await verifyCode(email, code);
+      location.replace(next);
+    } catch (err) {
+      showError(err.message);
+      busy(codeForm, false, 'Sign in');
+      $('code').select();
+    }
+  });
+
+  $('resend').addEventListener('click', async () => {
+    showError('');
+    try {
+      await sendCode(email);
+      startResendTimer();
+    } catch (err) {
+      showError(err.message);
+    }
+  });
+
+  $('change-email').addEventListener('click', () => {
+    codeForm.classList.add('hidden');
+    emailForm.classList.remove('hidden');
+    $('email').focus();
+  });
+</script>

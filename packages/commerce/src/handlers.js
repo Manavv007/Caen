@@ -20,6 +20,7 @@ import { createDb } from './supabase.js';
 import { sendOrderConfirmation } from './email.js';
 import { verifyTurnstile } from './turnstile.js';
 import { mapSettings } from './catalog-db.js';
+import { getUserFromRequest } from './auth.js';
 
 const MAX_BODY_BYTES = 20_000;
 
@@ -121,9 +122,25 @@ export async function handleCheckout(request, env, { fetch: fetchImpl = fetch } 
     if (!human) return json({ error: 'Please complete the security check and try again.', code: 'turnstile' }, 400);
   }
 
+  // Signed-in customer (optional): link the order, and save the address if asked.
+  const user = await getUserFromRequest(request, env, fetchImpl);
+
   const orderNumber = newOrderNumber();
   try {
+    if (user && body.saveAddress === true) {
+      await db.upsert('profiles', [{
+        user_id: user.id,
+        full_name: customer.name,
+        phone: customer.phone,
+        address1: customer.address1,
+        address2: customer.address2,
+        city: customer.city,
+        state: customer.state,
+        pincode: customer.pincode,
+      }], 'user_id').catch((err) => console.error('profile save failed', err)); // never blocks the order
+    }
     const [order] = await db.insert('orders', [{
+      user_id: user ? user.id : null,
       order_number: orderNumber,
       status: 'pending',
       customer_name: customer.name,

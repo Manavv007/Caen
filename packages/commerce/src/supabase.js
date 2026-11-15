@@ -26,6 +26,9 @@ export function createDb({ url, serviceKey }, fetchImpl = fetch) {
   return {
     /** @returns {Promise<Object[]>} inserted rows */
     insert: (table, rows) => call('POST', table, { body: rows, prefer: 'return=representation' }),
+    /** Insert or update on `onConflict` (merge). @returns {Promise<Object[]>} */
+    upsert: (table, rows, onConflict) =>
+      call('POST', `${table}?on_conflict=${encodeURIComponent(onConflict)}`, { body: rows, prefer: 'resolution=merge-duplicates,return=representation' }),
     /** Inserts, silently skipping rows whose primary key exists. @returns {Promise<Object[]>} rows actually inserted */
     insertIgnoringDuplicates: (table, rows, onConflict) =>
       call('POST', `${table}?on_conflict=${encodeURIComponent(onConflict)}`, { body: rows, prefer: 'resolution=ignore-duplicates,return=representation' }),

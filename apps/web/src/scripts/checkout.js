@@ -13,10 +13,10 @@ export const PAYMENTS_UNAVAILABLE = new Error('payments-unavailable');
 
 const RAZORPAY_SCRIPT = 'https://checkout.razorpay.com/v1/checkout.js';
 
-async function postJson(url, body) {
+async function postJson(url, body, accessToken = null) {
   const res = await fetch(url, {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: { 'content-type': 'application/json', ...(accessToken ? { authorization: `Bearer ${accessToken}` } : {}) },
     body: JSON.stringify(body),
   });
   // Not deployed / not configured yet.
@@ -58,14 +58,16 @@ function loadRazorpay() {
  * @param {{items: Array, customer: Object, turnstileToken?: string|null}} order
  * @returns {Promise<{orderNumber: string}>} resolves once payment is verified
  */
-export async function startPayment({ items, customer, turnstileToken = null, expectedTotalInr = null }) {
+export async function startPayment({ items, customer, turnstileToken = null, expectedTotalInr = null, accessToken = null, saveAddress = false }) {
   const created = await postJson('/api/checkout', {
     items,
     customer,
     ...(turnstileToken ? { turnstileToken } : {}),
     // The total this page showed: the server refuses if prices changed since.
     ...(Number.isInteger(expectedTotalInr) ? { expectedTotalInr } : {}),
-  });
+    // Signed in: the order is linked to the account (token in the header).
+    ...(accessToken && saveAddress ? { saveAddress: true } : {}),
+  }, accessToken);
   await loadRazorpay();
 
   const payment = await new Promise((resolve, reject) => {
