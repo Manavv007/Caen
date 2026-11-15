@@ -1,0 +1,27 @@
+---
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+---
+<Base title="Signing in" noindex>
+  <section class="container-page max-w-md py-24 text-center">
+    <div id="cb-working">
+      <Icon name="progress_activity" class="mx-auto h-10 w-10 animate-spin text-gold" />
+      <p class="mt-4 font-garamond text-[26px]">Signing you in…</p>
+    </div>
+    <div id="cb-error" class="hidden">
+      <p class="font-garamond text-[26px]">We couldn't sign you in</p>
+      <p id="cb-message" class="mt-2 text-[14px] text-muted"></p>
+      <a href="/account/login" class="btn-primary mt-8">Try again</a>
+    </div>
+  </section>
+</Base>
+<script>
+  import { completeOAuth } from '../../scripts/auth.js';
+  completeOAuth(new URLSearchParams(location.search))
+    .then((next) => location.replace(next))
+    .catch((err) => {
+      document.getElementById('cb-working').classList.add('hidden');
+      document.getElementById('cb-error').classList.remove('hidden');
+      document.getElementById('cb-message').textContent = err.message;
+    });
+</script>

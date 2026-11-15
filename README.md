@@ -23,6 +23,11 @@ In Supabase (Table Editor), no code needed — see [docs/editing-the-store.md](d
 The site rebuilds automatically about a minute after an edit. `packages/commerce/src/catalog.js` is only the
 starter data for local development and CI.
 
+## Customer accounts
+
+Sign in with a 6-digit email code (or Google): order history, wishlist, saved address, account deletion.
+Setup steps (email service, Google): [docs/accounts-setup.md](docs/accounts-setup.md).
+
 ## Develop
 
 Needs Node 22.

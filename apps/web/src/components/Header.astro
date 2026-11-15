@@ -28,8 +28,8 @@ const path = Astro.url.pathname;
     </details>
 
     <a href="/" class="flex flex-col items-center text-center lg:items-start" aria-label={`${SITE.name} home`}>
-      <span class="font-garamond text-[22px] leading-none tracking-[0.28em] lg:text-[26px]">CAEN JEWELS</span>
-      <span class="mt-1 text-[9px] uppercase tracking-[0.3em] text-gold">{SITE.tagline}</span>
+      <span class="whitespace-nowrap font-garamond text-[19px] leading-none tracking-[0.2em] sm:text-[22px] sm:tracking-[0.28em] lg:text-[26px]">CAEN JEWELS</span>
+      <span class="mt-1 whitespace-nowrap text-[8px] uppercase tracking-[0.24em] text-gold sm:text-[9px] sm:tracking-[0.3em]">{SITE.tagline}</span>
     </a>
 
     <nav class="hidden lg:block" aria-label="Main">
@@ -42,15 +42,28 @@ const path = Astro.url.pathname;
       </ul>
     </nav>
 
+    <div class="flex items-center">
+    <a href="/account" data-account-link class="relative flex h-11 w-11 items-center justify-center transition-colors hover:text-gold" aria-label="Sign in">
+      <Icon name="account_circle" class="h-6 w-6" data-account-out />
+      <Icon name="account_circle-fill" class="hidden h-6 w-6 text-gold" data-account-in />
+    </a>
     <a href="/cart" class="relative flex h-11 w-11 items-center justify-center transition-colors hover:text-gold" aria-label="Shopping bag">
       <Icon name="shopping_bag" class="h-6 w-6" />
       <span data-cart-count class="absolute right-1 top-1 hidden h-[18px] min-w-[18px] items-center justify-center rounded-full bg-gold px-1 text-[10px] font-semibold text-white"></span>
     </a>
+    </div>
   </div>
 </header>
 
 <script>
   import { onCartChange } from '../scripts/cart.js';
+  import { onAuthChange } from '../scripts/auth.js';
+  const accountLink = document.querySelector('[data-account-link]');
+  onAuthChange((user) => {
+    accountLink.querySelector('[data-account-out]').classList.toggle('hidden', !!user);
+    accountLink.querySelector('[data-account-in]').classList.toggle('hidden', !user);
+    accountLink.setAttribute('aria-label', user ? 'My account' : 'Sign in');
+  });
   const badge = document.querySelector('[data-cart-count]');
   onCartChange((items) => {
     const n = items.reduce((s, i) => s + i.qty, 0);
