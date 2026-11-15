@@ -58,6 +58,13 @@ export async function startPayment({ items, customer }) {
   await loadRazorpay();
 
   const payment = await new Promise((resolve, reject) => {
+    // A failed attempt is NOT the end: Razorpay keeps its window open so the
+    // customer can retry with another method, and a later success calls
+    // `handler`. So remember the failure and only report it if the customer
+    // closes the window without paying. (Rejecting on the first failure made
+    // the page show an error while the retry went through, and customers paid
+    // twice.)
+    let lastFailure = null;
     const rzp = new window.Razorpay({
       key: created.razorpay.keyId,
       order_id: created.razorpay.orderId,
@@ -68,9 +75,15 @@ export async function startPayment({ items, customer }) {
       prefill: { name: customer.name, email: customer.email, contact: `+91${customer.phone}` },
       theme: { color: '#1a1a1a' },
       handler: resolve,
-      modal: { ondismiss: () => reject(new Error('Payment was cancelled. Your bag is saved — you can try again.')) },
+      modal: {
+        ondismiss: () => reject(new Error(lastFailure
+          ? `${lastFailure} Your bag is saved — you can try again.`
+          : 'Payment was cancelled. Your bag is saved — you can try again.')),
+      },
     });
-    rzp.on('payment.failed', (r) => reject(new Error((r.error && r.error.description) || 'Payment failed. Please try again.')));
+    rzp.on('payment.failed', (r) => {
+      lastFailure = (r && r.error && r.error.description) || 'The payment did not go through.';
+    });
     rzp.open();
   });
 
