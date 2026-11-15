@@ -40,10 +40,16 @@ function tryOnServiceWorker() {
   };
 }
 
+// Public address of the store: canonical links, sitemap, product feed.
+// Set SITE_URL in Cloudflare Pages (Variables) when a custom domain is added.
+const site = process.env.SITE_URL || 'https://caen-4kj.pages.dev';
+
 export default defineConfig({
-  site: 'https://caen.pages.dev',
+  site,
   output: 'static',
-  build: { inlineStylesheets: 'auto' },
+  // /products/x served as products/x.html: no redirect to /products/x/ on Cloudflare.
+  build: { inlineStylesheets: 'auto', format: 'file' },
+  trailingSlash: 'never',
   integrations: [tryOnServiceWorker()],
   vite: {
     plugins: [tailwindcss(), ...(https ? [basicSsl()] : [])],
