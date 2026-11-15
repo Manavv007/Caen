@@ -21,8 +21,9 @@ let THREE = null;
 let GLTFLoader = null;
 let RoomEnvironment = null;
 
-/** Ring height (diameters from the centre; the gap is on -Y) below which the ring is fully hidden. */
-export const DEFAULT_CUT_HIDDEN = -0.30;
+/** Ring height (diameters from the centre; the gap is on -Y) below which the ring is fully hidden:
+ *  the half of the hoop nearest the gap is inside the nostril. */
+export const DEFAULT_CUT_HIDDEN = 0;
 /** Width of the fade-in above that (diameters). */
 const CUT_SOFTNESS = 0.07;
 

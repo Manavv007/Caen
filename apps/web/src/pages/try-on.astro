@@ -132,6 +132,11 @@ import '../styles/global.css';
       <span id="status-pill" class="px-4 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm text-[11px] uppercase tracking-wider text-[#F3DEB2]">
         Live camera connected
       </span>
+      <!-- Nose ring only: which nostril (the person's own left/right) -->
+      <button id="side-btn" class="hidden px-4 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm text-[11px] uppercase tracking-wider text-white hover:bg-white/20 transition-colors items-center gap-1.5" aria-live="polite">
+        <Icon name="swap_horiz" class="w-[16px] h-[16px] shrink-0" />
+        <span id="side-label">Right nostril</span>
+      </button>
       <button id="resize-btn" class="hidden px-4 py-2 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm text-[11px] uppercase tracking-wider text-white hover:bg-white/20 transition-colors flex items-center gap-1.5">
         <Icon name="straighten" class="w-[16px] h-[16px] shrink-0" />
         Resize

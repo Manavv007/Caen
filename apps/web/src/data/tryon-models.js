@@ -46,7 +46,7 @@ export const DEFAULT_NECKLACE_SKU = 'GOLD-NECKLACE-CHAIN';
 export const NOSE_RING_CATALOG = {
   'POINTY-NOSE-RING': {
     url: MODELS.pointy_nose_ring,
-    diameterMm: 12,
+    diameterMm: 9, // typical nostril hoop; was 12 (looked oversized)
     credit: '"Pointy Nose Ring" by Tiko (sketchfab.com/tikoavp), CC-BY-4.0',
     creditUrl: 'https://sketchfab.com/3d-models/pointy-nose-ring-c1edf8f97caa4b019aa57cbe24566e34',
   },

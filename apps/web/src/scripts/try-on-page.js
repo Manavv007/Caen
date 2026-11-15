@@ -151,6 +151,8 @@ const VISION_PREFER = urlParams.get('vision') === 'main' ? 'main' : 'worker';
 // Render on requestAnimationFrame and extrapolate between detections
 // (render-smoothing.js); ?smooth=0 renders once per detection, as before (A/B).
 const SMOOTH = urlParams.get('smooth') !== '0';
+// Nose ring: which nostril, the person's own side (traditional default: left). Switchable live.
+let noseSide = urlParams.get('side') === 'right' ? 'right' : 'left';
 // ?ringTilt=world tilts the ring by MediaPipe's 3D depth estimate (old behaviour, A/B).
 const RING_TILT = urlParams.get('ringTilt') === 'world' ? 'world' : 'flat';
 // ?sw=0 unregisters the asset-cache service worker (cold-start comparisons).
@@ -222,7 +224,7 @@ function createPipeline() {
       smooth: SMOOTH,
       modelUrl: NOSE_RING_ENTRY.url,
       diameterMm: num('noseMm') ?? NOSE_RING_ENTRY.diameterMm,
-      side: urlParams.get('side') === 'right' ? 'right' : 'left',
+      side: noseSide,
       tiltDeg: num('noseTilt'),
       rollDeg: num('noseRoll'),
       offset,
@@ -414,6 +416,7 @@ async function startTracking() {
     return;
   }
   pipeline = next;
+  if (isNose) showSideToggle();
   if (category === 'ring') pipeline.reset();
   modelLoadingIndicator.classList.add('hidden');
   setStatus(category === 'ring' ? 'Show your hand to the camera' : FACE_IDLE);
@@ -522,6 +525,30 @@ function stopRenderLoop() {
   if (renderLoopHandle !== null) cancelAnimationFrame(renderLoopHandle);
   renderLoopHandle = null;
 }
+
+const sideBtn = document.getElementById('side-btn');
+const sideLabel = document.getElementById('side-label');
+function renderSideToggle() {
+  // The button offers the OTHER nostril.
+  sideLabel.textContent = noseSide === 'left' ? 'Right nostril' : 'Left nostril';
+  sideBtn.setAttribute('aria-label', `Move the nose ring to your ${noseSide === 'left' ? 'right' : 'left'} nostril`);
+}
+function showSideToggle() {
+  renderSideToggle();
+  sideBtn.classList.remove('hidden');
+  sideBtn.classList.add('flex');
+}
+sideBtn.addEventListener('click', () => {
+  noseSide = noseSide === 'left' ? 'right' : 'left';
+  if (pipeline && pipeline.solver) {
+    pipeline.solver.side = noseSide;
+    pipeline.solver.reset();
+  }
+  const u = new URL(location.href);
+  u.searchParams.set('side', noseSide);
+  history.replaceState(null, '', u);
+  renderSideToggle();
+});
 
 function stopTracking() {
   trackingToken++;
