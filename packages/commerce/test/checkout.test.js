@@ -83,6 +83,39 @@ describe('POST /api/checkout', () => {
   });
 });
 
+describe('POST /api/checkout bot check (Turnstile)', () => {
+  const TS_ENV = { ...ENV, TURNSTILE_SECRET_KEY: 'ts-secret' };
+  const items = [{ sku: 'POINTY-NOSE-RING', qty: 1 }];
+  const run = async (extra) => {
+    const res = await handleCheckout(post('/api/checkout', { items, customer: CUSTOMER, ...extra }), TS_ENV, { fetch: backend.fetch });
+    return { status: res.status, data: await res.json() };
+  };
+
+  it('creates the order when the token verifies', async () => {
+    expect((await run({ turnstileToken: 'good-token' })).status).toBe(200);
+    expect(backend.tables.orders).toHaveLength(1);
+  });
+
+  it.each([['missing', {}], ['invalid', { turnstileToken: 'bad-token' }], ['not a string', { turnstileToken: 42 }]])(
+    'rejects a %s token before storing anything', async (_, extra) => {
+      const { status, data } = await run(extra);
+      expect(status).toBe(400);
+      expect(data.code).toBe('turnstile');
+      expect(backend.tables.orders).toHaveLength(0);
+      expect(backend.razorpayOrders).toHaveLength(0);
+    });
+
+  it('does not call Cloudflare for requests that fail validation', async () => {
+    await handleCheckout(post('/api/checkout', { items: [], customer: CUSTOMER, turnstileToken: 'good-token' }), TS_ENV, { fetch: backend.fetch });
+    expect(backend.turnstileCalls || 0).toBe(0);
+  });
+
+  it('is skipped when TURNSTILE_SECRET_KEY is not set', async () => {
+    const res = await handleCheckout(post('/api/checkout', { items, customer: CUSTOMER }), ENV, { fetch: backend.fetch });
+    expect(res.status).toBe(200);
+  });
+});
+
 describe('POST /api/checkout/confirm', () => {
   it('marks the order paid on a valid signature, once, and emails once', async () => {
     const { data } = await checkout([{ sku: 'CELESTE-SOLITAIRE-RING', qty: 1 }]);

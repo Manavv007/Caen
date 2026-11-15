@@ -46,6 +46,7 @@ const label = 'block text-[12px] font-medium uppercase tracking-[0.1em] text-mut
           <input type="checkbox" name="consent" required class="mt-0.5 h-4 w-4 accent-ink" />
           <span>I agree to the <a href="/shipping-returns" class="underline" target="_blank">shipping &amp; returns</a> terms and to my details being used to fulfil this order, as described in the <a href="/privacy" class="underline" target="_blank">privacy notice</a>.</span>
         </label>
+        <div id="turnstile-box" class="flex justify-center empty:hidden"></div>
         <p id="checkout-error" class="hidden rounded bg-red-50 px-4 py-3 text-[13px] text-red-800" role="alert"></p>
         <button id="pay-btn" type="submit" class="btn-primary w-full"><Icon name="lock" class="h-4 w-4" /> <span id="pay-label">Pay securely</span></button>
         <p class="text-center text-[12px] text-subtle">Payments by Razorpay — UPI, cards, netbanking and EMI. We never see your card details.</p>
@@ -63,18 +64,21 @@ const label = 'block text-[12px] font-medium uppercase tracking-[0.1em] text-mut
     </div>
   </section>
   <script type="application/json" id="cart-catalog" set:html={JSON.stringify(cartCatalog())} />
-  <script type="application/json" id="site-config" set:html={JSON.stringify({ whatsapp: SITE.whatsapp })} />
+  <script type="application/json" id="site-config" set:html={JSON.stringify({ whatsapp: SITE.whatsapp, turnstileSiteKey: import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || null })} />
 </Base>
 
 <script>
   import { readCart, onCartChange, clearCart } from '../scripts/cart.js';
   import { readCatalog, priceCart, formatInr, optionsText, esc } from '../scripts/cart-lines.js';
   import { startPayment, PAYMENTS_UNAVAILABLE } from '../scripts/checkout.js';
+  import { reportError } from '../scripts/error-report.js';
+  import { initTurnstile, getTurnstileToken, resetTurnstile } from '../scripts/turnstile.js';
 
   const catalog = readCatalog();
   const site = JSON.parse(document.getElementById('site-config').textContent);
   const $ = (id) => document.getElementById(id);
   const form = $('checkout-form');
+  initTurnstile($('turnstile-box'), site.turnstileSiteKey).catch((err) => reportError('checkout', err));
   const errorEl = $('checkout-error');
 
   onCartChange((items) => {
@@ -126,16 +130,20 @@ const label = 'block text-[12px] font-medium uppercase tracking-[0.1em] text-mut
     btn.disabled = true;
     $('pay-label').textContent = 'Starting payment…';
     try {
-      const result = await startPayment({ items: readCart(), customer });
+      const turnstileToken = await getTurnstileToken();
+      const result = await startPayment({ items: readCart(), customer, turnstileToken });
       clearCart();
       location.href = `/order/success?order=${encodeURIComponent(result.orderNumber)}`;
     } catch (err) {
       if (err === PAYMENTS_UNAVAILABLE) {
         showError(`Online payment is being set up. You can place this order on WhatsApp instead — we'll confirm availability and share a secure payment link. <a class="font-semibold underline" target="_blank" rel="noopener" href="${esc(whatsappOrder(customer))}">Order on WhatsApp</a>`);
       } else {
+        // Server-side failures only; 4xx are the customer's input (bad PIN code etc.).
+        if (!(err.status >= 400 && err.status < 500) && !/cancelled|did not go through|declined|not supported/i.test(err.message)) reportError('checkout', err);
         showError(esc(err.message || 'Something went wrong. Please try again.'));
       }
     } finally {
+      resetTurnstile();
       btn.disabled = false;
       $('pay-label').textContent = 'Pay securely';
     }

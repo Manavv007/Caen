@@ -4,7 +4,7 @@ import ProductImage from '../../components/ProductImage.astro';
 import ProductCard from '../../components/ProductCard.astro';
 import Icon from '../../components/Icon.astro';
 import { getProducts, getCategory, getRelated, resolveImage, categoryUrl, tryOnUrl } from '../../lib/catalog.js';
-import { formatInr } from '../../lib/format.js';
+import { formatInr, publicPath } from '../../lib/format.js';
 import { SITE } from '../../data/site.js';
 
 export function getStaticPaths() {
@@ -36,7 +36,7 @@ const jsonLd = {
     priceCurrency: 'INR',
     price: p.priceInr,
     availability: 'https://schema.org/InStock',
-    url: new URL(Astro.url.pathname, Astro.site).href,
+    url: new URL(publicPath(Astro.url.pathname), Astro.site).href,
   },
 };
 const optionClass = 'cursor-pointer rounded border border-line px-3 py-2.5 text-center text-[13px] transition-colors hover:border-ink has-[:checked]:border-ink has-[:checked]:bg-ink has-[:checked]:text-white has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-gold';

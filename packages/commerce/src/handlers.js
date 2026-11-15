@@ -8,6 +8,8 @@
  *   RAZORPAY_WEBHOOK_SECRET                   required for the webhook
  *   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY   required (orders database)
  *   RESEND_API_KEY, ORDER_EMAIL_FROM, ORDER_NOTIFY_EMAIL   optional (emails)
+ *   TURNSTILE_SECRET_KEY                      optional: when set, checkout
+ *                                             requires a valid bot check
  * While the required ones are missing, checkout answers 503 and the
  * storefront offers ordering on WhatsApp instead.
  */
@@ -16,6 +18,7 @@ import { priceOrder, newOrderNumber } from './order.js';
 import { createRazorpayOrder, verifyPaymentSignature, verifyWebhookSignature } from './razorpay.js';
 import { createDb } from './supabase.js';
 import { sendOrderConfirmation } from './email.js';
+import { verifyTurnstile } from './turnstile.js';
 
 const MAX_BODY_BYTES = 20_000;
 
@@ -67,15 +70,22 @@ async function markPaid(db, env, { razorpayOrderId, paymentId, amountPaise }, fe
 /** POST /api/checkout — create the order + Razorpay order. */
 export async function handleCheckout(request, env, { fetch: fetchImpl = fetch } = {}) {
   if (!checkoutConfigured(env)) return json({ error: 'Online payment is not available yet.' }, 503);
+  let body;
   let items;
   let customer;
   let priced;
   try {
-    ({ items, customer } = validateCheckoutRequest(await readJson(request)));
+    body = await readJson(request);
+    ({ items, customer } = validateCheckoutRequest(body));
     priced = priceOrder(items);
   } catch (err) {
     if (err instanceof ValidationError) return json({ error: err.message }, 400);
     throw err;
+  }
+  // Bot check (after the cheap validation, before anything is stored).
+  if (env.TURNSTILE_SECRET_KEY) {
+    const human = await verifyTurnstile(env.TURNSTILE_SECRET_KEY, body.turnstileToken, request.headers.get('cf-connecting-ip'), fetchImpl);
+    if (!human) return json({ error: 'Please complete the security check and try again.', code: 'turnstile' }, 400);
   }
 
   const db = createDb({ url: env.SUPABASE_URL, serviceKey: env.SUPABASE_SERVICE_ROLE_KEY }, fetchImpl);
