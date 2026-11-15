@@ -63,7 +63,7 @@ const label = 'block text-[12px] font-medium uppercase tracking-[0.1em] text-mut
       </aside>
     </div>
   </section>
-  <script type="application/json" id="cart-catalog" set:html={JSON.stringify(cartCatalog())} />
+  <script type="application/json" id="cart-catalog" set:html={JSON.stringify(await cartCatalog())} />
   <script type="application/json" id="site-config" set:html={JSON.stringify({ whatsapp: SITE.whatsapp, turnstileSiteKey: import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || null })} />
 </Base>
 
@@ -91,6 +91,9 @@ const label = 'block text-[12px] font-medium uppercase tracking-[0.1em] text-mut
     $('sum-shipping').textContent = cart.shipping ? formatInr(cart.shipping) : 'Free';
     $('sum-total').textContent = formatInr(cart.total);
   });
+
+  // (No inline onclick: the Content-Security-Policy blocks inline handlers.)
+  errorEl.addEventListener('click', (e) => { if (e.target.closest('[data-reload]')) location.reload(); });
 
   function showError(msg) {
     errorEl.innerHTML = msg;
@@ -131,12 +134,16 @@ const label = 'block text-[12px] font-medium uppercase tracking-[0.1em] text-mut
     $('pay-label').textContent = 'Starting payment…';
     try {
       const turnstileToken = await getTurnstileToken();
-      const result = await startPayment({ items: readCart(), customer, turnstileToken });
+      const expectedTotalInr = priceCart(readCart(), catalog).total;
+      const result = await startPayment({ items: readCart(), customer, turnstileToken, expectedTotalInr });
       clearCart();
       location.href = `/order/success?order=${encodeURIComponent(result.orderNumber)}`;
     } catch (err) {
       if (err === PAYMENTS_UNAVAILABLE) {
         showError(`Online payment is being set up. You can place this order on WhatsApp instead — we'll confirm availability and share a secure payment link. <a class="font-semibold underline" target="_blank" rel="noopener" href="${esc(whatsappOrder(customer))}">Order on WhatsApp</a>`);
+      } else if (err.code === 'price_changed' || err.code === 'unavailable') {
+        // The catalogue changed since this page was built: reload for the latest.
+        showError(`${esc(err.message)} <button type="button" class="font-semibold underline" data-reload>Refresh</button>`);
       } else {
         // Server-side failures only; 4xx are the customer's input (bad PIN code etc.).
         if (!(err.status >= 400 && err.status < 500) && !/cancelled|did not go through|declined|not supported/i.test(err.message)) reportError('checkout', err);

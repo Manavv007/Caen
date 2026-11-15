@@ -30,6 +30,7 @@ async function postJson(url, body) {
   if (!res.ok) {
     const err = new Error((data && data.error) || `Request failed (${res.status})`);
     err.status = res.status;
+    err.code = data && data.code;
     throw err;
   }
   return data;
@@ -57,8 +58,14 @@ function loadRazorpay() {
  * @param {{items: Array, customer: Object, turnstileToken?: string|null}} order
  * @returns {Promise<{orderNumber: string}>} resolves once payment is verified
  */
-export async function startPayment({ items, customer, turnstileToken = null }) {
-  const created = await postJson('/api/checkout', { items, customer, ...(turnstileToken ? { turnstileToken } : {}) });
+export async function startPayment({ items, customer, turnstileToken = null, expectedTotalInr = null }) {
+  const created = await postJson('/api/checkout', {
+    items,
+    customer,
+    ...(turnstileToken ? { turnstileToken } : {}),
+    // The total this page showed: the server refuses if prices changed since.
+    ...(Number.isInteger(expectedTotalInr) ? { expectedTotalInr } : {}),
+  });
   await loadRazorpay();
 
   const payment = await new Promise((resolve, reject) => {

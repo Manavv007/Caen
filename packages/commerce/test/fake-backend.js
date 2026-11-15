@@ -2,9 +2,23 @@
  * In-memory stand-in for the subset of Supabase PostgREST, Razorpay and
  * Resend that the handlers use. Pass `backend.fetch` as the fetch impl.
  */
+import { PRODUCTS } from '../src/catalog.js';
+
+/** Catalogue rows as stored in Supabase (seeded from the original catalogue). */
+export const productRows = () => PRODUCTS.map((p) => ({
+  sku: p.sku, slug: p.slug, name: p.name, category: p.category, price_inr: p.priceInr, active: true,
+}));
+export const settingsRow = () => ({
+  id: 1, email: 'shop@example.com', phone: '+91 00000 00000', whatsapp: '910000000000',
+  free_shipping_above_inr: 10000, shipping_fee_inr: 250, return_days: 15,
+});
+
 export class FakeBackend {
   constructor() {
-    this.tables = { orders: [], order_items: [], payment_events: [], client_errors: [] };
+    this.tables = {
+      orders: [], order_items: [], payment_events: [], client_errors: [],
+      products: productRows(), site_settings: [settingsRow()],
+    };
     this.razorpayOrders = [];
     this.emails = [];
     this.nextId = 1;
@@ -13,12 +27,15 @@ export class FakeBackend {
 
   _filters(search) {
     const f = {};
-    for (const [k, v] of new URLSearchParams(search)) if (v.startsWith('eq.')) f[k] = v.slice(3);
+    for (const [k, v] of new URLSearchParams(search)) {
+      if (v.startsWith('eq.')) f[k] = { eq: v.slice(3) };
+      else if (v.startsWith('in.(')) f[k] = { in: v.slice(4, -1).split(',').map((x) => x.replace(/^"|"$/g, '')) };
+    }
     return f;
   }
 
   _match(row, filters) {
-    return Object.entries(filters).every(([k, v]) => String(row[k]) === v);
+    return Object.entries(filters).every(([k, c]) => (c.in ? c.in.includes(String(row[k])) : String(row[k]) === c.eq));
   }
 
   async fetch(url, init = {}) {

@@ -63,7 +63,6 @@ describe('POST /api/checkout', () => {
 
   it.each([
     [[], CUSTOMER, 'empty'],
-    [[{ sku: 'NOPE', qty: 1 }], CUSTOMER, 'unknown sku'],
     [[{ sku: 'POINTY-NOSE-RING', qty: 0 }], CUSTOMER, 'zero qty'],
     [[{ sku: 'POINTY-NOSE-RING', qty: 11 }], CUSTOMER, 'qty over limit'],
     [[{ sku: 'POINTY-NOSE-RING', qty: 1 }], { ...CUSTOMER, phone: '12345' }, 'bad phone'],
@@ -75,6 +74,45 @@ describe('POST /api/checkout', () => {
     expect(typeof data.error).toBe('string');
     expect(backend.tables.orders).toHaveLength(0);
     expect(backend.razorpayOrders).toHaveLength(0);
+  });
+
+  it('answers 409 for a product that is unknown or no longer active (bag is stale)', async () => {
+    backend.tables.products.find((p) => p.sku === 'POINTY-NOSE-RING').active = false;
+    for (const sku of ['NOPE', 'POINTY-NOSE-RING']) {
+      const { status, data } = await checkout([{ sku, qty: 1 }]);
+      expect(status).toBe(409);
+      expect(data.code).toBe('unavailable');
+    }
+    expect(backend.tables.orders).toHaveLength(0);
+  });
+
+  it('charges the current database price, and refuses if the page showed a different total', async () => {
+    backend.tables.products.find((p) => p.sku === 'POINTY-NOSE-RING').price_inr = 5000; // was 4500 when the page was built
+    const items = [{ sku: 'POINTY-NOSE-RING', qty: 1 }];
+    const stale = await handleCheckout(post('/api/checkout', { items, customer: CUSTOMER, expectedTotalInr: 4750 }), ENV, { fetch: backend.fetch });
+    expect(stale.status).toBe(409);
+    expect(await stale.json()).toMatchObject({ code: 'price_changed', totalInr: 5250 });
+    expect(backend.tables.orders).toHaveLength(0);
+
+    const fresh = await handleCheckout(post('/api/checkout', { items, customer: CUSTOMER, expectedTotalInr: 5250 }), ENV, { fetch: backend.fetch });
+    expect(fresh.status).toBe(200);
+    expect(backend.tables.orders[0]).toMatchObject({ subtotal_inr: 5000, shipping_inr: 250, total_inr: 5250 });
+  });
+
+  it('uses the shipping rule from site_settings', async () => {
+    Object.assign(backend.tables.site_settings[0], { free_shipping_above_inr: 4000, shipping_fee_inr: 99 });
+    await checkout([{ sku: 'POINTY-NOSE-RING', qty: 1 }]); // 4500 >= 4000: free
+    expect(backend.tables.orders[0]).toMatchObject({ shipping_inr: 0, total_inr: 4500 });
+    backend.tables.site_settings[0].free_shipping_above_inr = 50000;
+    await checkout([{ sku: 'POINTY-NOSE-RING', qty: 1 }]);
+    expect(backend.tables.orders[1]).toMatchObject({ shipping_inr: 99, total_inr: 4599 });
+  });
+
+  it('answers 502 (and stores nothing) if the catalogue cannot be read', async () => {
+    delete backend.tables.products;
+    const { status } = await checkout([{ sku: 'POINTY-NOSE-RING', qty: 1 }]);
+    expect(status).toBe(502);
+    expect(backend.tables.orders).toHaveLength(0);
   });
 
   it('rejects malformed JSON', async () => {

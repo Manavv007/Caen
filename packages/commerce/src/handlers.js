@@ -19,6 +19,7 @@ import { createRazorpayOrder, verifyPaymentSignature, verifyWebhookSignature } f
 import { createDb } from './supabase.js';
 import { sendOrderConfirmation } from './email.js';
 import { verifyTurnstile } from './turnstile.js';
+import { mapSettings } from './catalog-db.js';
 
 const MAX_BODY_BYTES = 20_000;
 
@@ -73,22 +74,53 @@ export async function handleCheckout(request, env, { fetch: fetchImpl = fetch } 
   let body;
   let items;
   let customer;
-  let priced;
   try {
     body = await readJson(request);
     ({ items, customer } = validateCheckoutRequest(body));
-    priced = priceOrder(items);
   } catch (err) {
     if (err instanceof ValidationError) return json({ error: err.message }, 400);
     throw err;
   }
-  // Bot check (after the cheap validation, before anything is stored).
+
+  const db = createDb({ url: env.SUPABASE_URL, serviceKey: env.SUPABASE_SERVICE_ROLE_KEY }, fetchImpl);
+  // Live prices and shipping rule from the catalogue tables (active products only).
+  let productsBySku;
+  let settings;
+  try {
+    const skus = [...new Set(items.map((i) => i.sku))];
+    const [rows, settingsRows] = await Promise.all([
+      db.selectIn('products', 'sku', skus, { active: true }, 'sku,name,price_inr'),
+      db.select('site_settings', { id: 1 }),
+    ]);
+    if (!settingsRows.length) throw new Error('site_settings row is missing');
+    productsBySku = new Map(rows.map((r) => [r.sku, { sku: r.sku, name: r.name, priceInr: r.price_inr }]));
+    settings = mapSettings(settingsRows[0]);
+  } catch (err) {
+    console.error('checkout catalogue lookup failed', err);
+    return json({ error: 'Could not start the payment. Please try again in a moment.' }, 502);
+  }
+  let priced;
+  try {
+    priced = priceOrder(items, productsBySku, settings);
+  } catch (err) {
+    if (err instanceof ValidationError) return json({ error: err.message, code: 'unavailable' }, 409);
+    throw err;
+  }
+  // The page shows prices from the last site build; if the catalogue changed
+  // since, don't charge an amount the customer didn't see.
+  if (Number.isInteger(body.expectedTotalInr) && body.expectedTotalInr !== priced.totalInr) {
+    return json({
+      error: 'Prices have been updated since this page loaded. Please refresh to see the latest prices.',
+      code: 'price_changed',
+      totalInr: priced.totalInr,
+    }, 409);
+  }
+  // Bot check (after the cheap checks, before anything is stored).
   if (env.TURNSTILE_SECRET_KEY) {
     const human = await verifyTurnstile(env.TURNSTILE_SECRET_KEY, body.turnstileToken, request.headers.get('cf-connecting-ip'), fetchImpl);
     if (!human) return json({ error: 'Please complete the security check and try again.', code: 'turnstile' }, 400);
   }
 
-  const db = createDb({ url: env.SUPABASE_URL, serviceKey: env.SUPABASE_SERVICE_ROLE_KEY }, fetchImpl);
   const orderNumber = newOrderNumber();
   try {
     const [order] = await db.insert('orders', [{

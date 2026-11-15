@@ -1,10 +1,14 @@
 /**
- * Pricing rules shared by the storefront (display) and the checkout API
- * (what the customer is actually charged). PLACEHOLDER values.
+ * Order limits and the shipping rule. The amounts (free-shipping threshold,
+ * fee) come from site_settings in the database; the storefront shows them
+ * and the checkout API charges them.
  */
-export const FREE_SHIPPING_ABOVE_INR = 10000;
-export const SHIPPING_FEE_INR = 250;
 export const MAX_QTY_PER_LINE = 10;
 export const MAX_LINES = 20;
 
-export const shippingFor = (subtotalInr) => (subtotalInr === 0 || subtotalInr >= FREE_SHIPPING_ABOVE_INR ? 0 : SHIPPING_FEE_INR);
+/**
+ * @param {number} subtotalInr
+ * @param {{freeShippingAboveInr: number, shippingFeeInr: number}} settings
+ */
+export const shippingFor = (subtotalInr, settings) =>
+  (subtotalInr === 0 || subtotalInr >= settings.freeShippingAboveInr ? 0 : settings.shippingFeeInr);

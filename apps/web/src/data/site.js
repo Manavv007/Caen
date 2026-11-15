@@ -1,17 +1,20 @@
-import { FREE_SHIPPING_ABOVE_INR, SHIPPING_FEE_INR } from '@caen/commerce/pricing.js';
+import { getSettings } from '../lib/catalog.js';
 
 /**
- * Store-wide settings and contact details. PLACEHOLDERS from the design
- * mockups: replace with the real ones before launch.
+ * Store-wide settings. Contact details, shipping rule and returns come from
+ * the site_settings table in Supabase (edit them there); the rest is brand
+ * copy.
  */
+const s = getSettings();
+
 export const SITE = {
   name: 'CAEN JEWELS',
   tagline: 'Jewellery for your story',
   description: 'Hand-finished fine jewellery in hallmarked gold and certified diamonds — try it on live with your camera.',
-  email: 'salon@caenjewel.com',
-  phone: '+91 22 4589 0000',
-  whatsapp: '912245890000',
-  freeShippingAboveInr: FREE_SHIPPING_ABOVE_INR,
-  shippingFeeInr: SHIPPING_FEE_INR, // below the free-shipping threshold
-  returnDays: 15,
+  email: s.email,
+  phone: s.phone,
+  whatsapp: s.whatsapp,
+  freeShippingAboveInr: s.freeShippingAboveInr,
+  shippingFeeInr: s.shippingFeeInr, // below the free-shipping threshold
+  returnDays: s.returnDays,
 };
