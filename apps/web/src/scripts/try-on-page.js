@@ -12,6 +12,7 @@ import { registerAssetCache, warmAssetCache, assetCacheStatus } from '@caen/tryo
 import { mediapipeModelUrl } from '@caen/tryon/asset-urls.js';
 import { visionWasmUrls } from '@caen/tryon/mediapipe-vision.js';
 import MODELS from '../data/models.json';
+import { reportError } from './error-report.js';
 
 // Product catalogs below move to the database in Phase 3. Model URLs come
 // from scripts/build-models.mjs (compressed, content-hashed .glb files).
@@ -449,6 +450,7 @@ async function startTracking() {
     modelLoadingIndicator.classList.add('hidden');
     statusPill.textContent = `${category === 'ring' ? 'Hand' : 'Face'} tracking failed to load — showing camera only`;
     logDebug({ category, sku, trackingLoadError: String(err) });
+    reportError('tryon', err);
     return;
   }
   if (token !== trackingToken) { // stopped (camera switch / back) while loading
@@ -475,7 +477,10 @@ async function startTracking() {
       }
       governor.update(performance.now(), trackingLoop.resultsPerSecond);
     },
-    onError: (err) => logDebug({ category, sku, ...perfDebug(vision), trackingError: String((err && err.message) || err) }),
+    onError: (err) => {
+      logDebug({ category, sku, ...perfDebug(vision), trackingError: String((err && err.message) || err) });
+      reportError('tryon', err); // deduplicated per page load
+    },
   });
   trackingLoop.start();
   if (SMOOTH) startRenderLoop(pipeline);

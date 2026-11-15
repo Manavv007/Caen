@@ -40,5 +40,8 @@ const canonical = new URL(publicPath(Astro.url.pathname), Astro.site).href;
     <slot />
   </main>
   <Footer />
+  <script>
+    import '../scripts/error-report.js';
+  </script>
 </body>
 </html>

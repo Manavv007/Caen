@@ -4,7 +4,7 @@
  */
 export class FakeBackend {
   constructor() {
-    this.tables = { orders: [], order_items: [], payment_events: [] };
+    this.tables = { orders: [], order_items: [], payment_events: [], client_errors: [] };
     this.razorpayOrders = [];
     this.emails = [];
     this.nextId = 1;
