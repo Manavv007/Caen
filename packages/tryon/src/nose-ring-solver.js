@@ -48,7 +48,7 @@ export const NOSTRIL_LANDMARKS = {
  * First estimate from anatomy (the face mesh has no point for the piercing);
  * to be refined on the user's recordings.
  */
-export const PIERCE_OFFSET = { out: -0.01, down: -0.035, forward: 0.02 }; // fitted on frontal user photos
+export const PIERCE_OFFSET = { out: 0, down: -0.035, forward: 0.03 }; // fitted on frontal user photos; forward leaves a little air between ring and skin
 
 /**
  * How a nostril hoop looks from the front. The hoop goes in through the
@@ -65,7 +65,7 @@ export const PIERCE_OFFSET = { out: -0.01, down: -0.035, forward: 0.02 }; // fit
  *   The piercing is the upper end of the visible arc: the ring's centre is
  *   placed so the arc starts at the piercing and swings out and down.
  */
-export const RING_TILT_DEG = 40;
+export const RING_TILT_DEG = 20;
 export const RING_ROLL_DEG = 55;
 
 /** Kept for the ?noseDrop tuning parameter: extra drop of the centre, in diameters. */
