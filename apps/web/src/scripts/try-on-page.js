@@ -194,6 +194,8 @@ const VISION_PREFER = urlParams.get('vision') === 'main' ? 'main' : 'worker';
 // Render on requestAnimationFrame and extrapolate between detections
 // (render-smoothing.js); ?smooth=0 renders once per detection, as before (A/B).
 const SMOOTH = urlParams.get('smooth') !== '0';
+// ?ringTilt=world tilts the ring by MediaPipe's 3D depth estimate (old behaviour, A/B).
+const RING_TILT = urlParams.get('ringTilt') === 'world' ? 'world' : 'flat';
 // ?sw=0 unregisters the asset-cache service worker (cold-start comparisons).
 const USE_SW = urlParams.get('sw') !== '0';
 const MODEL_URL = { ring: RING_MODEL_URL, earring: EARRING_ENTRY.url, necklace: NECKLACE_ENTRY.url, nose: NOSE_RING_ENTRY.url }[category];
@@ -220,7 +222,7 @@ function createPipeline() {
   if (category === 'ring') {
     // The low tier skips skin segmentation (and its 16 MB model) entirely.
     return new RingTryOnPipeline({
-      overlayCanvas, debugCanvas: debug, modelUrl: RING_MODEL_URL, smooth: SMOOTH,
+      overlayCanvas, debugCanvas: debug, modelUrl: RING_MODEL_URL, smooth: SMOOTH, tiltMode: RING_TILT,
       segmentation: governor.tier.name !== 'low',
     });
   }
