@@ -208,10 +208,10 @@ function createPipeline() {
   }
   if (category === 'nose') {
     // Tuning from the URL while the placement is being refined:
-    //   ?side=right|left  ?noseTilt=deg  ?noseRoll=deg (gap turned toward the nose centre; 180 = gap down)
-    //   ?noseCut=-0.34  ring height hidden below (diameters from the centre, toward the gap; -1 = hide nothing)
+    //   ?side=right|left  ?noseTilt=deg (turned outward from facing the camera)  ?noseRoll=deg (gap: toward the nose centre, turned up)
+    //   ?noseCut=0  ring height hidden below (diameters from the centre, toward the gap; -1 = hide nothing)
     //   ?noseX= ?noseY= ?noseZ=  piercing offset in face widths (X out, Y down, Z forward)
-    //   ?noseDrop=  ring centre below the piercing, in ring diameters
+    //   ?noseDrop=  extra drop of the whole ring, in ring diameters
     //   ?noseMm=  ring outer diameter in mm
     const num = (k) => { const v = urlParams.get(k); return v !== null && v !== '' && Number.isFinite(parseFloat(v)) ? parseFloat(v) : undefined; };
     const offset = {};

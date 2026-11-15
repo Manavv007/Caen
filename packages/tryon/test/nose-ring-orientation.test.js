@@ -1,9 +1,10 @@
 /**
- * Nose ring orientation: the hoop passes through the nostril wall (plane
- * roughly edge-on to the camera), not a flat "O" facing the viewer.
+ * Nose ring orientation and placement: a hoop facing the camera (turned a
+ * little outward) whose gap points into the nostril, hung so that the
+ * visible arc starts at the piercing and wraps out and down around the wing.
  */
 import { describe, expect, it } from 'vitest';
-import { noseRingAxes } from '../src/nose-ring-solver.js';
+import { noseRingAxes, noseRingCenter } from '../src/nose-ring-solver.js';
 
 const dot = (a, b) => a.x * b.x + a.y * b.y + a.z * b.z;
 const cross = (a, b) => ({ x: a.y * b.z - a.z * b.y, y: a.z * b.x - a.x * b.z, z: a.x * b.y - a.y * b.x });
@@ -21,20 +22,30 @@ describe('noseRingAxes', () => {
       expect(dot(c, z)).toBeCloseTo(1, 6);
     });
 
-    it(`${sideName}: ring plane is near edge-on, normal points out of the nose`, () => {
+    it(`${sideName}: faces the camera, turned outward; gap toward the nose centre and up`, () => {
       const [, y, z] = noseRingAxes(frame, sideName);
       const out = sideName === 'left' ? 1 : -1;
-      expect(z.x * out).toBeGreaterThan(0.9); // normal mostly sideways, outward
-      expect(z.z).toBeGreaterThan(0.2); // tilted a little toward the camera
+      expect(z.z).toBeGreaterThan(0.6); // mostly toward the camera
+      expect(z.x * out).toBeGreaterThan(0.3); // turned outward
       const gap = { x: -y.x, y: -y.y, z: -y.z };
-      expect(gap.y).toBeGreaterThan(0.5); // gap points up, into the nostril...
-      expect(gap.z).toBeLessThan(-0.3); // ...and toward the back of the nose
+      expect(gap.x * out).toBeLessThan(-0.2); // toward the nose centre...
+      expect(gap.y).toBeGreaterThan(0.5); // ...and up, into the nostril
+    });
+
+    it(`${sideName}: the piercing is the upper end of the visible arc`, () => {
+      const axes = noseRingAxes(frame, sideName);
+      const pierce = { x: 0, y: 0, z: 0 };
+      const c = noseRingCenter(pierce, axes, frame, 1);
+      const rel = { x: pierce.x - c.x, y: pierce.y - c.y, z: pierce.z - c.z };
+      expect(Math.hypot(rel.x, rel.y, rel.z)).toBeCloseTo(0.46, 6); // on the ring
+      expect(dot(rel, axes[1])).toBeCloseTo(0, 6); // on the cut line (gap side hidden)
+      expect(rel.y).toBeGreaterThan(0); // centre below the piercing
     });
   }
 
-  it('tilt 0 / roll 0 gives an exactly edge-on ring with the gap straight up', () => {
+  it('tilt 0 / roll 0: flat to the camera, gap straight toward the nose centre', () => {
     const [, y, z] = noseRingAxes(frame, 'left', 0, 0);
-    expect(z.x).toBeCloseTo(1, 6);
-    expect(-y.y).toBeCloseTo(1, 6);
+    expect(z.z).toBeCloseTo(1, 6);
+    expect(-y.x).toBeCloseTo(-1, 6);
   });
 });
