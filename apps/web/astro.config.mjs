@@ -52,6 +52,8 @@ export default defineConfig({
   trailingSlash: 'never',
   integrations: [tryOnServiceWorker()],
   vite: {
+    // Never inline scripts/assets: the CSP (public/_headers) allows only files from this origin.
+    build: { assetsInlineLimit: 0 },
     plugins: [tailwindcss(), ...(https ? [basicSsl()] : [])],
     // MediaPipe's bundle is large and only needed by try-on: keep it out of
     // dependency pre-bundling so dev starts fast; it is still bundled in builds.

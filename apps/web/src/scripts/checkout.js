@@ -54,11 +54,11 @@ function loadRazorpay() {
 }
 
 /**
- * @param {{items: Array, customer: Object}} order
+ * @param {{items: Array, customer: Object, turnstileToken?: string|null}} order
  * @returns {Promise<{orderNumber: string}>} resolves once payment is verified
  */
-export async function startPayment({ items, customer }) {
-  const created = await postJson('/api/checkout', { items, customer });
+export async function startPayment({ items, customer, turnstileToken = null }) {
+  const created = await postJson('/api/checkout', { items, customer, ...(turnstileToken ? { turnstileToken } : {}) });
   await loadRazorpay();
 
   const payment = await new Promise((resolve, reject) => {

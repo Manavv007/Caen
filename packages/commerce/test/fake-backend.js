@@ -24,13 +24,18 @@ export class FakeBackend {
   async fetch(url, init = {}) {
     const u = new URL(url);
     const method = init.method || 'GET';
-    const body = init.body ? JSON.parse(init.body) : undefined;
+    const body = init.body && typeof init.body === 'string' && /^[\[{]/.test(init.body) ? JSON.parse(init.body) : undefined;
     const ok = (data, status = 200) => new Response(data === undefined ? '' : JSON.stringify(data), { status });
 
     if (u.hostname === 'api.razorpay.com' && u.pathname === '/v1/orders' && method === 'POST') {
       const order = { id: `order_${this.nextId++}`, amount: body.amount, currency: body.currency, receipt: body.receipt, status: 'created' };
       this.razorpayOrders.push(order);
       return ok(order);
+    }
+    if (u.hostname === 'challenges.cloudflare.com' && u.pathname === '/turnstile/v0/siteverify') {
+      const form = new URLSearchParams(init.body);
+      this.turnstileCalls = (this.turnstileCalls || 0) + 1;
+      return ok({ success: form.get('secret') === 'ts-secret' && form.get('response') === 'good-token' });
     }
     if (u.hostname === 'api.resend.com') {
       this.emails.push(body);
