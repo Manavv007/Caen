@@ -2,13 +2,15 @@
 import { getCategories, categoryUrl } from '../lib/catalog.js';
 interface Props { active?: string }
 const { active } = Astro.props;
-const link = 'whitespace-nowrap rounded-full border px-4 py-2 text-[12px] font-medium uppercase tracking-[0.12em] transition-colors';
+// block (not inline): an inline link's vertical padding overflows its line box, and the
+// horizontally scrolling <nav> clips it, cutting off the pill's top and bottom.
+const link = 'block whitespace-nowrap rounded-full border px-4 py-2 text-[12px] font-medium uppercase tracking-[0.12em] transition-colors';
 ---
-<nav aria-label="Categories" class="-mx-4 overflow-x-auto px-4">
+<nav aria-label="Categories" class="-mx-4 overflow-x-auto px-4 py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
   <ul class="flex gap-2">
-    <li><a href="/collections" class:list={[link, !active ? 'border-ink bg-ink text-white' : 'border-line hover:border-ink']}>All</a></li>
+    <li><a href="/collections" aria-current={!active ? 'page' : undefined} class:list={[link, !active ? 'border-ink bg-ink text-white' : 'border-line hover:border-ink']}>All</a></li>
     {getCategories().map((c) => (
-      <li><a href={categoryUrl(c)} class:list={[link, active === c.slug ? 'border-ink bg-ink text-white' : 'border-line hover:border-ink']}>{c.name}</a></li>
+      <li><a href={categoryUrl(c)} aria-current={active === c.slug ? 'page' : undefined} class:list={[link, active === c.slug ? 'border-ink bg-ink text-white' : 'border-line hover:border-ink']}>{c.name}</a></li>
     ))}
   </ul>
 </nav>
