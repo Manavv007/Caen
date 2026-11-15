@@ -1,4 +1,4 @@
-import { getProducts, getCategory, resolveImage, productUrl } from '../../lib/catalog.js';
+import { getProducts, getCategory, absoluteImageUrl, productUrl } from '../../lib/catalog.js';
 import { SITE } from '../../data/site.js';
 
 /**
@@ -11,8 +11,7 @@ const esc = (s) => String(s).replace(/[<>&'"]/g, (c) => ({ '<': '&lt;', '>': '&g
 
 export function GET({ site }) {
   const items = getProducts().map((p) => {
-    const img = resolveImage(p.image);
-    const imageUrl = img.asset ? new URL(img.asset.src, site).href : img.src;
+    const imageUrl = absoluteImageUrl(p.image, site);
     const category = getCategory(p.category);
     return `    <item>
       <g:id>${esc(p.sku)}</g:id>

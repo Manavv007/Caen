@@ -9,13 +9,19 @@ See [PLAN.md](PLAN.md) for the production plan and its progress.
 |---|---|
 | `apps/web` | Astro site (deploys to Cloudflare Pages): storefront pages in `src/pages`, catalogue in `src/data/catalog.js` (placeholder data until the database), try-on at `src/pages/try-on.astro`. |
 | `packages/tryon` | Try-on engine: MediaPipe tracking, solvers (pure, testable), three.js scenes. |
-| `packages/commerce` | Catalogue (`src/catalog.js`, single source for site + checkout), pricing, checkout/payment handlers. |
+| `packages/commerce` | Catalogue access (Supabase), pricing, checkout/payment handlers. `src/catalog.js` = starter data for local dev/CI. |
 | `apps/web/functions/api` | Cloudflare Pages Functions: `/api/checkout`, `/api/checkout/confirm`, `/api/razorpay/webhook`. |
 | `supabase/migrations` | Orders database schema. |
 | `assets-src/models` | Source 3D models (glTF + licences). Not shipped directly. |
 | `scripts/build-models.mjs` | Compresses source models to small `.glb` files in `apps/web/public/models` (committed). |
 | `scripts/fetch-mediapipe.mjs` | Self-hosts the MediaPipe wasm + pinned models into `apps/web/public/mediapipe` (gitignored, runs before dev/build). |
 | `fixtures` | Recorded try-on sessions used by the replay tests. |
+
+## Editing products and contact details
+
+In Supabase (Table Editor), no code needed — see [docs/editing-the-store.md](docs/editing-the-store.md).
+The site rebuilds automatically about a minute after an edit. `packages/commerce/src/catalog.js` is only the
+starter data for local development and CI.
 
 ## Develop
 
@@ -55,7 +61,7 @@ Connect the GitHub repo in the Cloudflare dashboard → Workers & Pages → Crea
 - Root directory: `apps/web` (Cloudflare picks up the API from `apps/web/functions`)
 - Build command: `npm run build`
 - Build output directory: `dist`
-- Environment variable: `NODE_VERSION=22`
+- Environment variables: `NODE_VERSION=22`, `SUPABASE_URL`, `SUPABASE_ANON_KEY` (public; the build reads the catalogue with it)
 - After adding a custom domain: `SITE_URL=https://yourdomain.in` (canonical links, sitemap, product feed)
 
 Caching and security headers (one site-wide Content-Security-Policy) come from `apps/web/public/_headers`; when adding a third-party script, image host or iframe, add it to that policy. Old prototype URLs redirect via `apps/web/public/_redirects`.

@@ -3,7 +3,7 @@ import Base from '../../layouts/Base.astro';
 import ProductImage from '../../components/ProductImage.astro';
 import ProductCard from '../../components/ProductCard.astro';
 import Icon from '../../components/Icon.astro';
-import { getProducts, getCategory, getRelated, resolveImage, categoryUrl, tryOnUrl } from '../../lib/catalog.js';
+import { getProducts, getCategory, getRelated, absoluteImageUrl, categoryUrl, tryOnUrl } from '../../lib/catalog.js';
 import { formatInr, publicPath } from '../../lib/format.js';
 import { SITE } from '../../data/site.js';
 
@@ -20,8 +20,7 @@ const ringSizes = p.category === 'rings'
   ? [['4', 14.9], ['4.5', 15.3], ['5', 15.7], ['5.5', 16.1], ['6', 16.5], ['6.5', 16.9], ['7', 17.3], ['7.5', 17.7], ['8', 18.1], ['9', 18.9]]
   : [];
 
-const img = resolveImage(p.image);
-const imageUrl = img.asset ? new URL(img.asset.src, Astro.site).href : img.src;
+const imageUrl = absoluteImageUrl(p.image, Astro.site);
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Product',

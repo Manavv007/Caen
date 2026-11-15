@@ -3,14 +3,16 @@ import Base from '../layouts/Base.astro';
 import ProductCard from '../components/ProductCard.astro';
 import ProductImage from '../components/ProductImage.astro';
 import Icon from '../components/Icon.astro';
-import { getCategories, getProducts, getProduct, getEditorial, categoryUrl, productUrl } from '../lib/catalog.js';
+import { getCategories, getProducts, getFeatured, getEditorial, categoryUrl, productUrl } from '../lib/catalog.js';
 import { SITE } from '../data/site.js';
 
 const ed = getEditorial();
 const categories = getCategories();
-const edit = ['celeste-solitaire-ring', 'aurelia-diamond-band', 'mira-diamond-pendant', 'elan-gold-hoops'].map(getProduct);
+// "The Caen Edit": products ticked `featured` in the catalogue.
+const edit = getFeatured(4);
 const tryOn = getProducts().filter((p) => p.tryOn);
-const earStack = getProducts({ category: 'earrings' }).filter((p) => ['classic-huggie-hoop', 'pave-curved-crawler', 'minimalist-bold-cuff', 'micro-solitaire-stud'].includes(p.slug));
+// Ear stack: earrings not already in the Edit, in catalogue order.
+const earStack = getProducts({ category: 'earrings' }).filter((p) => !p.featured).slice(0, 4);
 const occasions = [
   { name: 'Engagement', blurb: 'Solitaires and timeless bands', image: ed.engagement, href: categoryUrl('rings') },
   { name: 'Wedding', blurb: 'Bridal sets and heirloom pieces', image: ed.wedding, href: categoryUrl('necklaces') },
@@ -45,7 +47,7 @@ const faqs = [
         </p>
         <div class="mt-8 flex flex-wrap gap-3">
           <a href="/collections" class="btn-primary">Shop the collection <Icon name="arrow_forward" class="h-4 w-4" /></a>
-          <a href={productUrl(tryOn[0])} class="btn-outline"><Icon name="photo_camera" class="h-4 w-4" /> Try on live</a>
+          <a href={tryOn.length ? productUrl(tryOn[0]) : '/collections'} class="btn-outline"><Icon name="photo_camera" class="h-4 w-4" /> Try on live</a>
         </div>
         <ul class="mt-10 flex flex-wrap gap-x-6 gap-y-2 text-[11px] uppercase tracking-[0.14em] text-muted">
           <li>◆ 14K &amp; 18K solid gold</li><li>◆ IGI &amp; GIA certified</li><li>◆ Conflict-free sourcing</li>
@@ -99,7 +101,7 @@ const faqs = [
         </p>
       </div>
       <div class="grid grid-cols-2 gap-3">
-        {tryOn.map((p) => (
+        {tryOn.slice(0, 6).map((p) => (
           <a href={productUrl(p)} class="group flex items-center gap-3 rounded-lg bg-white/5 p-3 transition-colors hover:bg-white/10">
             <div class="h-16 w-16 shrink-0 overflow-hidden rounded bg-cream"><ProductImage image={p.image} class="h-full w-full object-cover" sizes="64px" width={160} /></div>
             <span class="font-garamond text-[17px] leading-tight">{p.name}</span>

@@ -23,7 +23,7 @@ import { cartCatalog } from '../lib/cart-catalog.js';
       </aside>
     </div>
   </section>
-  <script type="application/json" id="cart-catalog" set:html={JSON.stringify(cartCatalog())} />
+  <script type="application/json" id="cart-catalog" set:html={JSON.stringify(await cartCatalog())} />
 </Base>
 
 <script>

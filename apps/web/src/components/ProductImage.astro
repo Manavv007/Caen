@@ -1,9 +1,15 @@
 ---
+/**
+ * Product / editorial photo. Photos uploaded to Supabase Storage are
+ * downloaded at build time and served as resized WebP from this site
+ * (fast, immutable cache, no third-party image host). Site files
+ * (/images/...) and other hosts are used as they are.
+ */
 import { Image } from 'astro:assets';
 import { resolveImage } from '../lib/catalog.js';
 
 interface Props {
-  image: { src?: string; local?: string; alt: string };
+  image: { src: string; alt: string };
   class?: string;
   sizes?: string;
   eager?: boolean;
@@ -12,7 +18,8 @@ interface Props {
 const { image, class: className = '', sizes = '(min-width: 1024px) 25vw, 50vw', eager = false, width = 800 } = Astro.props;
 const img = resolveImage(image);
 const loading = eager ? 'eager' : 'lazy';
+const priority = eager ? 'high' : 'auto';
 ---
-{img.asset
-  ? <Image src={img.asset} alt={img.alt} widths={[400, 800]} sizes={sizes} class={className} loading={loading} fetchpriority={eager ? 'high' : 'auto'} />
-  : <img src={img.src} alt={img.alt} width={width} height={width} class={className} loading={loading} decoding="async" fetchpriority={eager ? 'high' : 'auto'} referrerpolicy="no-referrer" />}
+{img.remote
+  ? <Image src={img.src} alt={img.alt} inferSize widths={[400, 800, 1200].filter((w) => w <= Math.max(width, 400) * 1.5)} sizes={sizes} format="webp" class={className} loading={loading} fetchpriority={priority} />
+  : <img src={img.src} alt={img.alt} width={width} height={width} class={className} loading={loading} decoding="async" fetchpriority={priority} referrerpolicy="no-referrer" />}

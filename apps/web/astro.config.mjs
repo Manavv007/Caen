@@ -44,8 +44,12 @@ function tryOnServiceWorker() {
 // Set SITE_URL in Cloudflare Pages (Variables) when a custom domain is added.
 const site = process.env.SITE_URL || 'https://caen-4kj.pages.dev';
 
+// Product photos uploaded to Supabase Storage are optimised at build time.
+const imageDomains = process.env.SUPABASE_URL ? [new URL(process.env.SUPABASE_URL).host] : [];
+
 export default defineConfig({
   site,
+  image: { domains: imageDomains },
   output: 'static',
   // /products/x served as products/x.html: no redirect to /products/x/ on Cloudflare.
   build: { inlineStylesheets: 'auto', format: 'file' },

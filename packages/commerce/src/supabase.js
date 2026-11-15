@@ -33,5 +33,11 @@ export function createDb({ url, serviceKey }, fetchImpl = fetch) {
     update: (table, filters, patch) => call('PATCH', `${table}?${qs(filters)}`, { body: patch, prefer: 'return=representation' }),
     /** @returns {Promise<Object[]>} */
     select: (table, filters, columns = '*') => call('GET', `${table}?select=${encodeURIComponent(columns)}&${qs(filters)}`),
+    /** Rows whose `column` is one of `values` (plus optional eq filters). */
+    selectIn: (table, column, values, filters = {}, columns = '*') => {
+      const list = values.map((v) => `"${String(v).replace(/["\\]/g, '')}"`).join(',');
+      const extra = qs(filters);
+      return call('GET', `${table}?select=${encodeURIComponent(columns)}&${encodeURIComponent(column)}=in.(${encodeURIComponent(list)})${extra ? `&${extra}` : ''}`);
+    },
   };
 }
