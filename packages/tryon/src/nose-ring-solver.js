@@ -11,8 +11,8 @@
  *                  ─► piercing point = the nostril-wing landmark + small offsets (in W)
  *                  ─► ring centre = a little below the piercing, so the gap of the
  *                     horseshoe (the ball/cone ends) reaches the piercing
- *                  ─► ring plane = the face's frontal plane, turned slightly outward;
- *                     it moves rigidly with the head (it is attached to the nose)
+ *                  ─► ring plane = through the nostril wall (nearly edge-on from the
+ *                     front), gap into the nostril; moves rigidly with the head
  *                  ─► hidden when the head turns the nostril away behind the nose bridge
  *
  * All offsets are fractions of W (distance between the face's outer edges at
@@ -60,16 +60,21 @@ export const PIERCE_OFFSET = { out: -0.035, down: 0.004, forward: 0.02 };
  */
 export const RING_CENTER_DROP = 0.2;
 
-/** The ring's plane turns this far from the frontal plane toward the outside (degrees). */
-export const RING_TILT_DEG = 20;
+/**
+ * Ring plane orientation. A nostril hoop goes THROUGH the nostril wall, so
+ * its plane is roughly perpendicular to the side of the nose: seen from the
+ * front it is nearly edge-on (a narrow "J" hugging the nostril), not a full
+ * circle facing the camera. The ring's normal points outward from the nose,
+ * turned this far toward the camera (0 = exactly edge-on, 90 = facing the
+ * camera like a sticker).
+ */
+export const RING_TILT_DEG = 18;
 
 /**
- * The ring's gap (the end that goes into the nostril) is turned from "straight
- * up" toward the centre of the nose by this much (degrees), as on a real
- * hoop: the entry sits at the upper inner side of the ring, the rest of the
- * circle swings down and out around the wing.
+ * The ring's gap (the ends, which go into the nostril) is turned from
+ * "straight up" toward the back of the nose (into the nostril) by this much.
  */
-export const RING_ROLL_DEG = 40;
+export const RING_ROLL_DEG = 45;
 
 /**
  * Hiding: the nostril goes behind the nose bridge when the head turns away
@@ -121,26 +126,27 @@ export function estimatePiercing(w, frame, sideName, offset = PIERCE_OFFSET) {
 
 /**
  * Ring orientation. Model convention (nose-ring-model.js): the ring lies in
- * the XY plane, its gap on -Y. Here -Y is mapped to the face's "up" (gap up,
- * ends into the nostril) and Z (the ring's normal) to the face's forward,
- * turned `tiltDeg` toward the outside of the nose. `rollDeg` spins it about
- * its normal so the gap turns from "up" toward the nose centre (positive
- * values; the sign is mirrored for the other nostril; 180 = gap down).
+ * its XY plane, gap on -Y, normal Z.
+ *   Z (normal)  = outward from the nose centre, turned `tiltDeg` toward the camera
+ *   -Y (gap)    = "up" in the ring's plane, turned `rollDeg` toward the back
+ *                 of the nose (into the nostril)
+ * The part of the ring near the gap is the part inside the nostril; the
+ * scene hides it (nose-ring-scene.js, cutHidden).
  * @returns {{x,y,z}[]} model X, Y, Z axes in world space (right-handed)
  */
 export function noseRingAxes(frame, sideName, tiltDeg = RING_TILT_DEG, rollDeg = RING_ROLL_DEG) {
+  const dot = (a, b) => a.x * b.x + a.y * b.y + a.z * b.z;
   const out = outwardAxis(frame, sideName);
   const tilt = (tiltDeg * Math.PI) / 180;
-  const z = norm(add(mul(frame.forward, Math.cos(tilt)), mul(out, Math.sin(tilt))));
-  // Remove any component of "up" along the normal so Y stays in the ring's plane.
-  const upRaw = mul(frame.up, -1);
-  const y0 = norm(sub(upRaw, mul(z, upRaw.x * z.x + upRaw.y * z.y + upRaw.z * z.z)));
-  const x0 = cross(y0, z);
-  if (!rollDeg) return [x0, y0, z];
-  const r = ((sideName === 'left' ? -rollDeg : rollDeg) * Math.PI) / 180;
-  const c = Math.cos(r);
-  const s = Math.sin(r);
-  return [add(mul(x0, c), mul(y0, s)), add(mul(y0, c), mul(x0, -s)), z];
+  const z = norm(add(mul(out, Math.cos(tilt)), mul(frame.forward, Math.sin(tilt))));
+  const upP = norm(sub(frame.up, mul(z, dot(frame.up, z)))); // "up", in the ring's plane
+  let back = cross(upP, z); // in-plane, perpendicular to up
+  if (dot(back, frame.forward) > 0) back = mul(back, -1); // toward the back of the head
+  const r = (rollDeg * Math.PI) / 180;
+  const gap = norm(add(mul(upP, Math.cos(r)), mul(back, Math.sin(r))));
+  const y = mul(gap, -1);
+  const x = cross(y, z);
+  return [x, y, z];
 }
 
 /**
