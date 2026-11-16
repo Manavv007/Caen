@@ -57,7 +57,12 @@ const path = Astro.url.pathname;
 
 <script>
   import { onCartChange } from '../scripts/cart.js';
-  import { onAuthChange } from '../scripts/auth.js';
+  import { onAuthChange, hasLinkResult } from '../scripts/auth.js';
+  // A sign-in link that landed on another page (e.g. an old email pointing
+  // at the home page): finish signing in on the callback page.
+  if (hasLinkResult() && location.pathname !== '/account/callback') {
+    location.replace(`/account/callback${location.hash}`);
+  }
   const accountLink = document.querySelector('[data-account-link]');
   onAuthChange((user) => {
     accountLink.querySelector('[data-account-out]').classList.toggle('hidden', !!user);

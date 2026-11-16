@@ -1,6 +1,13 @@
 /**
  * Customer sign-in, a small client for Supabase Auth (GoTrue REST API):
- * email one-time code and Google (OAuth with PKCE). No SDK: a few KB.
+ * email one-time code or sign-in link, and Google (OAuth with PKCE). No SDK.
+ *
+ * The sign-in email carries a 6-digit code and/or a one-time link, depending
+ * on the email template (Supabase's built-in sender only allows its default
+ * template, which has just the link). Both work: the code is typed on
+ * /account/login, the link lands on /account/callback with the session in
+ * the URL fragment (#access_token=...), so it also works when the email is
+ * opened on another device.
  *
  * Config (public URL + anon key) is embedded in every page by Base.astro as
  * <script type="application/json" id="auth-config">. Without it (local
@@ -11,6 +18,7 @@
  */
 const KEY = 'caen.auth.v1';
 const PKCE_KEY = 'caen.auth.pkce';
+const NEXT_KEY = 'caen.auth.next';
 
 let config;
 function cfg() {
@@ -90,9 +98,18 @@ function friendly(msg, status) {
   return msg;
 }
 
-/** Step 1: email a one-time code (creates the account on first sign-in). */
-export function sendCode(email) {
-  return gotrue('otp', { body: { email: email.trim().toLowerCase(), create_user: true } });
+/**
+ * Step 1: email a one-time code / sign-in link (creates the account on first
+ * sign-in). The link returns to /account/callback, then to `next`.
+ */
+export function sendCode(email, next = '/account') {
+  try {
+    localStorage.setItem(NEXT_KEY, safeNext(next));
+  } catch {
+    // no storage: the link lands on /account
+  }
+  const redirect = encodeURIComponent(`${location.origin}/account/callback`);
+  return gotrue(`otp?redirect_to=${redirect}`, { body: { email: email.trim().toLowerCase(), create_user: true } });
 }
 
 /** Step 2: verify the code; signs in. */
@@ -124,11 +141,53 @@ export async function signInWithGoogle(next = '/account') {
   location.href = `${c.url}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(redirect)}&code_challenge=${challenge}&code_challenge_method=s256`;
 }
 
-/** On /account/callback: finish Google sign-in. @returns {Promise<string>} where to go next */
-export async function completeOAuth(params) {
-  const err = params.get('error_description') || params.get('error');
-  if (err) throw new Error(err);
-  const code = params.get('code');
+/** True when this URL carries the result of an email sign-in link (session or error). */
+export const hasLinkResult = (hash = location.hash) => /[#&](access_token|error_code|error)=/.test(hash);
+
+/** Error from a sign-in link or OAuth redirect, in shopper terms. */
+function linkError(p) {
+  const code = p.get('error_code') || '';
+  const desc = p.get('error_description') || p.get('error') || '';
+  if (/otp_expired/.test(code) || /expired|invalid/i.test(desc)) {
+    return 'This sign-in link has expired or was already used. Each link works once: tap “Try again” for a new one.';
+  }
+  return desc.replace(/\+/g, ' ');
+}
+
+/**
+ * On /account/callback: finish signing in, from an email link (session in
+ * the #fragment) or from Google (?code=, PKCE).
+ * @returns {Promise<string>} where to go next
+ */
+export async function completeSignIn(url = location) {
+  const hash = new URLSearchParams(url.hash.replace(/^#/, ''));
+  const query = new URLSearchParams(url.search);
+  // The fragment holds tokens: drop it from the address bar and history now.
+  if (url.hash) history.replaceState(null, '', url.pathname + url.search);
+
+  if (hash.get('access_token') || hash.get('error') || hash.get('error_code')) {
+    if (!hash.get('access_token')) throw new Error(linkError(hash));
+    const token = hash.get('access_token');
+    const user = await gotrue('user', { method: 'GET', token });
+    save({
+      access_token: token,
+      refresh_token: hash.get('refresh_token'),
+      expires_at: Number(hash.get('expires_at')) || undefined,
+      expires_in: Number(hash.get('expires_in')) || 3600,
+      user,
+    });
+    let next = '/account';
+    try {
+      next = safeNext(localStorage.getItem(NEXT_KEY) || '/account');
+      localStorage.removeItem(NEXT_KEY);
+    } catch {
+      // ignore
+    }
+    return next;
+  }
+
+  if (query.get('error') || query.get('error_description')) throw new Error(linkError(query));
+  const code = query.get('code');
   let saved = null;
   try {
     saved = JSON.parse(sessionStorage.getItem(PKCE_KEY) || 'null');

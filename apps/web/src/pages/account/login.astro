@@ -48,7 +48,8 @@ const field = 'mt-1.5 w-full rounded-lg border border-line-strong bg-white px-4 
           </form>
 
           <form id="code-step" class="hidden" novalidate>
-            <p class="text-[14px] text-muted">We sent a 6-digit code to <strong id="sent-to" class="text-ink"></strong>. <button type="button" id="change-email" class="text-ink underline underline-offset-2">Change</button></p>
+            <p class="text-[14px] text-muted">We emailed <strong id="sent-to" class="text-ink"></strong>. <button type="button" id="change-email" class="text-ink underline underline-offset-2">Change</button></p>
+            <p class="mt-3 rounded-lg bg-cream px-4 py-3 text-[13px] leading-relaxed text-muted"><strong class="text-ink">Got a sign-in link?</strong> Just tap it; you'll be signed in (this page continues on its own if you open it on this device). <strong class="text-ink">Got a code?</strong> Enter it below.</p>
             <label class="mt-5 block text-[12px] font-medium uppercase tracking-[0.1em] text-muted" for="code">6-digit code</label>
             <input id="code" name="code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required placeholder="••••••"
               class={`${field} text-center font-medium tracking-[0.6em] text-[26px] placeholder:text-line-strong`} />
@@ -98,6 +99,9 @@ const field = 'mt-1.5 w-full rounded-lg border border-line-strong bg-white px-4 
     });
   }
 
+  // Signed in from the email link in another tab: continue here too.
+  window.addEventListener('storage', () => { if (currentUser()) location.replace(next); });
+
   $('google-btn').addEventListener('click', () => signInWithGoogle(next).catch((e) => showError(e.message)));
 
   function startResendTimer() {
@@ -120,7 +124,7 @@ const field = 'mt-1.5 w-full rounded-lg border border-line-strong bg-white px-4 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) { showError('Please enter a valid email address.'); $('email').focus(); return; }
     busy(emailForm, true, 'Sending…');
     try {
-      await sendCode(value);
+      await sendCode(value, next);
       email = value;
       $('sent-to').textContent = email;
       emailForm.classList.add('hidden');
@@ -160,7 +164,7 @@ const field = 'mt-1.5 w-full rounded-lg border border-line-strong bg-white px-4 
   $('resend').addEventListener('click', async () => {
     showError('');
     try {
-      await sendCode(email);
+      await sendCode(email, next);
       startResendTimer();
     } catch (err) {
       showError(err.message);

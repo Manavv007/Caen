@@ -9,10 +9,9 @@
  *                  ─► world space (view-mapping.js: crop + mirror, y up, +z = toward viewer)
  *                  ─► face frame: side axis, up axis, forward axis, face width W
  *                  ─► piercing point = the nostril-wing landmark + small offsets (in W)
- *                  ─► ring centre = a little below the piercing, so the gap of the
- *                     horseshoe (the ball/cone ends) reaches the piercing
- *                  ─► ring plane = through the nostril wall (nearly edge-on from the
- *                     front), gap into the nostril; moves rigidly with the head
+ *                  ─► ring = near-frontal hoop, gap toward the nose centre (inside
+ *                     the nostril, hidden); the visible "J" starts at the piercing
+ *                     and wraps out and down around the wing; moves rigidly with the head
  *                  ─► hidden when the head turns the nostril away behind the nose bridge
  *
  * All offsets are fractions of W (distance between the face's outer edges at
@@ -49,32 +48,31 @@ export const NOSTRIL_LANDMARKS = {
  * First estimate from anatomy (the face mesh has no point for the piercing);
  * to be refined on the user's recordings.
  */
-export const PIERCE_OFFSET = { out: -0.035, down: 0.004, forward: 0.02 };
+export const PIERCE_OFFSET = { out: 0, down: -0.035, forward: 0.03 }; // fitted on frontal user photos; forward leaves a little air between ring and skin
 
 /**
- * Where the ring's centre sits relative to the piercing, as a fraction of the
- * ring's diameter, straight down. The horseshoe is mounted gap-up (the ends
- * point up into the nostril); its ends reach 0.48 diameters above its centre,
- * so 0.2 puts the ends ~0.3 diameters above the piercing (inside the nostril)
- * and the arc ~0.7 diameters below it, hugging the rim of the wing.
+ * How a nostril hoop looks from the front. The hoop goes in through the
+ * pierced hole on the side of the wing, wraps OUTSIDE around the wing's
+ * lower edge and comes back up into the nostril opening. The half inside the
+ * nostril is hidden (nose-ring-scene.js, cutHidden), so what shows is a "J"
+ * / "C" hugging the outer edge of the nostril.
+ *
+ *   RING_TILT_DEG  the ring faces the camera, turned this far outward
+ *                  (0 = flat to the camera, 90 = edge-on); a slight turn
+ *                  follows the curve of the wing.
+ *   RING_ROLL_DEG  the gap (the ends, hidden in the nostril) points toward
+ *                  the nose centre, turned this far up.
+ *   The piercing is the upper end of the visible arc: the ring's centre is
+ *   placed so the arc starts at the piercing and swings out and down.
  */
-export const RING_CENTER_DROP = 0.2;
+export const RING_TILT_DEG = 20;
+export const RING_ROLL_DEG = 55;
 
-/**
- * Ring plane orientation. A nostril hoop goes THROUGH the nostril wall, so
- * its plane is roughly perpendicular to the side of the nose: seen from the
- * front it is nearly edge-on (a narrow "J" hugging the nostril), not a full
- * circle facing the camera. The ring's normal points outward from the nose,
- * turned this far toward the camera (0 = exactly edge-on, 90 = facing the
- * camera like a sticker).
- */
-export const RING_TILT_DEG = 18;
+/** Kept for the ?noseDrop tuning parameter: extra drop of the centre, in diameters. */
+export const RING_CENTER_DROP = 0;
 
-/**
- * The ring's gap (the ends, which go into the nostril) is turned from
- * "straight up" toward the back of the nose (into the nostril) by this much.
- */
-export const RING_ROLL_DEG = 45;
+/** Tube centre-line radius relative to the outer diameter (the tube is ~8% thick). */
+const RING_MID_RADIUS = 0.46;
 
 /**
  * Hiding: the nostril goes behind the nose bridge when the head turns away
@@ -127,26 +125,37 @@ export function estimatePiercing(w, frame, sideName, offset = PIERCE_OFFSET) {
 /**
  * Ring orientation. Model convention (nose-ring-model.js): the ring lies in
  * its XY plane, gap on -Y, normal Z.
- *   Z (normal)  = outward from the nose centre, turned `tiltDeg` toward the camera
- *   -Y (gap)    = "up" in the ring's plane, turned `rollDeg` toward the back
- *                 of the nose (into the nostril)
- * The part of the ring near the gap is the part inside the nostril; the
- * scene hides it (nose-ring-scene.js, cutHidden).
+ *   Z (normal)  = toward the camera, turned `tiltDeg` outward (away from the nose centre)
+ *   -Y (gap)    = toward the nose centre in the ring's plane, turned `rollDeg` up
  * @returns {{x,y,z}[]} model X, Y, Z axes in world space (right-handed)
  */
 export function noseRingAxes(frame, sideName, tiltDeg = RING_TILT_DEG, rollDeg = RING_ROLL_DEG) {
   const dot = (a, b) => a.x * b.x + a.y * b.y + a.z * b.z;
   const out = outwardAxis(frame, sideName);
   const tilt = (tiltDeg * Math.PI) / 180;
-  const z = norm(add(mul(out, Math.cos(tilt)), mul(frame.forward, Math.sin(tilt))));
+  const z = norm(add(mul(frame.forward, Math.cos(tilt)), mul(out, Math.sin(tilt))));
   const upP = norm(sub(frame.up, mul(z, dot(frame.up, z)))); // "up", in the ring's plane
-  let back = cross(upP, z); // in-plane, perpendicular to up
-  if (dot(back, frame.forward) > 0) back = mul(back, -1); // toward the back of the head
+  let inward = cross(upP, z); // in-plane, perpendicular to up
+  if (dot(inward, out) > 0) inward = mul(inward, -1); // toward the nose centre
   const r = (rollDeg * Math.PI) / 180;
-  const gap = norm(add(mul(upP, Math.cos(r)), mul(back, Math.sin(r))));
+  const gap = norm(add(mul(inward, Math.cos(r)), mul(upP, Math.sin(r))));
   const y = mul(gap, -1);
   const x = cross(y, z);
   return [x, y, z];
+}
+
+/**
+ * Ring centre so that the piercing is the upper/outer end of the visible
+ * arc (where the ring leaves the skin). The cut at the ring's centre line
+ * (cutHidden 0) meets the circle at centre ± R·p, p ⟂ gap in the ring's
+ * plane; the piercing is the upper of the two.
+ */
+export function noseRingCenter(pierce, axes, frame, diameter, drop = RING_CENTER_DROP) {
+  const [, y, z] = axes;
+  let p = cross(z, y); // in-plane, perpendicular to the gap
+  if (p.x * frame.up.x + p.y * frame.up.y + p.z * frame.up.z < 0) p = mul(p, -1);
+  const R = RING_MID_RADIUS * diameter;
+  return add(sub(pierce, mul(p, R)), mul(frame.up, -drop * diameter));
 }
 
 /**
@@ -216,8 +225,7 @@ export class NoseRingSolver {
     const diameter = (this.diameterMm / FACE_WIDTH_MM) * W;
     const pierce = estimatePiercing(w, frame, this.side, this.offset);
     const axes = noseRingAxes(frame, this.side, this.tiltDeg, this.rollDeg);
-    // The ring hangs from the piercing along the ring's own "gap" direction (-Y of the model).
-    const center = add(pierce, mul(axes[1], this.drop * diameter));
+    const center = noseRingCenter(pierce, axes, frame, diameter, this.drop);
 
     out.ring = {
       position: rel(center),

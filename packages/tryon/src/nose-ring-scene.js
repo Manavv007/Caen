@@ -23,7 +23,7 @@ let RoomEnvironment = null;
 
 /** Ring height (diameters from the centre; the gap is on -Y) below which the ring is fully hidden:
  *  the half of the hoop nearest the gap is inside the nostril. */
-export const DEFAULT_CUT_HIDDEN = 0;
+export const DEFAULT_CUT_HIDDEN = -0.035; // centres the soft edge on the cut
 /** Width of the fade-in above that (diameters). */
 const CUT_SOFTNESS = 0.07;
 
