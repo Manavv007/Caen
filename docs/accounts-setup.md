@@ -23,6 +23,12 @@ custom SMTP and enter host (Brevo: `smtp-relay.brevo.com`), port `587`,
 username, the SMTP key as password, sender email and sender name
 `CAEN JEWELS`. Save.
 
+Until then, Supabase sends its default email, which has a one-time
+**sign-in link** instead of a code. That works too: tapping the link signs
+the customer in (on any device). Some email apps open links in the
+background to scan them, which can use the link up before the customer
+taps it; the branded email with a 6-digit code avoids that.
+
 Tell Claude (or a developer) once that's done: the branded code email in
 `supabase/auth-email-templates.json` and a higher sending limit can only be
 applied after custom SMTP is on.

@@ -16,8 +16,8 @@ import Icon from '../../components/Icon.astro';
   </section>
 </Base>
 <script>
-  import { completeOAuth } from '../../scripts/auth.js';
-  completeOAuth(new URLSearchParams(location.search))
+  import { completeSignIn } from '../../scripts/auth.js';
+  completeSignIn()
     .then((next) => location.replace(next))
     .catch((err) => {
       document.getElementById('cb-working').classList.add('hidden');
